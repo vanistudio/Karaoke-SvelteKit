@@ -63,69 +63,88 @@
 		<main class="flex-1 w-full max-w-7xl mx-auto p-4 lg:p-8">
 			{@render children()}
 		</main>
-		<div class="bg-base-100 border-t border-base-300 mt-auto">
-			<div class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-12 lg:py-16">
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-					<div class="flex flex-col gap-4">
-						<div class="flex items-center gap-2">
-							<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-3xl" />
-							<span class="text-2xl font-black uppercase tracking-widest flex items-center">KARA<span class="text-primary">SYSTEM</span></span>
+		<div class="bg-neutral text-neutral-content mt-auto">
+			<div class="border-b border-neutral-content/10">
+				<div class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-16 lg:py-20 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+					<div class="max-w-2xl">
+						<h2 class="text-3xl lg:text-5xl font-black uppercase tracking-tighter mb-4 leading-tight">Đẳng cấp âm thanh<br/><span class="text-primary">Đỉnh cao giải trí.</span></h2>
+						<p class="text-neutral-content/60 font-medium text-lg leading-relaxed">Liên hệ ngay để nhận tư vấn không gian sự kiện đặc quyền và báo giá dịch vụ phòng VIP.</p>
+					</div>
+					<a href="/rooms" class="btn btn-primary rounded-md font-bold uppercase tracking-widest px-8 h-14">
+						Đặt Phòng Ngay
+						<Icon icon="solar:arrow-right-line-duotone" class="text-xl" />
+					</a>
+				</div>
+			</div>
+			<div class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-16 lg:py-20">
+				<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+					<div class="lg:col-span-5 flex flex-col justify-between">
+						<div>
+							<div class="flex items-center gap-2 mb-6">
+								<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-4xl" />
+								<span class="text-3xl font-black uppercase tracking-widest flex items-center">KARA<span class="text-primary">SYSTEM</span></span>
+							</div>
+							<p class="text-neutral-content/60 leading-relaxed font-medium mb-8 max-w-sm">
+								Tổ hợp giải trí đa phương tiện. Hơn 50 không gian phòng hát thương gia đạt tiêu chuẩn thẩm âm quốc tế.
+							</p>
 						</div>
-						<p class="font-medium text-sm text-base-content/70 leading-relaxed mb-4 lg:pr-8">
-							Hệ thống phòng hát thương gia đạt tiêu chuẩn âm thanh châu Âu. Cung cấp dịch vụ giải trí đỉnh cao từ năm 2018.
-						</p>
-						<div class="flex gap-4 items-center text-base-content/60">
-							<a href="/" class="hover:text-primary transition-colors"><Icon icon="solar:map-point-wave-line-duotone" class="text-2xl" /></a>
-							<a href="/" class="hover:text-primary transition-colors"><Icon icon="solar:phone-calling-line-duotone" class="text-2xl" /></a>
-							<a href="/" class="hover:text-primary transition-colors"><Icon icon="solar:letter-line-duotone" class="text-2xl" /></a>
+						<div class="max-w-sm">
+							<h6 class="font-bold tracking-widest uppercase mb-3 text-xs text-neutral-content/40">News & Offers</h6>
+							<div class="join w-full">
+								<input class="input input-bordered join-item w-full bg-base-100/10 text-neutral-content border-neutral-content/20 focus:border-primary rounded-md focus:bg-base-100 focus:text-base-content" placeholder="Email của bạn..."/>
+								<button class="btn btn-primary join-item rounded-md uppercase font-bold tracking-widest px-6">Gửi</button>
+							</div>
 						</div>
 					</div>
-					<div>
-						<h6 class="font-bold tracking-widest uppercase mb-6 text-base-content">Dịch Vụ</h6>
-						<ul class="flex flex-col gap-4 text-sm text-base-content/70 font-medium">
-							<li><a href="/" class="hover:text-primary transition-colors">Phòng Hát Tiêu Chuẩn</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Phòng Hội Nghị / Party</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Dịch Vụ Ăn Uống</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Trang Trí Sự Kiện</a></li>
-						</ul>
-					</div>
-					<div>
-						<h6 class="font-bold tracking-widest uppercase mb-6 text-base-content">Công Ty</h6>
-						<ul class="flex flex-col gap-4 text-sm text-base-content/70 font-medium">
-							<li><a href="/" class="hover:text-primary transition-colors">Về Chúng Tôi</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Tuyển Dụng</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Tin Tức Khuyến Mãi</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Liên Hệ Đặt Lịch</a></li>
-						</ul>
-					</div>
-					<div>
-						<h6 class="font-bold tracking-widest uppercase mb-6 text-base-content">Pháp Lý</h6>
-						<ul class="flex flex-col gap-4 text-sm text-base-content/70 font-medium">
-							<li><a href="/" class="hover:text-primary transition-colors">Điều Khoản Sử Dụng</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Chính Sách Bảo Mật</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Chính Sách Hoàn Tiền</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Quy Định Khách Hàng</a></li>
-						</ul>
+					<div class="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-8">
+						<div class="flex flex-col gap-6">
+							<h6 class="font-bold tracking-widest uppercase text-neutral-content/40 text-xs">Dịch Vụ</h6>
+							<ul class="flex flex-col gap-4 text-sm font-medium">
+								<li><a href="/" class="hover:text-primary transition-colors">Phòng Hát Tiêu Chuẩn</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Phòng Hội Nghị / Party</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Dịch Vụ Ẩm Thực</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Trang Trí Sự Kiện</a></li>
+							</ul>
+						</div>
+						<div class="flex flex-col gap-6">
+							<h6 class="font-bold tracking-widest uppercase text-neutral-content/40 text-xs">Công Ty</h6>
+							<ul class="flex flex-col gap-4 text-sm font-medium">
+								<li><a href="/" class="hover:text-primary transition-colors">Hồ Sơ Năng Lực</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Tuyển Dụng Mới</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Tin Tức / Blog</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Liên Hệ Đặt Lịch</a></li>
+							</ul>
+						</div>
+						<div class="flex flex-col gap-6">
+							<h6 class="font-bold tracking-widest uppercase text-neutral-content/40 text-xs">Pháp Lý</h6>
+							<ul class="flex flex-col gap-4 text-sm font-medium">
+								<li><a href="/" class="hover:text-primary transition-colors">Điều Khoản Dịch Vụ</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Chính Sách Bảo Mật</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Chính Sách Hoàn Tiền</a></li>
+								<li><a href="/" class="hover:text-primary transition-colors">Quy Định Khách Hàng</a></li>
+							</ul>
+						</div>
 					</div>
 				</div>
 			</div>
-			
-			<div class="border-t border-base-200">
-				<div class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
-					<div class="flex items-center gap-2 text-base-content/60 text-sm">
-						<Icon icon="solar:copyright-line-duotone" class="text-xl" />
-						<p class="font-bold tracking-wider">KaraSystem Management © 2026. All rights reserved.</p>
+			<div class="border-t border-neutral-content/10 bg-neutral/50">
+				<div class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-6">
+					<div class="flex flex-wrap gap-4 items-center text-neutral-content/50 text-xs font-bold uppercase tracking-widest">
+						<span>© 2026 KaraSystem Mgmt.</span>
+						<span class="hidden md:inline text-neutral-content/20">|</span>
+						<a href="/" class="hover:text-neutral-content transition-colors">Báo lỗi hệ thống</a>
+						<span class="hidden md:inline text-neutral-content/20">|</span>
+						<a href="/" class="hover:text-neutral-content transition-colors">Cookies</a>
 					</div>
-					<div class="flex gap-6 text-sm font-bold text-base-content/50 uppercase tracking-widest">
-						<a href="/" class="hover:text-primary transition-colors">Báo Cáo Lỗi</a>
-						<a href="/" class="hover:text-primary transition-colors">Hỗ Trợ 24/7</a>
+					<div class="flex gap-4">
+						<a href="/" class="w-10 h-10 flex items-center justify-center rounded-md bg-neutral-content/10 hover:bg-primary hover:text-primary-content transition-colors"><Icon icon="solar:round-alt-arrow-right-line-duotone" class="text-xl" /></a>
+						<a href="/" class="w-10 h-10 flex items-center justify-center rounded-md bg-neutral-content/10 hover:bg-primary hover:text-primary-content transition-colors"><Icon icon="solar:phone-calling-line-duotone" class="text-xl" /></a>
+						<a href="/" class="w-10 h-10 flex items-center justify-center rounded-md bg-neutral-content/10 hover:bg-primary hover:text-primary-content transition-colors"><Icon icon="solar:letter-line-duotone" class="text-xl" /></a>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div> 
-	
-	<!-- Drawer Side (Mobile Sidebar) -->
+	</div>
 	<div class="drawer-side z-100">
 		<label for="mobile-sidebar" aria-label="đóng menu" class="drawer-overlay"></label>
 		<ul class="menu bg-base-100 text-base-content min-h-full w-80 p-4 border-r border-base-300">
