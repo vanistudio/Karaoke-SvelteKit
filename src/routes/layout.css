@@ -1,2 +1,13 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton/themes/wintry';
+@layer base {
+	:root {
+		background-color: var(--color-surface-50);
+		color: var(--color-surface-900);
+	}
+	body {
+		@apply bg-surface-50 text-surface-900 min-h-screen antialiased;
+	}
+}
