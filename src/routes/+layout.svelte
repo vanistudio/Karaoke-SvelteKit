@@ -29,36 +29,39 @@
 			</div>
 			<div class="badge badge-sm rounded-md bg-base-100 text-primary font-bold border-none tracking-widest hidden sm:flex">ĐẶT PHÒNG TRỰC TUYẾN</div>
 		</div>
-		<header class="navbar bg-base-100 border-b border-base-300 px-4 xl:px-8 z-50 rounded-b-md h-16 sticky top-0">
-			<div class="navbar-start w-auto lg:w-1/4">
-				<label for="mobile-sidebar" aria-label="Mở menu" class="btn btn-ghost lg:hidden rounded-md">
-					<Icon icon="solar:hamburger-menu-line-duotone" class="text-2xl" />
-				</label>
-				<a href="/" class="btn btn-ghost text-xl font-black uppercase tracking-widest rounded-md gap-2">
-					<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-2xl" />
-					KARA<span class="text-primary -ml-1">SYSTEM</span>
-				</a>
-			</div>
-			<div class="navbar-center hidden lg:flex">
-				<ul class="menu menu-horizontal px-1">
-					{#each navigation as item}
-						<li>
-							<a
-								href={item.href}
-								class="rounded-md text-sm font-bold tracking-wider hover:bg-base-200 {$page.url.pathname === item.href ? 'border-b-2 border-primary text-primary' : 'text-base-content/80'}"
-							>
-								<Icon icon={item.icon} class="text-lg" />
-								{item.name}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-			<div class="navbar-end w-auto lg:w-1/4 gap-4 ml-auto">
-				<a href="/login" class="link text-sm font-bold tracking-wide uppercase hidden sm:block text-base-content/80">Đăng Nhập</a>
-				<a href="/register" class="btn btn-primary btn-sm rounded-md font-bold uppercase tracking-widest">TẠO TÀI KHOẢN</a>
-			</div>
-		</header>
+		<div class="sticky top-6 z-50 w-full px-4 lg:px-8 py-2 flex justify-center pointer-events-none transition-all">
+			<header class="navbar bg-base-100 border border-base-300 rounded-full shadow-sm h-16 w-full max-w-6xl pointer-events-auto px-2 lg:px-6">
+				<div class="navbar-start">
+					<label for="mobile-sidebar" aria-label="Mở menu" class="btn btn-ghost lg:hidden rounded-full w-10 h-10 p-0 mr-1 flex justify-center items-center">
+						<Icon icon="solar:hamburger-menu-line-duotone" class="text-2xl" />
+					</label>
+					<a href="/" class="btn btn-ghost tracking-widest rounded-full gap-2 hover:bg-base-200">
+						<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-2xl" />
+						<span class="text-lg lg:text-xl font-black uppercase hidden sm:inline lg:hidden xl:inline">KARA<span class="text-primary -ml-1">SYSTEM</span></span>
+					</a>
+				</div>
+				
+				<div class="navbar-center hidden lg:flex">
+					<ul class="flex items-center m-0 p-0">
+						{#each navigation as item}
+							<li class="list-none">
+								<a
+									href={item.href}
+									class="px-3 xl:px-5 py-2.5 mx-1 rounded-full text-[13px] xl:text-sm font-bold tracking-wider transition-colors inline-block whitespace-nowrap {$page.url.pathname === item.href ? 'bg-primary text-primary-content' : 'text-base-content/80 hover:bg-base-200 hover:text-base-content'}"
+								>
+									{item.name}
+								</a>
+							</li>
+						{/each}
+					</ul>
+				</div>
+				
+				<div class="navbar-end gap-3 xl:gap-5">
+					<a href="/login" class="link text-sm font-bold tracking-wide uppercase hidden md:block text-base-content/80 hover:text-primary transition-colors whitespace-nowrap">Đăng Nhập</a>
+					<a href="/register" class="btn btn-primary rounded-full font-bold uppercase tracking-widest px-4 xl:px-6 h-10 min-h-0 text-xs xl:text-sm shadow-sm whitespace-nowrap">TẠO TÀI KHOẢN</a>
+				</div>
+			</header>
+		</div>
 
 		<main class="flex-1 w-full max-w-7xl mx-auto p-4 lg:p-8">
 			{@render children()}
