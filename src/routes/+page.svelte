@@ -1,120 +1,88 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { trpc } from '$lib/trpc/client';
+	import Icon from '@iconify/svelte';
+	import DatePicker from '$lib/components/ui/DatePicker.svelte';
+	import TimePicker from '$lib/components/ui/TimePicker.svelte';
 
-	let healthMessage = $state('Kiểm tra kết nối...');
 	let isReady = $state(false);
+	
+	let selectedDate = $state(new Date());
+	let selectedTime = $state('19:00');
 
 	$effect(() => {
-		trpc()
-			.healthcheck.query()
-			.then((res: string) => {
-				healthMessage = 'Hệ thống trực tuyến';
-				isReady = true;
-			})
-			.catch(() => {
-				healthMessage = 'Mất kết nối máy chủ';
-			});
+		trpc().healthcheck.query().then(() => isReady = true).catch(() => isReady = false);
 	});
-</script>
-
-<div class="mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-10 md:py-16">
-	<!-- Hero Section -->
-	<section class="flex flex-col items-center text-center">
-		<h1 class="mb-4 max-w-3xl text-4xl font-bold tracking-tight text-base-content md:text-5xl lg:text-6xl">
-			Hệ Thống Đặt Phòng Karaoke <br/>
-			<span class="text-primary">Chuyên Nghiệp</span>
-		</h1>
-		
-		<p class="mb-10 max-w-2xl text-base text-base-content/70 md:text-lg">
-			Tối ưu hóa thời gian đặt phòng. Trải nghiệm dịch vụ giải trí đẳng cấp với hệ thống âm thanh tiêu chuẩn 5 sao và quản lý tự động hoàn toàn.
-		</p>
-		
-		<!-- Booking Action Container -->
-		<div class="flex w-full max-w-4xl flex-col gap-4 rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm sm:flex-row sm:items-center">
-			
-            <div class="flex flex-1 items-center gap-3 rounded-lg border border-base-200 bg-base-200/50 px-4 py-3">
-				<Icon icon="solar:calendar-date-line-duotone" class="text-2xl text-base-content/50" />
-				<div class="flex flex-col text-left">
-					<span class="text-xs font-semibold text-base-content/60 uppercase tracking-wide">Ngày Hát</span>
-					<span class="text-sm font-medium text-base-content">Hôm nay, 19:00</span>
+</script><div class="flex flex-col gap-8">
+	<div class="bg-base-200 rounded-md py-10 px-6 border border-base-300">
+		<div class="text-center w-full max-w-3xl mx-auto">
+			<div class="badge badge-primary rounded-md mb-4 tracking-widest font-bold font-mono px-4 py-3">ĐẶT PHÒNG KHÁCH HÀNG</div>
+			<h1 class="text-3xl lg:text-4xl font-black uppercase tracking-tight text-base-content mb-4 leading-tight">
+				Hệ Thống Đặt Phòng Trực Tuyến
+			</h1>
+			<p class="py-2 text-base-content/70 font-medium">Lựa chọn thời gian, phân loại phòng. Hệ thống tự động ghép phòng và xác nhận đặt chỗ.</p>
+		</div>
+	</div>
+	<div class="card bg-base-100 rounded-md border border-base-300 w-full">
+		<div class="card-body p-6 lg:p-8">
+			<h2 class="card-title text-2xl font-bold uppercase tracking-widest mb-1 flex items-center gap-2">
+				<Icon icon="solar:calendar-search-broken" class="text-primary text-3xl"/>
+				Tra Cứu Khả Dụng
+			</h2>
+			<p class="text-base-content/50 text-sm mb-6">Xin vui lòng điền thông tin bên dưới để kiểm tra tình trạng phòng trống.</p>
+			<div class="flex flex-col xl:flex-row gap-5">
+				<div class="form-control w-full">
+					<div class="label"><span class="label-text font-bold uppercase tracking-widest text-xs">Ngày Phục Vụ</span></div>
+					<DatePicker bind:value={selectedDate} />
+				</div>
+				<div class="form-control w-full">
+					<div class="label"><span class="label-text font-bold uppercase tracking-widest text-xs">Giờ Tới</span></div>
+					<TimePicker bind:value={selectedTime} />
+				</div>
+				<div class="form-control w-full">
+					<div class="label"><span class="label-text font-bold uppercase tracking-widest text-xs">Phân Loại Phòng (Group)</span></div>
+					<select class="select select-bordered rounded-md border-base-300 w-full">
+						<option disabled selected>-- Quy mô nhóm --</option>
+						<option>Phòng Tiêu Chuẩn (1-5 Khách)</option>
+						<option>Phòng TrungVIP (5-12 Khách)</option>
+						<option>Phòng Party Lớn (15+ Khách)</option>
+					</select>
 				</div>
 			</div>
-            
-			<div class="flex flex-1 items-center gap-3 rounded-lg border border-base-200 bg-base-200/50 px-4 py-3">
-				<Icon icon="solar:users-group-two-rounded-line-duotone" class="text-2xl text-base-content/50" />
-				<div class="flex flex-col text-left">
-					<span class="text-xs font-semibold text-base-content/60 uppercase tracking-wide">Số Lượng Khách</span>
-					<span class="text-sm font-medium text-base-content">5 - 10 Người</span>
+			<div class="card-actions justify-end mt-8 border-t border-base-200 pt-6">
+				<button class="btn btn-primary rounded-md font-bold tracking-widest uppercase px-8">
+					<Icon icon="solar:magic-stick-3-line-duotone" class="text-xl" />
+					Tìm Phòng Trống
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+		<div class="card bg-base-100 rounded-md border border-base-300">
+			<div class="card-body">
+				<div class="w-12 h-12 rounded-md bg-base-200 flex items-center justify-center mb-4 text-primary">
+					<Icon icon="solar:crown-star-line-duotone" class="text-3xl" />
 				</div>
-			</div>
-            
-			<button class="btn btn-primary px-8 h-full min-h-[3rem] w-full sm:w-auto shadow-sm">
-				Tìm Phòng Trống
-			</button>
-		</div>
-	</section>
-
-	<div class="divider"></div> 
-
-	<!-- Services Section -->
-	<section class="space-y-8">
-		<div class="flex items-center justify-between">
-			<h2 class="text-2xl font-bold text-base-content">Dịch Vụ Tiêu Chuẩn</h2>
-			<div class="flex items-center gap-2 text-sm">
-				{#if isReady}
-					<div class="badge badge-success gap-1 font-semibold p-3 text-success-content">
-						<Icon icon="solar:check-circle-bold" />
-						{healthMessage}
-					</div>
-				{:else}
-					<div class="badge badge-error gap-1 font-semibold p-3 text-error-content">
-						<Icon icon="solar:danger-triangle-bold" />
-						{healthMessage}
-					</div>
-				{/if}
+				<h3 class="card-title text-lg font-bold tracking-wide">Giải Trí Chuẩn VIP</h3>
+				<p class="text-base-content/60 text-sm mt-2">Dàn âm thanh siêu trầm, kết nối nhạc Youtube/Spotify không giới hạn.</p>
 			</div>
 		</div>
-
-		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-			<!-- DaisyUI Card 1 -->
-			<div class="card bg-base-100 border border-base-200 transition-all hover:shadow-md hover:border-primary/30">
-                <div class="card-body">
-                    <div class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-base-200 text-base-content">
-                        <Icon icon="solar:star-fall-2-line-duotone" class="text-2xl" />
-                    </div>
-                    <h3 class="card-title text-lg">Phòng Hát Đẳng Cấp</h3>
-                    <p class="text-sm text-base-content/70">
-                        Đa dạng sức chứa từ 5 đến 40 khách. Thiết kế thanh lịch, trang bị hệ thống âm thanh nội địa và cách âm kỹ thuật số.
-                    </p>
-                </div>
-			</div>
-
-			<!-- DaisyUI Card 2 -->
-			<div class="card bg-base-100 border border-base-200 transition-all hover:shadow-md hover:border-primary/30">
-                <div class="card-body">
-                    <div class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-base-200 text-base-content">
-                        <Icon icon="solar:cup-stars-line-duotone" class="text-2xl" />
-                    </div>
-                    <h3 class="card-title text-lg">Thực Đơn Phong Phú</h3>
-                    <p class="text-sm text-base-content/70">
-                        Bao gồm các gói combo tiệc nhẹ, bia và đồ uống pha chế tươi. Hỗ trợ đặt món trước khi đến để không làm gián đoạn cuộc vui.
-                    </p>
-                </div>
-			</div>
-
-			<!-- DaisyUI Card 3 -->
-			<div class="card bg-base-100 border border-base-200 transition-all hover:shadow-md hover:border-primary/30">
-                <div class="card-body">
-                    <div class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-base-200 text-base-content">
-                        <Icon icon="solar:ticket-sale-line-duotone" class="text-2xl" />
-                    </div>
-                    <h3 class="card-title text-lg">Chính Sách Ưu Đãi</h3>
-                    <p class="text-sm text-base-content/70">
-                        Tích lũy điểm thưởng qua mỗi hóa đơn. Quy đổi hạng thành viên và áp dụng chiết khấu tự động trên nền tảng.
-                    </p>
-                </div>
+		<div class="card bg-base-100 rounded-md border border-base-300">
+			<div class="card-body">
+				<div class="w-12 h-12 rounded-md bg-base-200 flex items-center justify-center mb-4 text-secondary">
+					<Icon icon="solar:chef-hat-line-duotone" class="text-3xl" />
+				</div>
+				<h3 class="card-title text-lg font-bold tracking-wide">Ẩm Thực Đặc Sắc</h3>
+				<p class="text-base-content/60 text-sm mt-2">Đa dạng từ món ăn nhẹ đến bữa tiệc nướng sành điệu, kết hợp quầy pha chế.</p>
 			</div>
 		</div>
-	</section>
+		<div class="card bg-base-100 rounded-md border border-base-300">
+			<div class="card-body">
+				<div class="w-12 h-12 rounded-md bg-base-200 flex items-center justify-center mb-4 text-accent">
+					<Icon icon="solar:map-point-wave-line-duotone" class="text-3xl" />
+				</div>
+				<h3 class="card-title text-lg font-bold tracking-wide">Vị Trí Trung Tâm</h3>
+				<p class="text-base-content/60 text-sm mt-2">Bãi đậu xe rộng rãi an toàn, sảnh chờ sang trọng, đa dạng không gian VIP.</p>
+			</div>
+		</div>
+	</div>
 </div>

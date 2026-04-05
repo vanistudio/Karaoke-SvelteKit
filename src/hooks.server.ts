@@ -7,7 +7,6 @@ import { createTRPCHandle } from 'trpc-sveltekit';
 import { createContext } from '$lib/server/trpc/context';
 import { appRouter } from '$lib/server/routes/app.router';
 
-
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
 
@@ -18,7 +17,6 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 
 	return svelteKitHandler({ event, resolve, auth, building });
 };
-
 export const handle: Handle = sequence(
 	handleBetterAuth,
 	createTRPCHandle({ url: '/api/trpc', router: appRouter, createContext })

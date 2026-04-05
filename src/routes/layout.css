@@ -2,9 +2,23 @@
 @plugin '@tailwindcss/typography';
 @plugin "daisyui";
 
-/* Optional: Define default theme for daisyui if it's running via Tailwind v4 plugin, otherwise defaults to light/dark based on system */
 @layer base {
-	body {
-		@apply bg-base-200 text-base-content min-h-screen antialiased;
-	}
+    *::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    * {
+        -ms-overflow-style: none !important;
+        scrollbar-width: none !important;
+    }
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus,
+.input:focus-within,
+.select:focus-within {
+	outline: none !important;
+	box-shadow: none !important;
 }
