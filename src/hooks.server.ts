@@ -21,5 +21,5 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 
 export const handle: Handle = sequence(
 	handleBetterAuth,
-	createTRPCHandle({ router: appRouter, createContext })
+	createTRPCHandle({ url: '/api/trpc', router: appRouter, createContext })
 );

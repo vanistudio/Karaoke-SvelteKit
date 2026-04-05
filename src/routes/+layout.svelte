@@ -6,7 +6,6 @@
 
 	let { children } = $props();
 
-	// Define navigation items
 	const navigation = [
 		{ name: 'Trang chủ', href: '/', icon: 'solar:home-2-line-duotone' },
 		{ name: 'Phòng Hát', href: '/rooms', icon: 'solar:soundwave-circle-line-duotone' },
@@ -17,45 +16,69 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>KaraSystem - Bảng Điều Khiển</title>
+	<title>KaraSystem - Nền Tảng Đặt Phòng Chuyên Nghiệp</title>
 </svelte:head>
 
-<div class="flex h-screen w-full flex-col overflow-hidden bg-surface-50 transition-colors">
-	<header class="flex h-16 w-full shrink-0 border-b border-surface-200 bg-white shadow-sm">
-		<div class="container mx-auto flex items-center justify-between px-4">
-			<a href="/" class="flex items-center gap-2">
-				<Icon icon="solar:microphone-3-line-duotone" class="text-3xl text-primary-500" />
-				<span class="text-xl font-black uppercase tracking-widest text-primary-600">KaraSystem</span>
+<div class="flex h-screen w-full flex-col bg-base-200">
+	<!-- DaisyUI Navbar -->
+	<header class="navbar bg-base-100 shadow-sm px-6 sticky top-0 z-50 border-b border-base-300">
+		<!-- Navbar Start (Logo) -->
+		<div class="navbar-start">
+			<a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+				<Icon icon="solar:microphone-3-line-duotone" class="text-3xl text-primary" />
+				<span class="text-xl font-bold uppercase tracking-wider text-base-content">
+					Kara<span class="text-primary">System</span>
+				</span>
 			</a>
-			<nav class="hidden md:flex flex-1 items-center justify-center gap-8">
+		</div>
+
+		<!-- Navbar Center (Menu) -->
+		<div class="navbar-center hidden lg:flex">
+			<ul class="menu menu-horizontal px-1 gap-2">
 				{#each navigation as item}
-					<a
-						href={item.href}
-						class="flex items-center gap-2 font-medium transition-colors hover:text-primary-500 {$page.url.pathname === item.href ? 'text-primary-500' : 'text-surface-600'}"
-					>
-						<Icon icon={item.icon} class="text-xl" />
-						{item.name}
-					</a>
+					<li>
+						<a 
+							href={item.href} 
+							class="font-medium {$page.url.pathname === item.href ? 'active text-primary bg-primary/10' : 'text-base-content/80 hover:text-primary'} gap-2"
+						>
+							<Icon icon={item.icon} class="text-xl" />
+							{item.name}
+						</a>
+					</li>
 				{/each}
-			</nav>
-			<div class="flex items-center gap-4">
-				<button class="btn preset-tonal-primary hidden sm:flex">
-					<Icon icon="solar:magnifer-line-duotone" class="text-xl" />
-				</button>
-				
-				<div class="h-6 w-px bg-surface-200"></div>
-				
-				<a href="/login" class="btn preset-filled-primary font-semibold">
-					Đăng nhập
-				</a>
+			</ul>
+		</div>
+
+		<!-- Navbar End (Actions) -->
+		<div class="navbar-end gap-4">
+			<button class="btn btn-ghost btn-circle">
+				<Icon icon="solar:magnifer-line-duotone" class="text-xl" />
+			</button>
+			
+			<div class="hidden sm:block divider divider-horizontal m-0 w-0 h-6"></div>
+			
+			<div class="hidden md:flex items-center gap-2">
+				<a href="/login" class="btn btn-ghost">Đăng nhập</a>
+				<a href="/register" class="btn btn-primary">Đăng ký</a>
+			</div>
+            
+            <!-- Avatar Dropdown for logged in user (example) -->
+			<div class="dropdown dropdown-end">
+				<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+					<div class="w-10 rounded-full ring-1 ring-base-300">
+						<img alt="User Avatar" src="https://i.pravatar.cc/150?u=123" />
+					</div>
+				</div>
+				<ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border border-base-200">
+					<li><a>Hồ sơ cá nhân</a></li>
+					<li><a>Cài đặt</a></li>
+					<li><a class="text-error">Đăng xuất</a></li>
+				</ul>
 			</div>
 		</div>
 	</header>
-	<div class="flex flex-1 overflow-hidden">
-		<main class="flex-1 overflow-auto bg-surface-50/50 p-6">
-			<div class="container mx-auto max-w-7xl">
-				{@render children()}
-			</div>
-		</main>
-	</div>
+
+	<main class="flex-1 overflow-auto">
+		{@render children()}
+	</main>
 </div>
