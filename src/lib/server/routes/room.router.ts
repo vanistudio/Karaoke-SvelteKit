@@ -20,5 +20,18 @@ export const roomRouter = router({
 		)
 		.mutation(async ({ input }) => {
 			return await roomController.addRoom(input);
+		}),
+	findAvailable: publicProcedure
+		.input(
+			z.object({
+				startTime: z.string().datetime().or(z.date()),
+				endTime: z.string().datetime().or(z.date()),
+				minCapacity: z.number().positive().optional()
+			})
+		)
+		.query(async ({ input }) => {
+			const start = new Date(input.startTime);
+			const end = new Date(input.endTime);
+			return await roomController.findAvailableRooms(start, end, input.minCapacity);
 		})
 });

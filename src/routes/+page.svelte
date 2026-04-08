@@ -3,15 +3,36 @@
 	import Icon from '@iconify/svelte';
 	import DatePicker from '$lib/components/ui/DatePicker.svelte';
 	import TimePicker from '$lib/components/ui/TimePicker.svelte';
-
 	let isReady = $state(false);
-	
 	let selectedDate = $state(new Date());
 	let selectedTime = $state('19:00');
+	let isSearching = $state(false);
+	let searchResults = $state<any[] | null>(null);
 
 	$effect(() => {
 		trpc().healthcheck.query().then(() => isReady = true).catch(() => isReady = false);
 	});
+
+	async function searchRooms() {
+		isSearching = true;
+		const year = selectedDate.getFullYear();
+		const month = selectedDate.getMonth();
+		const day = selectedDate.getDate();
+		const [hours, minutes] = selectedTime.split(':').map(Number);
+		const startTime = new Date(year, month, day, hours, minutes);
+		const endTime = new Date(startTime.getTime() + 3 * 60 * 60 * 1000);
+
+		try {
+			searchResults = await trpc().room.findAvailable.query({
+				startTime: startTime.toISOString(),
+				endTime: endTime.toISOString(),
+			});
+		} catch (error) {
+			console.error("Lỗi tìm kiếm phòng:", error);
+		} finally {
+			isSearching = false;
+		}
+	}
 </script><div class="flex flex-col gap-8">
 	<div class="bg-base-200 rounded-md py-10 px-6 border border-base-300">
 		<div class="text-center w-full max-w-3xl mx-auto">
@@ -49,13 +70,57 @@
 				</div>
 			</div>
 			<div class="card-actions justify-end mt-8 border-t border-base-200 pt-6">
-				<button class="btn btn-primary rounded-md font-bold tracking-widest uppercase px-8">
-					<Icon icon="solar:magic-stick-3-line-duotone" class="text-xl" />
+				<button class="btn btn-primary rounded-md font-bold tracking-widest uppercase px-8" disabled={isSearching} onclick={searchRooms}>
+					{#if isSearching}
+						<span class="loading loading-spinner loading-sm"></span>
+					{:else}
+						<Icon icon="solar:magic-stick-3-line-duotone" class="text-xl" />
+					{/if}
 					Tìm Phòng Trống
 				</button>
 			</div>
 		</div>
 	</div>
+
+	{#if searchResults}
+		<div class="w-full mt-4">
+			<h2 class="text-2xl font-bold uppercase tracking-widest mb-6">Kết Quả Tìm Kiếm: {searchResults.length} phòng</h2>
+			{#if searchResults.length === 0}
+				<div class="alert alert-warning rounded-md bg-warning/10 border-warning/20">
+					<Icon icon="solar:danger-circle-line-duotone" class="text-warning text-2xl" />
+					<span>Xin lỗi, không có phòng trống phù hợp với thời gian này. Vui lòng chọn giờ khác.</span>
+				</div>
+			{:else}
+				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+					{#each searchResults as room}
+						<div class="card bg-base-100 rounded-md border border-base-300 hover:border-primary transition duration-300">
+							<div class="card-body">
+								<h3 class="card-title text-lg font-bold">{room.name}</h3>
+								<div class="flex flex-col gap-2 text-sm font-medium mt-2">
+									<div class="flex justify-between border-b border-base-200 pb-2">
+										<span class="text-base-content/60">Phân loại:</span>
+										<span class="uppercase font-bold text-primary">{room.type}</span>
+									</div>
+									<div class="flex justify-between border-b border-base-200 pb-2">
+										<span class="text-base-content/60">Sức chứa:</span>
+										<span>Tối đa {room.capacity} Khách</span>
+									</div>
+									<div class="flex justify-between pt-1">
+										<span class="text-base-content/60">Giá / Giờ:</span>
+										<span class="font-bold text-lg">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(room.pricePerHour)}</span>
+									</div>
+								</div>
+								<div class="card-actions justify-end mt-4">
+									<button class="btn btn-outline btn-primary btn-sm rounded-md w-full">CHỌN PHÒNG NÀY</button>
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	{/if}
+
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 		<div class="card bg-base-100 rounded-md border border-base-300">
 			<div class="card-body">

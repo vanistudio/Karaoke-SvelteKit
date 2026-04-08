@@ -1,4 +1,5 @@
 import { roomRepository } from '../repositories/room.repository';
+import { bookingRepository } from '../repositories/booking.repository';
 
 export class RoomService {
 	async getAllRooms() {
@@ -13,6 +14,21 @@ export class RoomService {
 
 	async createRoom(data: Parameters<typeof roomRepository.create>[0]) {
 		return await roomRepository.create(data);
+	}
+
+	async findAvailableRooms(startTime: Date, endTime: Date, minCapacity?: number) {
+		const allRooms = await roomRepository.findAll();
+		const availableRooms = [];
+
+		for (const r of allRooms) {
+			if (minCapacity && r.capacity < minCapacity) continue;
+			const overlaps = await bookingRepository.findOverlappingBookings(r.id, startTime, endTime);
+			if (overlaps.length === 0) {
+				availableRooms.push(r);
+			}
+		}
+
+		return availableRooms;
 	}
 }
 

@@ -12,6 +12,10 @@ export class RoomController {
 	async addRoom(data: Parameters<typeof roomService.createRoom>[0]) {
 		return await roomService.createRoom(data);
 	}
+
+	async findAvailableRooms(startTime: Date, endTime: Date, minCapacity?: number) {
+		return await roomService.findAvailableRooms(startTime, endTime, minCapacity);
+	}
 }
 
 export const roomController = new RoomController();
