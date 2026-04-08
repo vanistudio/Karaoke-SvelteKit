@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { signOut } from '$lib/auth-client';
+	import { addToast } from '$lib/stores/toast';
 	let { children } = $props();
 	
 	let user = $derived($page.data.user);
@@ -60,7 +62,8 @@
 						<div class="divider my-1"></div>
 						<li><button onclick={async () => {
 							await signOut();
-							window.location.href = '/login';
+							addToast('Đăng xuất phiên quản trị.', 'info');
+							await goto('/login', { invalidateAll: true });
 						}} class="py-2 hover:bg-error/10 text-error hover:text-error rounded-sm font-bold w-full text-left transition-colors"><Icon icon="solar:logout-2-line-duotone" class="text-lg"/> Đăng xuất</button></li>
 					</ul>
 				</div>

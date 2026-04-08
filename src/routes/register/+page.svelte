@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { z } from 'zod';
 	import { signUp } from '$lib/auth-client';
+	import { addToast } from '$lib/stores/toast';
 	const registerSchema = z.object({
 		name: z.string().min(2, 'Tên hiển thị phải chứa ít nhất 2 ký tự.').trim(),
 		email: z.string().email('Email không đúng định dạng.').trim(),
@@ -51,6 +52,7 @@
 		if (error) {
 			globalError = error.message || 'Xảy ra lỗi trong quá trình khởi tạo tài khoản.';
 		} else {
+			addToast('Tạo tài khoản thành công! Khám phá phòng hát ngay.', 'success');
 			await goto('/', { invalidateAll: true });
 		}
 	}

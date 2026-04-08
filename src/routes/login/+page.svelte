@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { z } from 'zod';
 	import { signIn } from '$lib/auth-client';
+	import { addToast } from '$lib/stores/toast';
 	const loginSchema = z.object({
 		email: z.string().email('Email không đúng định dạng.').trim(),
 		password: z.string().min(8, 'Mật khẩu phải chứa ít nhất 8 ký tự.').trim()
@@ -43,6 +44,7 @@
 		if (error) {
 			globalError = error.message || 'Mật khẩu hoặc tài khoản không hợp lệ.';
 		} else {
+			addToast('Đăng nhập thành công! Chào mừng trở lại.', 'success');
 			await goto('/', { invalidateAll: true });
 		}
 	}

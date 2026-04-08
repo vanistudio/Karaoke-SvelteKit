@@ -2,8 +2,11 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import Icon from '@iconify/svelte';
 	import { signOut } from '$lib/auth-client';
+	import Toast from '$lib/components/Toast.svelte';
+	import { addToast } from '$lib/stores/toast';
 
 	let { children } = $props();
 
@@ -21,6 +24,9 @@
 	<link rel="icon" href={favicon} />
 	<title>KaraSystem | Quản Trị Hệ Thống</title>
 </svelte:head>
+
+<Toast />
+
 <div class="drawer">
 	<input id="mobile-sidebar" type="checkbox" class="drawer-toggle" />
 	<div class="drawer-content flex flex-col min-h-screen bg-base-200 font-sans">
@@ -71,7 +77,7 @@
 				<div class="flex items-center gap-6 justify-end">
 					{#if user}
 						<a href="/admin" class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 hover:text-primary transition-colors shrink-0">Xin chào, {user.name}</a>
-						<button onclick={async () => { await signOut(); window.location.href = '/login'; }} class="btn btn-outline border-base-300 hover:border-error hover:bg-error hover:text-white rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm transition-colors">
+						<button onclick={async () => { await signOut(); addToast('Hẹn gặp lại bạn!', 'info'); await goto('/login', { invalidateAll: true }); }} class="btn btn-outline border-base-300 hover:border-error hover:bg-error hover:text-white rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm transition-colors">
 							ĐĂNG XUẤT
 						</button>
 					{:else}
@@ -182,7 +188,7 @@
 					</a>
 				</li>
 				<li>
-					<button onclick={async () => { await signOut(); window.location.href = '/login'; }} class="rounded-md font-bold text-sm tracking-wider text-error">
+					<button onclick={async () => { await signOut(); addToast('Hẹn gặp lại bạn!', 'info'); await goto('/login', { invalidateAll: true }); }} class="rounded-md font-bold text-sm tracking-wider text-error">
 						<Icon icon="solar:logout-2-line-duotone" class="text-xl" />
 						ĐĂNG XUẤT
 					</button>
