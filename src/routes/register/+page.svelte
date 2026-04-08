@@ -51,7 +51,7 @@
 		if (error) {
 			globalError = error.message || 'Xảy ra lỗi trong quá trình khởi tạo tài khoản.';
 		} else {
-			goto('/');
+			await goto('/', { invalidateAll: true });
 		}
 	}
 </script>

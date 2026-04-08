@@ -43,7 +43,7 @@
 		if (error) {
 			globalError = error.message || 'Mật khẩu hoặc tài khoản không hợp lệ.';
 		} else {
-			goto('/');
+			await goto('/', { invalidateAll: true });
 		}
 	}
 </script>

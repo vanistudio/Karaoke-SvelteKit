@@ -7,7 +7,6 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<!-- Summary Statistics -->
 	<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 		<div class="card bg-base-100 rounded-md border border-base-300 shadow-sm relative overflow-hidden">
 			<div class="absolute -right-4 -top-4 text-primary/10">
@@ -81,7 +80,6 @@
 					Lịch Đặt Phòng Mới Nhất
 				</h2>
 				<div class="overflow-x-auto">
-					<!-- Fake Data for Overview Blueprinting -->
 					<table class="table table-sm xs:table-sm w-full">
 						<thead>
 							<tr class="uppercase text-[10px] tracking-widest border-b border-base-200">
