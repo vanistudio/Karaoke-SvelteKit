@@ -3,8 +3,11 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/stores';
 	import Icon from '@iconify/svelte';
+	import { signOut } from '$lib/auth-client';
 
 	let { children } = $props();
+
+	let user = $derived($page.data.user);
 
 	const navigation = [
 		{ name: 'TRANG CHỦ', href: '/', icon: 'solar:home-2-line-duotone' },
@@ -66,10 +69,17 @@
 					{/each}
 				</nav>
 				<div class="flex items-center gap-6 justify-end">
-					<a href="/login" class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 hover:text-primary transition-colors shrink-0">ĐĂNG NHẬP</a>
-					<a href="/register" class="btn btn-primary rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm">
-						TẠO TÀI KHOẢN
-					</a>
+					{#if user}
+						<a href="/admin" class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 hover:text-primary transition-colors shrink-0">Xin chào, {user.name}</a>
+						<button onclick={async () => { await signOut(); window.location.href = '/login'; }} class="btn btn-outline border-base-300 hover:border-error hover:bg-error hover:text-white rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm transition-colors">
+							ĐĂNG XUẤT
+						</button>
+					{:else}
+						<a href="/login" class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 hover:text-primary transition-colors shrink-0">ĐĂNG NHẬP</a>
+						<a href="/register" class="btn btn-primary rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm">
+							TẠO TÀI KHOẢN
+						</a>
+					{/if}
 				</div>
 			</div>
 		</header>
@@ -164,18 +174,33 @@
 			{/each}
 			
 			<div class="divider mt-4 mb-2 text-xs font-bold tracking-widest text-base-content/50">TÀI KHOẢN</div>
-			<li>
-				<a href="/login" class="rounded-md font-bold text-sm tracking-wider">
-					<Icon icon="solar:login-2-line-duotone" class="text-xl" />
-					ĐĂNG NHẬP
-				</a>
-			</li>
-			<li>
-				<a href="/register" class="rounded-md font-bold text-sm tracking-wider text-primary">
-					<Icon icon="solar:user-plus-rounded-line-duotone" class="text-xl" />
-					TẠO TÀI KHOẢN
-				</a>
-			</li>
+			{#if user}
+				<li>
+					<a href="/admin" class="rounded-md font-bold text-sm tracking-wider">
+						<Icon icon="solar:pie-chart-2-line-duotone" class="text-xl" />
+						QUẢN TRỊ (/ADMIN)
+					</a>
+				</li>
+				<li>
+					<button onclick={async () => { await signOut(); window.location.href = '/login'; }} class="rounded-md font-bold text-sm tracking-wider text-error">
+						<Icon icon="solar:logout-2-line-duotone" class="text-xl" />
+						ĐĂNG XUẤT
+					</button>
+				</li>
+			{:else}
+				<li>
+					<a href="/login" class="rounded-md font-bold text-sm tracking-wider">
+						<Icon icon="solar:login-2-line-duotone" class="text-xl" />
+						ĐĂNG NHẬP
+					</a>
+				</li>
+				<li>
+					<a href="/register" class="rounded-md font-bold text-sm tracking-wider text-primary">
+						<Icon icon="solar:user-plus-rounded-line-duotone" class="text-xl" />
+						TẠO TÀI KHOẢN
+					</a>
+				</li>
+			{/if}
 		</ul>
 	</div>
 </div>

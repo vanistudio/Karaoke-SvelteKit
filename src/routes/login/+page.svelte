@@ -2,8 +2,7 @@
 	import Icon from '@iconify/svelte';
 	import { goto } from '$app/navigation';
 	import { z } from 'zod';
-	import { createAuthClient } from 'better-auth/svelte';
-	const { signIn } = createAuthClient();
+	import { signIn } from '$lib/auth-client';
 	const loginSchema = z.object({
 		email: z.string().email('Email không đúng định dạng.').trim(),
 		password: z.string().min(8, 'Mật khẩu phải chứa ít nhất 8 ký tự.').trim()
