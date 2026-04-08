@@ -1,4 +1,4 @@
-import { bookingService } from '../services/booking.service';
+import { bookingService } from '$lib/server/services/booking.service';
 
 export class BookingController {
 	async listBookings() {

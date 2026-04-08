@@ -1,5 +1,5 @@
-import { db } from '../db';
-import { booking } from '../db/schema';
+import { db } from '$lib/server/db';
+import { booking } from '$lib/server/db/schema';
 import { eq, and, not, lt, gt } from 'drizzle-orm';
 
 export class BookingRepository {

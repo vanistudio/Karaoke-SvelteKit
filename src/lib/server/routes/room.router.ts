@@ -1,6 +1,6 @@
-import { router, publicProcedure } from '../trpc/t';
+import { router, publicProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
-import { roomController } from '../controllers/room.controller';
+import { roomController } from '$lib/server/controllers/room.controller';
 
 export const roomRouter = router({
 	list: publicProcedure.query(async () => {

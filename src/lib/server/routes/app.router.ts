@@ -1,4 +1,4 @@
-import { router, publicProcedure } from '../trpc/t';
+import { router, publicProcedure } from '$lib/server/trpc/t';
 import { roomRouter } from './room.router';
 import { bookingRouter } from './booking.router';
 

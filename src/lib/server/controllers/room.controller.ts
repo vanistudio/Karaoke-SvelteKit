@@ -1,4 +1,4 @@
-import { roomService } from '../services/room.service';
+import { roomService } from '$lib/server/services/room.service';
 
 export class RoomController {
 	async listRooms() {

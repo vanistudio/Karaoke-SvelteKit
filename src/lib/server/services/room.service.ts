@@ -1,5 +1,5 @@
-import { roomRepository } from '../repositories/room.repository';
-import { bookingRepository } from '../repositories/booking.repository';
+import { roomRepository } from '$lib/server/repositories/room.repository';
+import { bookingRepository } from '$lib/server/repositories/booking.repository';
 
 export class RoomService {
 	async getAllRooms() {

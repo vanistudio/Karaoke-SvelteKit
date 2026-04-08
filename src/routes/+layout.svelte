@@ -76,7 +76,10 @@
 				</nav>
 				<div class="flex items-center gap-6 justify-end">
 					{#if user}
-						<a href="/admin" class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 hover:text-primary transition-colors shrink-0">Xin chào, {user.name}</a>
+						{#if user.role === 'admin'}
+							<a href="/admin" class="text-[11px] font-bold tracking-widest uppercase hidden md:flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors shrink-0"><Icon icon="solar:pie-chart-2-bold-duotone" class="text-sm"/> ADMIN AREA</a>
+						{/if}
+						<span class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 shrink-0">Xin chào, {user.name}</span>
 						<button onclick={async () => { await signOut(); addToast('Hẹn gặp lại bạn!', 'info'); await goto('/login', { invalidateAll: true }); }} class="btn btn-outline border-base-300 hover:border-error hover:bg-error hover:text-white rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm transition-colors">
 							ĐĂNG XUẤT
 						</button>
@@ -181,12 +184,20 @@
 			
 			<div class="divider mt-4 mb-2 text-xs font-bold tracking-widest text-base-content/50">TÀI KHOẢN</div>
 			{#if user}
-				<li>
-					<a href="/admin" class="rounded-md font-bold text-sm tracking-wider">
-						<Icon icon="solar:pie-chart-2-line-duotone" class="text-xl" />
-						QUẢN TRỊ (/ADMIN)
-					</a>
+				<li class="pointer-events-none mb-1">
+					<span class="rounded-md font-bold text-sm tracking-wider text-base-content/60 flex items-center gap-2">
+						<Icon icon="solar:user-circle-bold-duotone" class="text-xl" />
+						Hi, {user.name}
+					</span>
 				</li>
+				{#if user.role === 'admin'}
+					<li>
+						<a href="/admin" class="rounded-md font-bold text-sm tracking-wider text-primary bg-primary/10 mb-1">
+							<Icon icon="solar:pie-chart-2-bold-duotone" class="text-xl" />
+							Khu Vực Quản Trị
+						</a>
+					</li>
+				{/if}
 				<li>
 					<button onclick={async () => { await signOut(); addToast('Hẹn gặp lại bạn!', 'info'); await goto('/login', { invalidateAll: true }); }} class="rounded-md font-bold text-sm tracking-wider text-error">
 						<Icon icon="solar:logout-2-line-duotone" class="text-xl" />

@@ -1,6 +1,6 @@
-import { router, publicProcedure, protectedProcedure } from '../trpc/t';
+import { router, publicProcedure, protectedProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
-import { bookingController } from '../controllers/booking.controller';
+import { bookingController } from '$lib/server/controllers/booking.controller';
 
 export const bookingRouter = router({
 	list: publicProcedure.query(async () => {
