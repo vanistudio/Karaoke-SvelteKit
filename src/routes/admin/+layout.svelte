@@ -1,7 +1,10 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { page } from '$app/stores';
+	import { signOut } from '$lib/auth-client';
 	let { children } = $props();
+	
+	let user = $derived($page.data.user);
 </script>
 
 <div class="drawer lg:drawer-open font-sans bg-base-200">
@@ -34,12 +37,16 @@
 				<div class="dropdown dropdown-end ml-2">
 					<div tabindex="0" role="button" class="flex items-center gap-3 btn btn-ghost px-2 hover:bg-base-200 rounded-md">
 						<div class="text-right hidden sm:block">
-							<div class="text-sm font-bold leading-none">Admin Manager</div>
-							<div class="text-[10px] uppercase font-bold tracking-widest text-base-content/50 mt-1">Super Admin</div>
+							<div class="text-sm font-bold leading-none">{user?.name || 'Admin Manager'}</div>
+							<div class="text-[10px] uppercase font-bold tracking-widest text-base-content/50 mt-1">{user?.role || 'Super Admin'}</div>
 						</div>
 						<div class="avatar">
-							<div class="w-9 rounded-md border border-base-300 shadow-sm">
-								<img alt="Admin Avatar" src="https://ui-avatars.com/api/?name=Admin&background=random" />
+							<div class="w-9 rounded-md border border-base-300 shadow-sm overflow-hidden">
+								{#if user?.image}
+									<img alt="Admin Avatar" src={user.image} />
+								{:else}
+									<img alt="Admin Avatar" src={`https://ui-avatars.com/api/?name=${user?.name || 'Admin'}&background=random`} />
+								{/if}
 							</div>
 						</div>
 						<Icon icon="solar:alt-arrow-down-line-duotone" class="text-base-content/40 hidden sm:block" />
@@ -51,7 +58,10 @@
 						<li><a href="#profile" class="py-2 hover:bg-base-200 rounded-sm font-medium"><Icon icon="solar:user-circle-line-duotone" class="text-lg opacity-70"/> Hồ sơ cá nhân</a></li>
 						<li><a href="#settings" class="py-2 hover:bg-base-200 rounded-sm font-medium"><Icon icon="solar:settings-line-duotone" class="text-lg opacity-70"/> Cài đặt hệ thống</a></li>
 						<div class="divider my-1"></div>
-						<li><button class="py-2 hover:bg-error/10 text-error hover:text-error rounded-sm font-bold w-full text-left transition-colors"><Icon icon="solar:logout-2-line-duotone" class="text-lg"/> Đăng xuất</button></li>
+						<li><button onclick={async () => {
+							await signOut();
+							window.location.href = '/login';
+						}} class="py-2 hover:bg-error/10 text-error hover:text-error rounded-sm font-bold w-full text-left transition-colors"><Icon icon="solar:logout-2-line-duotone" class="text-lg"/> Đăng xuất</button></li>
 					</ul>
 				</div>
 			</div>
