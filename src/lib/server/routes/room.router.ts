@@ -1,4 +1,4 @@
-import { router, publicProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, protectedProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { roomController } from '$lib/server/controllers/room.controller';
 
@@ -9,17 +9,39 @@ export const roomRouter = router({
 	getById: publicProcedure.input(z.number()).query(async ({ input }) => {
 		return await roomController.getRoom(input);
 	}),
-	create: publicProcedure
+	count: publicProcedure.query(async () => {
+		return await roomController.countRooms();
+	}),
+	create: protectedProcedure
 		.input(
 			z.object({
 				name: z.string().min(1),
 				capacity: z.number().positive(),
-				type: z.enum(['standard', 'vip']),
+				type: z.enum(['standard', 'vip', 'super_vip']),
 				pricePerHour: z.number().positive()
 			})
 		)
 		.mutation(async ({ input }) => {
 			return await roomController.addRoom(input);
+		}),
+	update: protectedProcedure
+		.input(
+			z.object({
+				id: z.number(),
+				name: z.string().min(1).optional(),
+				capacity: z.number().positive().optional(),
+				type: z.enum(['standard', 'vip', 'super_vip']).optional(),
+				pricePerHour: z.number().positive().optional()
+			})
+		)
+		.mutation(async ({ input }) => {
+			const { id, ...data } = input;
+			return await roomController.updateRoom(id, data);
+		}),
+	delete: protectedProcedure
+		.input(z.number())
+		.mutation(async ({ input }) => {
+			return await roomController.deleteRoom(input);
 		}),
 	findAvailable: publicProcedure
 		.input(

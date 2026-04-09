@@ -16,6 +16,22 @@ export class RoomService {
 		return await roomRepository.create(data);
 	}
 
+	async updateRoom(id: number, data: Parameters<typeof roomRepository.update>[1]) {
+		const existing = await roomRepository.findById(id);
+		if (!existing) throw new Error('Room not found');
+		return await roomRepository.update(id, data);
+	}
+
+	async deleteRoom(id: number) {
+		const existing = await roomRepository.findById(id);
+		if (!existing) throw new Error('Room not found');
+		return await roomRepository.delete(id);
+	}
+
+	async countRooms() {
+		return await roomRepository.count();
+	}
+
 	async findAvailableRooms(startTime: Date, endTime: Date, minCapacity?: number) {
 		const allRooms = await roomRepository.findAll();
 		const availableRooms = [];

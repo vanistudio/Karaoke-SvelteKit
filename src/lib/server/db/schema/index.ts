@@ -4,5 +4,6 @@ export * from './account.schema';
 export * from './verification.schema';
 export * from './room.schema';
 export * from './booking.schema';
+export * from './service.schema';
 export * from './task.schema';
 export * from './relations';

@@ -16,6 +16,21 @@ export class RoomRepository {
 		const result = await db.insert(room).values(data).returning();
 		return result[0];
 	}
+
+	async update(id: number, data: Partial<typeof room.$inferInsert>) {
+		const result = await db.update(room).set(data).where(eq(room.id, id)).returning();
+		return result[0];
+	}
+
+	async delete(id: number) {
+		const result = await db.delete(room).where(eq(room.id, id)).returning();
+		return result[0];
+	}
+
+	async count() {
+		const result = await db.select().from(room);
+		return result.length;
+	}
 }
 
 export const roomRepository = new RoomRepository();
