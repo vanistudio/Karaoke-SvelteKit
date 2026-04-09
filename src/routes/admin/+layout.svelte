@@ -37,7 +37,7 @@
 				</div>
 				
 				<div class="dropdown dropdown-end ml-2">
-					<div tabindex="0" role="button" class="flex items-center gap-3 btn btn-ghost px-2 hover:bg-base-200 rounded-md">
+					<div role="button" class="flex items-center gap-3 btn btn-ghost px-2 hover:bg-base-200 rounded-md">
 						<div class="text-right hidden sm:block">
 							<div class="text-sm font-bold leading-none">{user?.name || 'Admin Manager'}</div>
 							<div class="text-[10px] uppercase font-bold tracking-widest text-base-content/50 mt-1">{user?.role || 'Super Admin'}</div>
@@ -53,7 +53,7 @@
 						</div>
 						<Icon icon="solar:alt-arrow-down-line-duotone" class="text-base-content/40 hidden sm:block" />
 					</div>
-					<ul tabindex="0" class="mt-3 z-1 p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-md w-56 border border-base-300/50">
+					<ul class="mt-3 z-1 p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-md w-56 border border-base-300/50">
 						<li class="menu-title px-4 py-2 border-b border-base-200 mb-1">
 							<span class="text-xs uppercase tracking-widest font-bold">Tài Khoản</span>
 						</li>
@@ -97,7 +97,6 @@
 				<a href="/admin/bookings" class="group {$page.url.pathname.startsWith('/admin/bookings') ? 'active font-bold bg-primary/10 text-primary border-r-4 border-primary rounded-none rounded-l-md' : 'rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors'} py-3 px-4">
 					<Icon icon="solar:ticket-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform {$page.url.pathname.startsWith('/admin/bookings') ? 'text-primary' : 'opacity-70'}" />
 					<span class="ml-2 tracking-wide flex-1">Lịch Đặt Phòng</span>
-					<span class="badge badge-sm badge-secondary font-bold">Mới</span>
 				</a>
 			</li>
 			
@@ -111,8 +110,8 @@
 				</a>
 			</li>
 			<li>
-				<a href="/admin/services" class="group rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors py-3 px-4">
-					<Icon icon="solar:wineglass-triangle-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform opacity-70" />
+				<a href="/admin/services" class="group {$page.url.pathname.startsWith('/admin/services') ? 'active font-bold bg-primary/10 text-primary border-r-4 border-primary rounded-none rounded-l-md' : 'rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors'} py-3 px-4">
+					<Icon icon="solar:wineglass-triangle-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform {$page.url.pathname.startsWith('/admin/services') ? 'text-primary' : 'opacity-70'}" />
 					<span class="ml-2 tracking-wide">Menu Dịch Vụ</span>
 				</a>
 			</li>

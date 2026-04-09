@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { trpc } from '$lib/trpc/client';
 	import Icon from '@iconify/svelte';
+	import { addToast } from '$lib/stores/toast';
 
 	let bookings = $state<any[]>([]);
 	let isReady = $state(false);
+
 	async function fetchBookings() {
 		try {
-			bookings = await trpc().booking.list.query();
+			bookings = await trpc().dashboard.enrichedBookings.query();
 		} catch (error) {
-			console.error("Fetch Err", error);
+			console.error(error);
 		} finally {
 			isReady = true;
 		}
@@ -20,22 +22,27 @@
 
 	async function changeStatus(id: number, newStatus: 'pending' | 'confirmed' | 'cancelled') {
 		try {
-			await trpc().booking.changeStatus.mutate({
-				id: id,
-				status: newStatus
-			});
+			await trpc().booking.changeStatus.mutate({ id, status: newStatus });
+			addToast(`Cập nhật trạng thái đơn #BKG-${id} thành công!`, 'success');
 			await fetchBookings();
 		} catch (error) {
-			alert("Cập nhật trạng thái thất bại.");
+			addToast('Cập nhật trạng thái thất bại.', 'error');
 			console.error(error);
 		}
 	}
 	
 	function formatDate(dateString: string | Date | null) {
-		if (!dateString) return "Trống";
+		if (!dateString) return 'N/A';
 		const dateObj = typeof dateString === 'string' ? new Date(dateString) : dateString;
 		return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(dateObj);
 	}
+
+	function formatVND(value: number) {
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+	}
+
+	let pendingCount = $derived(bookings.filter(b => b.status === 'pending').length);
+	let confirmedCount = $derived(bookings.filter(b => b.status === 'confirmed').length);
 </script>
 
 <svelte:head>
@@ -46,7 +53,7 @@
 	<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 		<div class="bg-base-100 p-6 rounded-md border border-base-300 shadow-sm flex items-center justify-between">
 			<div>
-				<p class="text-xs font-bold text-base-content/60 uppercase tracking-widest">Tổng Cuộc Gọi Đặt Đơn</p>
+				<p class="text-xs font-bold text-base-content/60 uppercase tracking-widest">Tổng Đơn Đặt Phòng</p>
 				<h3 class="text-2xl font-black text-base-content">
 					{isReady ? bookings.length : '...'}
 				</h3>
@@ -57,9 +64,9 @@
 		</div>
 		<div class="bg-base-100 p-6 rounded-md border border-base-300 shadow-sm flex items-center justify-between">
 			<div>
-				<p class="text-xs font-bold text-warning uppercase tracking-widest">Đang Chờ Kích Hoạt</p>
+				<p class="text-xs font-bold text-warning uppercase tracking-widest">Đang Chờ Duyệt</p>
 				<h3 class="text-2xl font-black text-warning">
-					{isReady ? bookings.filter((b: any) => b.status === 'pending').length : '...'}
+					{isReady ? pendingCount : '...'}
 				</h3>
 			</div>
 			<div class="h-12 w-12 rounded-full bg-warning/10 text-warning flex items-center justify-center">
@@ -70,7 +77,7 @@
 			<div>
 				<p class="text-xs font-bold text-success uppercase tracking-widest">Đã Xác Nhận</p>
 				<h3 class="text-2xl font-black text-success">
-					{isReady ? bookings.filter((b: any) => b.status === 'confirmed').length : '...'}
+					{isReady ? confirmedCount : '...'}
 				</h3>
 			</div>
 			<div class="h-12 w-12 rounded-full bg-success/10 text-success flex items-center justify-center">
@@ -80,16 +87,16 @@
 	</div>
 	<div class="card bg-base-100 border border-base-300 shadow-sm rounded-md">
 		<div class="overflow-x-auto w-full min-h-[50vh]">
-			<table class="table table-zebra table-sm xs:table-sm w-full">
+			<table class="table table-zebra table-sm w-full">
 				<thead class="bg-base-200/50 uppercase tracking-widest text-[#888] text-[10px] sm:text-xs border-b border-base-300">
 					<tr>
 						<th>Mã Lịch</th>
-						<th>Khách Hàng (User ID)</th>
-						<th>Cơ Sở Lựa Chọn</th>
-						<th>Thời Gian Bắt Đầu / Kết Thúc</th>
+						<th>Khách Hàng</th>
+						<th>Phòng</th>
+						<th>Thời Gian</th>
 						<th class="text-right">Tổng Cước</th>
 						<th class="text-center">Trạng Thái</th>
-						<th class="text-right">Phê Duyệt Controls</th>
+						<th class="text-right">Phê Duyệt</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -102,45 +109,50 @@
 					{:else if bookings.length === 0}
 						<tr>
 							<td colspan="7" class="text-center py-10 font-medium text-base-content/60">
-								Hoàn toàn trống. Tuyệt vời!
+								Chưa có đơn đặt phòng nào trong hệ thống.
 							</td>
 						</tr>
 					{:else}
-						{#each bookings as booking}
+						{#each bookings as bk}
 							<tr class="hover whitespace-nowrap">
-								<td class="font-mono text-xs font-bold text-base-content/50">#BKG-{booking.id}</td>
-								<td class="font-bold max-w-[120px] truncate" title={booking.userId}>{booking.userId}</td>
-								<td class="font-medium text-primary">Phòng ID: {booking.roomId}</td>
+								<td class="font-mono text-xs font-bold text-base-content/50">#BKG-{bk.id}</td>
+								<td>
+									<div class="flex flex-col">
+										<span class="font-bold text-sm">{bk.userName || 'N/A'}</span>
+										<span class="text-xs text-base-content/50">{bk.userEmail || ''}</span>
+									</div>
+								</td>
+								<td class="font-medium text-primary">{bk.roomName || 'N/A'}</td>
 								<td class="text-xs font-medium">
-									<div>{formatDate(booking.startTime)}</div>
-									<div class="text-base-content/50">đến {formatDate(booking.endTime)}</div>
+									<div>{formatDate(bk.startTime)}</div>
+									<div class="text-base-content/50">đến {formatDate(bk.endTime)}</div>
 								</td>
 								<td class="text-right font-mono font-bold">
-									{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking.totalCost ?? 0)}
+									{formatVND(bk.totalCost ?? 0)}
 								</td>
 								
 								<td class="text-center">
-									{#if booking.status === 'pending'}
+									{#if bk.status === 'pending'}
 										<div class="badge badge-warning badge-sm rounded-md font-bold w-24">CHỜ DUYỆT</div>
-									{:else if booking.status === 'confirmed'}
+									{:else if bk.status === 'confirmed'}
 										<div class="badge badge-success badge-sm rounded-md font-bold w-24">THÀNH CÔNG</div>
 									{:else}
-										<div class="badge badge-error badge-sm rounded-md font-bold w-24 text-white">ĐÃ HỦY ÁN</div>
+										<div class="badge badge-error badge-sm rounded-md font-bold w-24 text-white">ĐÃ HỦY</div>
 									{/if}
 								</td>
 								
 								<td class="text-right">
-									{#if booking.status === 'pending'}
+									{#if bk.status === 'pending'}
 										<div class="join">
-											<button onclick={() => changeStatus(booking.id, 'confirmed')} class="btn btn-xs btn-success text-white join-item tooltip tooltip-left" data-tip="Phê Duyệt Đơn Này">
+											<button onclick={() => changeStatus(bk.id, 'confirmed')} class="btn btn-xs btn-success text-white join-item tooltip tooltip-left" data-tip="Phê Duyệt">
 												<Icon icon="solar:check-circle-bold-duotone" />
 											</button>
-											<button onclick={() => changeStatus(booking.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item tooltip tooltip-left" data-tip="Hủy Cuộc Hẹn Này">
+											<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item tooltip tooltip-left" data-tip="Hủy Đơn">
 												<Icon icon="solar:close-circle-bold-duotone" />
 											</button>
 										</div>
-									{:else if booking.status === 'confirmed'}
-										<button onclick={() => changeStatus(booking.id, 'cancelled')} class="btn btn-xs btn-outline btn-error rounded-sm tooltip tooltip-left" data-tip="Hủy Chữ Tín Đơn Này">
+									{:else if bk.status === 'confirmed'}
+										<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-outline btn-error rounded-sm tooltip tooltip-left" data-tip="Hủy Đơn">
 											<Icon icon="solar:shield-warning-line-duotone" /> HỦY
 										</button>
 									{:else}
