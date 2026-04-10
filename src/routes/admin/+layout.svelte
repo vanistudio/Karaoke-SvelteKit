@@ -96,37 +96,7 @@
 	</aside>
 
 	<div class="flex-1 flex flex-col min-h-screen min-w-0">
-		<header class="sticky top-0 z-30 bg-base-100/95 backdrop-blur-lg border-b border-base-300/60 h-16 flex items-center justify-between px-4 lg:px-8 shrink-0">
-			<div class="flex items-center gap-3">
-				<button onclick={() => sidebarOpen = true} class="btn btn-ghost btn-sm btn-square rounded-lg lg:hidden">
-					<Icon icon="solar:hamburger-menu-line-duotone" class="text-xl" />
-				</button>
-				<div>
-					<h1 class="text-base lg:text-lg font-bold tracking-wide text-base-content">Trung Tâm Điều Hành</h1>
-					<p class="text-[10px] text-base-content/40 font-medium tracking-widest uppercase hidden sm:block">Karaoke Management System</p>
-				</div>
-			</div>
-
-			<div class="flex items-center gap-2">
-				<button class="btn btn-ghost btn-sm btn-square rounded-lg text-base-content/40 hover:text-primary">
-					<Icon icon="solar:bell-bing-line-duotone" class="text-xl" />
-				</button>
-				<div class="flex items-center gap-2.5 pl-2 ml-1 border-l border-base-200">
-					<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-						<Icon icon="solar:user-bold-duotone" class="text-primary text-base" />
-					</div>
-					<div class="hidden sm:block">
-						<p class="text-sm font-semibold leading-none">{user?.name || 'Admin'}</p>
-						<p class="text-[10px] text-base-content/40 font-medium uppercase tracking-wider mt-0.5">{user?.role || 'admin'}</p>
-					</div>
-					<button onclick={handleLogout} class="btn btn-ghost btn-xs btn-square rounded-lg text-base-content/30 hover:text-error ml-1" title="Đăng xuất">
-						<Icon icon="solar:logout-2-line-duotone" class="text-base" />
-					</button>
-				</div>
-			</div>
-		</header>
-
-		<main class="flex-1 p-4 lg:p-8">
+		<main class="flex-1 px-4 lg:px-8">
 			{@render children()}
 		</main>
 	</div>
