@@ -5,148 +5,153 @@
 
 	let rooms = $state<any[]>([]);
 	let isReady = $state(false);
-
-	let newRoom = $state({ name: '', capacity: 5, type: 'standard', pricePerHour: 100000 });
-	let editRoom = $state<{ id: number; name: string; capacity: number; type: string; pricePerHour: number } | null>(null);
 	let isSaving = $state(false);
-	let deleteTarget = $state<{ id: number; name: string } | null>(null);
 	let isDeleting = $state(false);
 
-	async function fetchRooms() {
+	let form = $state({ name: '', capacity: 5, type: 'standard', pricePerHour: 100000 });
+	let editTarget = $state<{ id: number; name: string; capacity: number; type: string; pricePerHour: number } | null>(null);
+	let deleteTarget = $state<{ id: number; name: string } | null>(null);
+
+	$effect(() => {
+		loadData();
+	});
+
+	async function loadData() {
 		try {
 			rooms = await trpc().room.list.query();
-		} catch (error) {
-			console.error(error);
+		} catch (e) {
+			console.error(e);
 		} finally {
 			isReady = true;
 		}
 	}
 
-	$effect(() => {
-		fetchRooms();
-	});
+	function openCreateModal() {
+		form = { name: '', capacity: 5, type: 'standard', pricePerHour: 100000 };
+		(document.getElementById('room_modal') as HTMLDialogElement)?.showModal();
+	}
 
-	async function handleCreateRoom() {
+	function openEditModal(r: any) {
+		editTarget = { id: r.id, name: r.name, capacity: r.capacity, type: r.type, pricePerHour: r.pricePerHour };
+		form = { name: r.name, capacity: r.capacity, type: r.type, pricePerHour: r.pricePerHour };
+		(document.getElementById('room_modal') as HTMLDialogElement)?.showModal();
+	}
+
+	function closeModal() {
+		editTarget = null;
+		(document.getElementById('room_modal') as HTMLDialogElement)?.close();
+	}
+
+	async function handleSave() {
 		isSaving = true;
 		try {
-			await trpc().room.create.mutate({
-				name: newRoom.name,
-				capacity: newRoom.capacity,
-				type: newRoom.type as any,
-				pricePerHour: newRoom.pricePerHour
-			});
-			(document.getElementById('create_room_modal') as HTMLDialogElement)?.close();
-			addToast('Tạo phòng mới thành công!', 'success');
-			await fetchRooms();
-			newRoom = { name: '', capacity: 5, type: 'standard', pricePerHour: 100000 };
-		} catch (error: any) {
-			addToast(error?.message || 'Có lỗi xảy ra khi tạo phòng.', 'error');
+			if (editTarget) {
+				await trpc().room.update.mutate({ id: editTarget.id, name: form.name, capacity: form.capacity, type: form.type as any, pricePerHour: form.pricePerHour });
+				addToast('Cập nhật phòng thành công!', 'success');
+			} else {
+				await trpc().room.create.mutate({ name: form.name, capacity: form.capacity, type: form.type as any, pricePerHour: form.pricePerHour });
+				addToast('Tạo phòng mới thành công!', 'success');
+			}
+			closeModal();
+			await loadData();
+		} catch (e: any) {
+			addToast(e?.message || 'Có lỗi xảy ra.', 'error');
 		} finally {
 			isSaving = false;
 		}
 	}
 
-	function openEditModal(room: any) {
-		editRoom = { id: room.id, name: room.name, capacity: room.capacity, type: room.type, pricePerHour: room.pricePerHour };
-		(document.getElementById('edit_room_modal') as HTMLDialogElement)?.showModal();
+	function openDeleteConfirm(r: any) {
+		deleteTarget = { id: r.id, name: r.name };
+		(document.getElementById('delete_modal') as HTMLDialogElement)?.showModal();
 	}
 
-	async function handleUpdateRoom() {
-		if (!editRoom) return;
-		isSaving = true;
-		try {
-			await trpc().room.update.mutate({
-				id: editRoom.id,
-				name: editRoom.name,
-				capacity: editRoom.capacity,
-				type: editRoom.type as any,
-				pricePerHour: editRoom.pricePerHour
-			});
-			(document.getElementById('edit_room_modal') as HTMLDialogElement)?.close();
-			addToast('Cập nhật phòng thành công!', 'success');
-			await fetchRooms();
-			editRoom = null;
-		} catch (error: any) {
-			addToast(error?.message || 'Có lỗi xảy ra khi cập nhật.', 'error');
-		} finally {
-			isSaving = false;
-		}
-	}
-
-	function openDeleteConfirm(room: any) {
-		deleteTarget = { id: room.id, name: room.name };
-		(document.getElementById('delete_room_modal') as HTMLDialogElement)?.showModal();
-	}
-
-	async function handleDeleteRoom() {
+	async function handleDelete() {
 		if (!deleteTarget) return;
 		isDeleting = true;
 		try {
 			await trpc().room.delete.mutate(deleteTarget.id);
-			(document.getElementById('delete_room_modal') as HTMLDialogElement)?.close();
 			addToast(`Đã xóa phòng "${deleteTarget.name}".`, 'success');
-			await fetchRooms();
+			(document.getElementById('delete_modal') as HTMLDialogElement)?.close();
 			deleteTarget = null;
-		} catch (error: any) {
-			addToast(error?.message || 'Không thể xóa phòng — có thể còn đơn đặt.', 'error');
+			await loadData();
+		} catch (e: any) {
+			addToast(e?.message || 'Không thể xóa — phòng có thể còn đơn đặt.', 'error');
 		} finally {
 			isDeleting = false;
 		}
 	}
 
-	const typeLabel: Record<string, string> = { standard: 'Cơ Bản', vip: 'VIP', super_vip: 'Super VIP' };
-	const typeBadge: Record<string, string> = { standard: 'badge-ghost', vip: 'badge-secondary', super_vip: 'badge-accent' };
+	const typeLabel: Record<string, string> = { standard: 'Standard', vip: 'VIP', super_vip: 'Super VIP' };
+	const typeCls: Record<string, string> = { standard: 'badge-ghost', vip: 'badge-secondary', super_vip: 'badge-accent' };
 
-	function formatVND(value: number) {
-		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+	function fmtVND(v: number) {
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 	}
 </script>
 
-<svelte:head>
-	<title>Quản Lý Phòng | KaraSystem Admin</title>
-</svelte:head>
+<svelte:head><title>Quản Lý Phòng | KaraSystem Admin</title></svelte:head>
 
 <div class="flex flex-col gap-6">
-	<div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-base-100 p-5 rounded-xl border border-base-300/60">
+	<div class="flex items-center justify-between">
 		<div>
-			<h2 class="text-lg font-bold tracking-wide">Danh Sách Phòng</h2>
+			<h2 class="text-xl font-bold">Hệ Thống Phòng</h2>
 			<p class="text-sm text-base-content/40 font-medium mt-0.5">{rooms.length} phòng đang hoạt động</p>
 		</div>
-		<button class="btn btn-primary btn-sm rounded-lg font-bold tracking-wider text-xs" onclick={() => (document.getElementById('create_room_modal') as HTMLDialogElement)?.showModal()}>
+		<button onclick={openCreateModal} class="btn btn-primary btn-sm rounded-lg font-bold text-xs">
 			<Icon icon="solar:add-square-line-duotone" class="text-lg"/>
 			Thêm Phòng
 		</button>
 	</div>
 
-	<div class="bg-base-100 rounded-xl border border-base-300/60">
+	<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Tổng Phòng</p>
+			<p class="text-2xl font-black mt-1">{rooms.length}</p>
+		</div>
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Standard</p>
+			<p class="text-2xl font-black mt-1">{rooms.filter(r => r.type === 'standard').length}</p>
+		</div>
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-violet-500 uppercase tracking-widest">VIP</p>
+			<p class="text-2xl font-black text-violet-500 mt-1">{rooms.filter(r => r.type === 'vip').length}</p>
+		</div>
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Super VIP</p>
+			<p class="text-2xl font-black text-amber-600 mt-1">{rooms.filter(r => r.type === 'super_vip').length}</p>
+		</div>
+	</div>
+
+	<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
 		<div class="overflow-x-auto">
-			<table class="table w-full">
+			<table class="table table-sm">
 				<thead>
-					<tr class="text-[10px] uppercase tracking-widest text-base-content/30 border-b border-base-200 bg-base-200/30">
-						<th>ID</th>
-						<th>Tên Phòng</th>
-						<th>Kiểu</th>
-						<th class="text-center">Sức Chứa</th>
-						<th class="text-right">Đơn Giá / Giờ</th>
-						<th class="text-right w-28">Thao Tác</th>
+					<tr class="text-[10px] uppercase tracking-widest text-base-content/30 bg-base-200/30">
+						<th class="font-bold">ID</th>
+						<th class="font-bold">Tên Phòng</th>
+						<th class="font-bold">Loại</th>
+						<th class="font-bold text-center">Sức Chứa</th>
+						<th class="font-bold text-right">Đơn Giá / Giờ</th>
+						<th class="font-bold text-right">Thao Tác</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#if !isReady}
-						<tr><td colspan="6" class="text-center py-10"><span class="loading loading-spinner text-primary"></span></td></tr>
+						<tr><td colspan="6" class="text-center py-12"><span class="loading loading-spinner text-primary"></span></td></tr>
 					{:else if rooms.length === 0}
-						<tr><td colspan="6" class="text-center py-10 font-medium text-base-content/40">Chưa thiết lập phòng nào.</td></tr>
+						<tr><td colspan="6" class="text-center py-12 text-base-content/30 font-medium">Chưa thiết lập phòng nào.</td></tr>
 					{:else}
-						{#each rooms as room}
+						{#each rooms as r}
 							<tr class="hover">
-								<td class="font-mono text-xs font-bold text-base-content/30">#{room.id}</td>
-								<td class="font-bold">{room.name}</td>
-								<td><div class="badge badge-xs rounded-md font-bold uppercase {typeBadge[room.type] || 'badge-ghost'}">{typeLabel[room.type] || room.type}</div></td>
-								<td class="text-center font-medium">{room.capacity}</td>
-								<td class="text-right font-mono font-bold text-primary">{formatVND(room.pricePerHour)}</td>
+								<td class="font-mono text-xs font-bold text-base-content/30">#{r.id}</td>
+								<td class="font-bold text-sm">{r.name}</td>
+								<td><span class="badge badge-xs rounded-md font-bold uppercase {typeCls[r.type] || 'badge-ghost'}">{typeLabel[r.type] || r.type}</span></td>
+								<td class="text-center font-medium">{r.capacity} người</td>
+								<td class="text-right font-mono text-sm font-bold text-primary">{fmtVND(r.pricePerHour)}</td>
 								<td class="text-right">
-									<button onclick={() => openEditModal(room)} class="btn btn-xs btn-ghost btn-square text-info hover:bg-info/10"><Icon icon="solar:pen-2-line-duotone" class="text-lg"/></button>
-									<button onclick={() => openDeleteConfirm(room)} class="btn btn-xs btn-ghost btn-square text-error hover:bg-error/10"><Icon icon="solar:trash-bin-trash-line-duotone" class="text-lg"/></button>
+									<button onclick={() => openEditModal(r)} class="btn btn-xs btn-ghost btn-square text-blue-500 hover:bg-blue-500/10"><Icon icon="solar:pen-2-line-duotone" class="text-lg"/></button>
+									<button onclick={() => openDeleteConfirm(r)} class="btn btn-xs btn-ghost btn-square text-red-500 hover:bg-red-500/10"><Icon icon="solar:trash-bin-trash-line-duotone" class="text-lg"/></button>
 								</td>
 							</tr>
 						{/each}
@@ -157,42 +162,39 @@
 	</div>
 </div>
 
-<dialog id="create_room_modal" class="modal">
-	<div class="modal-box bg-base-100 rounded-xl border border-base-300/60 max-w-lg">
-		<h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-			<Icon icon="solar:home-smile-angle-line-duotone" class="text-xl text-primary"/>
-			Thêm Phòng Karaoke
+<dialog id="room_modal" class="modal">
+	<div class="modal-box rounded-xl max-w-lg">
+		<h3 class="font-bold text-lg mb-5 flex items-center gap-2">
+			<Icon icon={editTarget ? 'solar:pen-2-line-duotone' : 'solar:home-smile-angle-line-duotone'} class="text-xl {editTarget ? 'text-blue-500' : 'text-primary'}"/>
+			{editTarget ? 'Chỉnh Sửa Phòng' : 'Thêm Phòng Mới'}
 		</h3>
 		<div class="flex flex-col gap-4">
 			<label class="form-control w-full">
-				<div class="label"><span class="label-text font-bold">Tên Phòng</span></div>
-				<input type="text" bind:value={newRoom.name} placeholder="VD: Phòng Trà VIP 1" class="input input-bordered w-full rounded-lg" required />
+				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Tên Phòng</span></div>
+				<input type="text" bind:value={form.name} placeholder="VD: Phòng VIP 01" class="input input-bordered w-full rounded-lg" />
 			</label>
 			<div class="grid grid-cols-2 gap-4">
 				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Loại Phòng</span></div>
-					<select bind:value={newRoom.type} class="select select-bordered w-full rounded-lg font-medium text-sm">
+					<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Loại Phòng</span></div>
+					<select bind:value={form.type} class="select select-bordered w-full rounded-lg text-sm font-medium">
 						<option value="standard">Standard</option>
 						<option value="vip">VIP</option>
 						<option value="super_vip">Super VIP</option>
 					</select>
 				</label>
 				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Sức Chứa</span></div>
-					<input type="number" bind:value={newRoom.capacity} min="1" max="100" class="input input-bordered w-full rounded-lg" required />
+					<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Sức Chứa</span></div>
+					<input type="number" bind:value={form.capacity} min="1" max="100" class="input input-bordered w-full rounded-lg" />
 				</label>
 			</div>
 			<label class="form-control w-full">
-				<div class="label"><span class="label-text font-bold">Đơn Giá (VNĐ / Giờ)</span></div>
-				<label class="input input-bordered flex items-center gap-2 font-mono rounded-lg">
-					<span class="text-base-content/40 font-bold">₫</span>
-					<input type="number" bind:value={newRoom.pricePerHour} min="1000" class="grow" required />
-				</label>
+				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Đơn Giá (VNĐ / Giờ)</span></div>
+				<input type="number" bind:value={form.pricePerHour} min="1000" class="input input-bordered w-full rounded-lg font-mono" />
 			</label>
-			<div class="modal-action border-t border-base-200 mt-4 pt-4">
-				<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button></form>
-				<button onclick={handleCreateRoom} class="btn btn-primary rounded-lg font-bold px-8" disabled={isSaving}>
-					{#if isSaving}<span class="loading loading-spinner loading-sm"></span>{:else}Lưu{/if}
+			<div class="modal-action border-t border-base-200 pt-4">
+				<button onclick={closeModal} class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button>
+				<button onclick={handleSave} class="btn {editTarget ? 'btn-info text-white' : 'btn-primary'} rounded-lg font-bold px-8" disabled={isSaving}>
+					{#if isSaving}<span class="loading loading-spinner loading-sm"></span>{:else}{editTarget ? 'Cập Nhật' : 'Tạo Mới'}{/if}
 				</button>
 			</div>
 		</div>
@@ -200,64 +202,17 @@
 	<form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-<dialog id="edit_room_modal" class="modal">
-	<div class="modal-box bg-base-100 rounded-xl border border-base-300/60 max-w-lg">
-		<h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-			<Icon icon="solar:pen-2-line-duotone" class="text-xl text-info"/>
-			Chỉnh Sửa Phòng
-		</h3>
-		{#if editRoom}
-			<div class="flex flex-col gap-4">
-				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Tên Phòng</span></div>
-					<input type="text" bind:value={editRoom.name} class="input input-bordered w-full rounded-lg" required />
-				</label>
-				<div class="grid grid-cols-2 gap-4">
-					<label class="form-control w-full">
-						<div class="label"><span class="label-text font-bold">Loại Phòng</span></div>
-						<select bind:value={editRoom.type} class="select select-bordered w-full rounded-lg font-medium text-sm">
-							<option value="standard">Standard</option>
-							<option value="vip">VIP</option>
-							<option value="super_vip">Super VIP</option>
-						</select>
-					</label>
-					<label class="form-control w-full">
-						<div class="label"><span class="label-text font-bold">Sức Chứa</span></div>
-						<input type="number" bind:value={editRoom.capacity} min="1" max="100" class="input input-bordered w-full rounded-lg" required />
-					</label>
-				</div>
-				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Đơn Giá (VNĐ / Giờ)</span></div>
-					<label class="input input-bordered flex items-center gap-2 font-mono rounded-lg">
-						<span class="text-base-content/40 font-bold">₫</span>
-						<input type="number" bind:value={editRoom.pricePerHour} min="1000" class="grow" required />
-					</label>
-				</label>
-				<div class="modal-action border-t border-base-200 mt-4 pt-4">
-					<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button></form>
-					<button onclick={handleUpdateRoom} class="btn btn-info text-white rounded-lg font-bold px-8" disabled={isSaving}>
-						{#if isSaving}<span class="loading loading-spinner loading-sm"></span>{:else}Lưu{/if}
-					</button>
-				</div>
-			</div>
-		{/if}
-	</div>
-	<form method="dialog" class="modal-backdrop"><button>close</button></form>
-</dialog>
-
-<dialog id="delete_room_modal" class="modal">
-	<div class="modal-box bg-base-100 rounded-xl border border-base-300/60 max-w-sm">
-		<h3 class="font-bold text-lg mb-2 flex items-center gap-2 text-error">
+<dialog id="delete_modal" class="modal">
+	<div class="modal-box rounded-xl max-w-sm">
+		<h3 class="font-bold text-lg mb-2 flex items-center gap-2 text-red-500">
 			<Icon icon="solar:trash-bin-trash-line-duotone" class="text-xl"/>
 			Xác Nhận Xóa
 		</h3>
 		{#if deleteTarget}
-			<p class="text-sm text-base-content/60 leading-relaxed">
-				Xóa phòng <span class="font-bold text-base-content">"{deleteTarget.name}"</span>? Hành động không thể hoàn tác.
-			</p>
-			<div class="modal-action border-t border-base-200 mt-4 pt-4">
+			<p class="text-sm text-base-content/50 leading-relaxed">Xóa phòng <span class="font-bold text-base-content">"{deleteTarget.name}"</span>? Hành động không thể hoàn tác.</p>
+			<div class="modal-action border-t border-base-200 pt-4">
 				<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isDeleting}>Giữ Lại</button></form>
-				<button onclick={handleDeleteRoom} class="btn btn-error text-white rounded-lg font-bold px-8" disabled={isDeleting}>
+				<button onclick={handleDelete} class="btn btn-error text-white rounded-lg font-bold px-8" disabled={isDeleting}>
 					{#if isDeleting}<span class="loading loading-spinner loading-sm"></span>{:else}Xóa{/if}
 				</button>
 			</div>

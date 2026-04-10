@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { room, booking, user, service } from '$lib/server/db/schema';
-import { eq, count, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, count, sql } from 'drizzle-orm';
 
 export class DashboardService {
 	async getStats() {
@@ -20,7 +20,11 @@ export class DashboardService {
 			.select({ total: sql<number>`COALESCE(SUM(${booking.totalCost}), 0)` })
 			.from(booking)
 			.where(
-				sql`${booking.status} = 'confirmed' AND ${booking.createdAt} >= ${todayStart} AND ${booking.createdAt} <= ${todayEnd}`
+				and(
+					eq(booking.status, 'confirmed'),
+					gte(booking.createdAt, todayStart),
+					lte(booking.createdAt, todayEnd)
+				)
 			);
 
 		return {

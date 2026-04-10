@@ -5,179 +5,184 @@
 
 	let services = $state<any[]>([]);
 	let isReady = $state(false);
-	let activeCategory = $state('all');
-
-	let newService = $state({ name: '', category: 'food', price: 10000, description: '', isAvailable: true });
-	let editService = $state<{ id: number; name: string; category: string; price: number; description: string; isAvailable: boolean } | null>(null);
 	let isSaving = $state(false);
-	let deleteTarget = $state<{ id: number; name: string } | null>(null);
 	let isDeleting = $state(false);
+	let filterCategory = $state('all');
 
-	async function fetchServices() {
+	let form = $state({ name: '', category: 'food', price: 10000, description: '', isAvailable: true });
+	let editTarget = $state<{ id: number } | null>(null);
+	let deleteTarget = $state<{ id: number; name: string } | null>(null);
+
+	$effect(() => {
+		loadData();
+	});
+
+	async function loadData() {
 		try {
 			services = await trpc().service.list.query();
-		} catch (error) {
-			console.error(error);
+		} catch (e) {
+			console.error(e);
 		} finally {
 			isReady = true;
 		}
 	}
 
-	$effect(() => {
-		fetchServices();
-	});
-
-	let filteredServices = $derived(
-		activeCategory === 'all' ? services : services.filter(s => s.category === activeCategory)
+	let filtered = $derived(
+		filterCategory === 'all' ? services : services.filter(s => s.category === filterCategory)
 	);
 
-	async function handleCreateService() {
+	function openCreateModal() {
+		editTarget = null;
+		form = { name: '', category: 'food', price: 10000, description: '', isAvailable: true };
+		(document.getElementById('svc_modal') as HTMLDialogElement)?.showModal();
+	}
+
+	function openEditModal(s: any) {
+		editTarget = { id: s.id };
+		form = { name: s.name, category: s.category, price: s.price, description: s.description || '', isAvailable: s.isAvailable };
+		(document.getElementById('svc_modal') as HTMLDialogElement)?.showModal();
+	}
+
+	function closeModal() {
+		editTarget = null;
+		(document.getElementById('svc_modal') as HTMLDialogElement)?.close();
+	}
+
+	async function handleSave() {
 		isSaving = true;
 		try {
-			await trpc().service.create.mutate({
-				name: newService.name,
-				category: newService.category as any,
-				price: newService.price,
-				description: newService.description || undefined,
-				isAvailable: newService.isAvailable
-			});
-			(document.getElementById('create_service_modal') as HTMLDialogElement)?.close();
-			addToast('Thêm dịch vụ thành công!', 'success');
-			await fetchServices();
-			newService = { name: '', category: 'food', price: 10000, description: '', isAvailable: true };
-		} catch (error: any) {
-			addToast(error?.message || 'Có lỗi xảy ra.', 'error');
+			if (editTarget) {
+				await trpc().service.update.mutate({ id: editTarget.id, name: form.name, category: form.category as any, price: form.price, description: form.description || undefined, isAvailable: form.isAvailable });
+				addToast('Cập nhật dịch vụ thành công!', 'success');
+			} else {
+				await trpc().service.create.mutate({ name: form.name, category: form.category as any, price: form.price, description: form.description || undefined, isAvailable: form.isAvailable });
+				addToast('Thêm dịch vụ thành công!', 'success');
+			}
+			closeModal();
+			await loadData();
+		} catch (e: any) {
+			addToast(e?.message || 'Có lỗi xảy ra.', 'error');
 		} finally {
 			isSaving = false;
 		}
 	}
 
-	function openEditModal(svc: any) {
-		editService = { id: svc.id, name: svc.name, category: svc.category, price: svc.price, description: svc.description || '', isAvailable: svc.isAvailable };
-		(document.getElementById('edit_service_modal') as HTMLDialogElement)?.showModal();
+	function openDeleteConfirm(s: any) {
+		deleteTarget = { id: s.id, name: s.name };
+		(document.getElementById('del_modal') as HTMLDialogElement)?.showModal();
 	}
 
-	async function handleUpdateService() {
-		if (!editService) return;
-		isSaving = true;
-		try {
-			await trpc().service.update.mutate({
-				id: editService.id,
-				name: editService.name,
-				category: editService.category as any,
-				price: editService.price,
-				description: editService.description || undefined,
-				isAvailable: editService.isAvailable
-			});
-			(document.getElementById('edit_service_modal') as HTMLDialogElement)?.close();
-			addToast('Cập nhật dịch vụ thành công!', 'success');
-			await fetchServices();
-			editService = null;
-		} catch (error: any) {
-			addToast(error?.message || 'Có lỗi xảy ra.', 'error');
-		} finally {
-			isSaving = false;
-		}
-	}
-
-	function openDeleteConfirm(svc: any) {
-		deleteTarget = { id: svc.id, name: svc.name };
-		(document.getElementById('delete_service_modal') as HTMLDialogElement)?.showModal();
-	}
-
-	async function handleDeleteService() {
+	async function handleDelete() {
 		if (!deleteTarget) return;
 		isDeleting = true;
 		try {
 			await trpc().service.delete.mutate(deleteTarget.id);
-			(document.getElementById('delete_service_modal') as HTMLDialogElement)?.close();
 			addToast(`Đã xóa "${deleteTarget.name}".`, 'success');
-			await fetchServices();
+			(document.getElementById('del_modal') as HTMLDialogElement)?.close();
 			deleteTarget = null;
-		} catch (error: any) {
-			addToast(error?.message || 'Không thể xóa dịch vụ.', 'error');
+			await loadData();
+		} catch (e: any) {
+			addToast(e?.message || 'Không thể xóa dịch vụ.', 'error');
 		} finally {
 			isDeleting = false;
 		}
 	}
 
-	const categoryLabel: Record<string, string> = { food: 'Đồ Ăn', drink: 'Thức Uống', decoration: 'Trang Trí', other: 'Khác' };
-	const categoryIcon: Record<string, string> = { food: 'solar:chef-hat-heart-line-duotone', drink: 'solar:wineglass-triangle-line-duotone', decoration: 'solar:star-shine-line-duotone', other: 'solar:box-line-duotone' };
-	const categoryBadge: Record<string, string> = { food: 'badge-warning', drink: 'badge-info', decoration: 'badge-secondary', other: 'badge-ghost' };
+	const catLabel: Record<string, string> = { food: 'Đồ Ăn', drink: 'Thức Uống', decoration: 'Trang Trí', other: 'Khác' };
+	const catIcon: Record<string, string> = { food: 'solar:chef-hat-heart-line-duotone', drink: 'solar:wineglass-triangle-line-duotone', decoration: 'solar:star-shine-line-duotone', other: 'solar:box-line-duotone' };
+	const catCls: Record<string, string> = { food: 'badge-warning', drink: 'badge-info', decoration: 'badge-secondary', other: 'badge-ghost' };
 
-	function formatVND(value: number) {
-		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+	function fmtVND(v: number) {
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 	}
 </script>
 
-<svelte:head>
-	<title>Menu Dịch Vụ | KaraSystem Admin</title>
-</svelte:head>
+<svelte:head><title>Menu Dịch Vụ | KaraSystem Admin</title></svelte:head>
 
 <div class="flex flex-col gap-6">
-	<div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-base-100 p-5 rounded-xl border border-base-300/60">
+	<div class="flex items-center justify-between">
 		<div>
-			<h2 class="text-lg font-bold tracking-wide">Menu Dịch Vụ</h2>
+			<h2 class="text-xl font-bold">Menu Dịch Vụ</h2>
 			<p class="text-sm text-base-content/40 font-medium mt-0.5">{services.length} mục trong hệ thống</p>
 		</div>
-		<button class="btn btn-primary btn-sm rounded-lg font-bold tracking-wider text-xs" onclick={() => (document.getElementById('create_service_modal') as HTMLDialogElement)?.showModal()}>
+		<button onclick={openCreateModal} class="btn btn-primary btn-sm rounded-lg font-bold text-xs">
 			<Icon icon="solar:add-square-line-duotone" class="text-lg"/>
 			Thêm Dịch Vụ
 		</button>
 	</div>
 
+	<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Tổng Mục</p>
+			<p class="text-2xl font-black mt-1">{services.length}</p>
+		</div>
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Đang Bán</p>
+			<p class="text-2xl font-black text-emerald-600 mt-1">{services.filter(s => s.isAvailable).length}</p>
+		</div>
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Ngừng Bán</p>
+			<p class="text-2xl font-black text-red-500 mt-1">{services.filter(s => !s.isAvailable).length}</p>
+		</div>
+		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
+			<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Danh Mục</p>
+			<p class="text-2xl font-black mt-1">{new Set(services.map(s => s.category)).size}</p>
+		</div>
+	</div>
+
 	<div class="flex gap-2 flex-wrap">
-		<button onclick={() => activeCategory = 'all'} class="btn btn-xs rounded-lg font-bold tracking-wider {activeCategory === 'all' ? 'btn-primary' : 'btn-ghost'}">Tất Cả ({services.length})</button>
-		{#each Object.entries(categoryLabel) as [key, label]}
-			<button onclick={() => activeCategory = key} class="btn btn-xs rounded-lg font-bold tracking-wider {activeCategory === key ? 'btn-primary' : 'btn-ghost'}">
-				<Icon icon={categoryIcon[key]} class="text-sm"/>
-				{label} ({services.filter(s => s.category === key).length})
+		<button onclick={() => filterCategory = 'all'} class="btn btn-xs rounded-lg font-bold {filterCategory === 'all' ? 'btn-primary' : 'btn-ghost'}">Tất Cả ({services.length})</button>
+		{#each Object.entries(catLabel) as [key, label]}
+			{@const cnt = services.filter(s => s.category === key).length}
+			<button onclick={() => filterCategory = key} class="btn btn-xs rounded-lg font-bold {filterCategory === key ? 'btn-primary' : 'btn-ghost'}">
+				<Icon icon={catIcon[key]} class="text-sm"/>
+				{label} ({cnt})
 			</button>
 		{/each}
 	</div>
 
-	<div class="bg-base-100 rounded-xl border border-base-300/60">
+	<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
 		<div class="overflow-x-auto">
-			<table class="table w-full">
+			<table class="table table-sm">
 				<thead>
-					<tr class="text-[10px] uppercase tracking-widest text-base-content/30 border-b border-base-200 bg-base-200/30">
-						<th>ID</th>
-						<th>Tên Dịch Vụ</th>
-						<th>Danh Mục</th>
-						<th class="text-right">Đơn Giá</th>
-						<th class="text-center">Trạng Thái</th>
-						<th class="text-right w-28">Thao Tác</th>
+					<tr class="text-[10px] uppercase tracking-widest text-base-content/30 bg-base-200/30">
+						<th class="font-bold">ID</th>
+						<th class="font-bold">Tên Dịch Vụ</th>
+						<th class="font-bold">Danh Mục</th>
+						<th class="font-bold text-right">Đơn Giá</th>
+						<th class="font-bold text-center">Trạng Thái</th>
+						<th class="font-bold text-right">Thao Tác</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#if !isReady}
-						<tr><td colspan="6" class="text-center py-10"><span class="loading loading-spinner text-primary"></span></td></tr>
-					{:else if filteredServices.length === 0}
-						<tr><td colspan="6" class="text-center py-10 font-medium text-base-content/40">Chưa có dịch vụ trong danh mục này.</td></tr>
+						<tr><td colspan="6" class="text-center py-12"><span class="loading loading-spinner text-primary"></span></td></tr>
+					{:else if filtered.length === 0}
+						<tr><td colspan="6" class="text-center py-12 text-base-content/30 font-medium">Không có dịch vụ nào.</td></tr>
 					{:else}
-						{#each filteredServices as svc}
+						{#each filtered as s}
 							<tr class="hover">
-								<td class="font-mono text-xs font-bold text-base-content/30">#{svc.id}</td>
+								<td class="font-mono text-xs font-bold text-base-content/30">#{s.id}</td>
 								<td>
 									<div class="flex flex-col">
-										<span class="font-bold">{svc.name}</span>
-										{#if svc.description}
-											<span class="text-xs text-base-content/30 mt-0.5 max-w-[200px] truncate">{svc.description}</span>
+										<span class="font-bold text-sm">{s.name}</span>
+										{#if s.description}
+											<span class="text-[11px] text-base-content/30 max-w-[200px] truncate">{s.description}</span>
 										{/if}
 									</div>
 								</td>
-								<td><div class="badge badge-xs rounded-md font-bold uppercase {categoryBadge[svc.category] || 'badge-ghost'}">{categoryLabel[svc.category] || svc.category}</div></td>
-								<td class="text-right font-mono font-bold text-primary">{formatVND(svc.price)}</td>
+								<td><span class="badge badge-xs rounded-md font-bold uppercase {catCls[s.category] || 'badge-ghost'}">{catLabel[s.category] || s.category}</span></td>
+								<td class="text-right font-mono text-sm font-bold text-primary">{fmtVND(s.price)}</td>
 								<td class="text-center">
-									{#if svc.isAvailable}
-										<div class="badge badge-success badge-xs rounded-md font-bold">Đang Bán</div>
+									{#if s.isAvailable}
+										<span class="badge badge-success badge-xs rounded-md font-bold">Đang Bán</span>
 									{:else}
-										<div class="badge badge-error badge-xs rounded-md font-bold text-white">Ngừng</div>
+										<span class="badge badge-error badge-xs rounded-md font-bold text-white">Ngừng</span>
 									{/if}
 								</td>
 								<td class="text-right">
-									<button onclick={() => openEditModal(svc)} class="btn btn-xs btn-ghost btn-square text-info hover:bg-info/10"><Icon icon="solar:pen-2-line-duotone" class="text-lg"/></button>
-									<button onclick={() => openDeleteConfirm(svc)} class="btn btn-xs btn-ghost btn-square text-error hover:bg-error/10"><Icon icon="solar:trash-bin-trash-line-duotone" class="text-lg"/></button>
+									<button onclick={() => openEditModal(s)} class="btn btn-xs btn-ghost btn-square text-blue-500 hover:bg-blue-500/10"><Icon icon="solar:pen-2-line-duotone" class="text-lg"/></button>
+									<button onclick={() => openDeleteConfirm(s)} class="btn btn-xs btn-ghost btn-square text-red-500 hover:bg-red-500/10"><Icon icon="solar:trash-bin-trash-line-duotone" class="text-lg"/></button>
 								</td>
 							</tr>
 						{/each}
@@ -188,21 +193,21 @@
 	</div>
 </div>
 
-<dialog id="create_service_modal" class="modal">
-	<div class="modal-box bg-base-100 rounded-xl border border-base-300/60 max-w-lg">
-		<h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-			<Icon icon="solar:wineglass-triangle-line-duotone" class="text-xl text-primary"/>
-			Thêm Dịch Vụ Mới
+<dialog id="svc_modal" class="modal">
+	<div class="modal-box rounded-xl max-w-lg">
+		<h3 class="font-bold text-lg mb-5 flex items-center gap-2">
+			<Icon icon={editTarget ? 'solar:pen-2-line-duotone' : 'solar:wineglass-triangle-line-duotone'} class="text-xl {editTarget ? 'text-blue-500' : 'text-primary'}"/>
+			{editTarget ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới'}
 		</h3>
 		<div class="flex flex-col gap-4">
 			<label class="form-control w-full">
-				<div class="label"><span class="label-text font-bold">Tên Dịch Vụ</span></div>
-				<input type="text" bind:value={newService.name} placeholder="VD: Bia Tiger, Trái Cây..." class="input input-bordered w-full rounded-lg" required />
+				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Tên Dịch Vụ</span></div>
+				<input type="text" bind:value={form.name} placeholder="VD: Bia Tiger, Trái Cây..." class="input input-bordered w-full rounded-lg" />
 			</label>
 			<div class="grid grid-cols-2 gap-4">
 				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Danh Mục</span></div>
-					<select bind:value={newService.category} class="select select-bordered w-full rounded-lg font-medium text-sm">
+					<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Danh Mục</span></div>
+					<select bind:value={form.category} class="select select-bordered w-full rounded-lg text-sm font-medium">
 						<option value="food">Đồ Ăn</option>
 						<option value="drink">Thức Uống</option>
 						<option value="decoration">Trang Trí</option>
@@ -210,27 +215,24 @@
 					</select>
 				</label>
 				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Đơn Giá (VNĐ)</span></div>
-					<label class="input input-bordered flex items-center gap-2 font-mono rounded-lg">
-						<span class="text-base-content/40 font-bold">₫</span>
-						<input type="number" bind:value={newService.price} min="1000" class="grow" required />
-					</label>
+					<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Đơn Giá (VNĐ)</span></div>
+					<input type="number" bind:value={form.price} min="1000" class="input input-bordered w-full rounded-lg font-mono" />
 				</label>
 			</div>
 			<label class="form-control w-full">
-				<div class="label"><span class="label-text font-bold">Mô Tả (Tùy Chọn)</span></div>
-				<textarea bind:value={newService.description} placeholder="Mô tả ngắn..." class="textarea textarea-bordered w-full rounded-lg" rows="2"></textarea>
+				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Mô Tả</span></div>
+				<textarea bind:value={form.description} placeholder="Mô tả ngắn (tùy chọn)..." class="textarea textarea-bordered w-full rounded-lg" rows="2"></textarea>
 			</label>
 			<div class="form-control">
 				<label class="label cursor-pointer justify-start gap-3">
-					<input type="checkbox" bind:checked={newService.isAvailable} class="toggle toggle-primary toggle-sm" />
-					<span class="label-text font-bold">Đang mở bán</span>
+					<input type="checkbox" bind:checked={form.isAvailable} class="toggle toggle-primary toggle-sm" />
+					<span class="label-text font-bold text-sm">Đang mở bán</span>
 				</label>
 			</div>
-			<div class="modal-action border-t border-base-200 mt-4 pt-4">
-				<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button></form>
-				<button onclick={handleCreateService} class="btn btn-primary rounded-lg font-bold px-8" disabled={isSaving}>
-					{#if isSaving}<span class="loading loading-spinner loading-sm"></span>{:else}Lưu{/if}
+			<div class="modal-action border-t border-base-200 pt-4">
+				<button onclick={closeModal} class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button>
+				<button onclick={handleSave} class="btn {editTarget ? 'btn-info text-white' : 'btn-primary'} rounded-lg font-bold px-8" disabled={isSaving}>
+					{#if isSaving}<span class="loading loading-spinner loading-sm"></span>{:else}{editTarget ? 'Cập Nhật' : 'Tạo Mới'}{/if}
 				</button>
 			</div>
 		</div>
@@ -238,71 +240,17 @@
 	<form method="dialog" class="modal-backdrop"><button>close</button></form>
 </dialog>
 
-<dialog id="edit_service_modal" class="modal">
-	<div class="modal-box bg-base-100 rounded-xl border border-base-300/60 max-w-lg">
-		<h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-			<Icon icon="solar:pen-2-line-duotone" class="text-xl text-info"/>
-			Chỉnh Sửa Dịch Vụ
-		</h3>
-		{#if editService}
-			<div class="flex flex-col gap-4">
-				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Tên Dịch Vụ</span></div>
-					<input type="text" bind:value={editService.name} class="input input-bordered w-full rounded-lg" required />
-				</label>
-				<div class="grid grid-cols-2 gap-4">
-					<label class="form-control w-full">
-						<div class="label"><span class="label-text font-bold">Danh Mục</span></div>
-						<select bind:value={editService.category} class="select select-bordered w-full rounded-lg font-medium text-sm">
-							<option value="food">Đồ Ăn</option>
-							<option value="drink">Thức Uống</option>
-							<option value="decoration">Trang Trí</option>
-							<option value="other">Khác</option>
-						</select>
-					</label>
-					<label class="form-control w-full">
-						<div class="label"><span class="label-text font-bold">Đơn Giá (VNĐ)</span></div>
-						<label class="input input-bordered flex items-center gap-2 font-mono rounded-lg">
-							<span class="text-base-content/40 font-bold">₫</span>
-							<input type="number" bind:value={editService.price} min="1000" class="grow" required />
-						</label>
-					</label>
-				</div>
-				<label class="form-control w-full">
-					<div class="label"><span class="label-text font-bold">Mô Tả</span></div>
-					<textarea bind:value={editService.description} class="textarea textarea-bordered w-full rounded-lg" rows="2"></textarea>
-				</label>
-				<div class="form-control">
-					<label class="label cursor-pointer justify-start gap-3">
-						<input type="checkbox" bind:checked={editService.isAvailable} class="toggle toggle-primary toggle-sm" />
-						<span class="label-text font-bold">Đang mở bán</span>
-					</label>
-				</div>
-				<div class="modal-action border-t border-base-200 mt-4 pt-4">
-					<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button></form>
-					<button onclick={handleUpdateService} class="btn btn-info text-white rounded-lg font-bold px-8" disabled={isSaving}>
-						{#if isSaving}<span class="loading loading-spinner loading-sm"></span>{:else}Lưu{/if}
-					</button>
-				</div>
-			</div>
-		{/if}
-	</div>
-	<form method="dialog" class="modal-backdrop"><button>close</button></form>
-</dialog>
-
-<dialog id="delete_service_modal" class="modal">
-	<div class="modal-box bg-base-100 rounded-xl border border-base-300/60 max-w-sm">
-		<h3 class="font-bold text-lg mb-2 flex items-center gap-2 text-error">
+<dialog id="del_modal" class="modal">
+	<div class="modal-box rounded-xl max-w-sm">
+		<h3 class="font-bold text-lg mb-2 flex items-center gap-2 text-red-500">
 			<Icon icon="solar:trash-bin-trash-line-duotone" class="text-xl"/>
 			Xác Nhận Xóa
 		</h3>
 		{#if deleteTarget}
-			<p class="text-sm text-base-content/60 leading-relaxed">
-				Xóa dịch vụ <span class="font-bold text-base-content">"{deleteTarget.name}"</span>? Hành động không thể hoàn tác.
-			</p>
-			<div class="modal-action border-t border-base-200 mt-4 pt-4">
+			<p class="text-sm text-base-content/50 leading-relaxed">Xóa dịch vụ <span class="font-bold text-base-content">"{deleteTarget.name}"</span>? Hành động không thể hoàn tác.</p>
+			<div class="modal-action border-t border-base-200 pt-4">
 				<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isDeleting}>Giữ Lại</button></form>
-				<button onclick={handleDeleteService} class="btn btn-error text-white rounded-lg font-bold px-8" disabled={isDeleting}>
+				<button onclick={handleDelete} class="btn btn-error text-white rounded-lg font-bold px-8" disabled={isDeleting}>
 					{#if isDeleting}<span class="loading loading-spinner loading-sm"></span>{:else}Xóa{/if}
 				</button>
 			</div>
