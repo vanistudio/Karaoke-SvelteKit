@@ -3,9 +3,13 @@
 	import Icon from '@iconify/svelte';
 	import { authClient } from '$lib/auth-client';
 	import { addToast } from '$lib/stores/toast';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
 
 	let user = $derived($page.data.user);
+
+	$effect(() => {
+		if (!user) goto('/login', { invalidateAll: true });
+	});
 
 	let editingName = $state(false);
 	let nameInput = $state('');

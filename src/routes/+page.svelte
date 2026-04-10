@@ -6,6 +6,7 @@
 	let isReady = $state(false);
 	let selectedDate = $state(new Date());
 	let selectedTime = $state('19:00');
+	let selectedGroup = $state('');
 	let isSearching = $state(false);
 	let searchResults = $state<any[] | null>(null);
 
@@ -22,10 +23,13 @@
 		const startTime = new Date(year, month, day, hours, minutes);
 		const endTime = new Date(startTime.getTime() + 3 * 60 * 60 * 1000);
 
+		const minCapacity = selectedGroup === 'small' ? 1 : selectedGroup === 'medium' ? 5 : selectedGroup === 'large' ? 15 : undefined;
+
 		try {
 			searchResults = await trpc().room.findAvailable.query({
 				startTime: startTime.toISOString(),
 				endTime: endTime.toISOString(),
+				minCapacity
 			});
 		} catch (error) {
 			console.error("Lỗi tìm kiếm phòng:", error);
@@ -61,11 +65,11 @@
 				</div>
 				<div class="form-control w-full">
 					<div class="label"><span class="label-text font-bold uppercase tracking-widest text-xs">Phân Loại Phòng (Group)</span></div>
-					<select class="select select-bordered rounded-md border-base-300 w-full">
-						<option disabled selected>-- Quy mô nhóm --</option>
-						<option>Phòng Tiêu Chuẩn (1-5 Khách)</option>
-						<option>Phòng TrungVIP (5-12 Khách)</option>
-						<option>Phòng Party Lớn (15+ Khách)</option>
+					<select bind:value={selectedGroup} class="select select-bordered rounded-md border-base-300 w-full">
+						<option value="">-- Quy mô nhóm --</option>
+						<option value="small">Phòng Tiêu Chuẩn (1-5 Khách)</option>
+						<option value="medium">Phòng Trung/VIP (5-12 Khách)</option>
+						<option value="large">Phòng Party Lớn (15+ Khách)</option>
 					</select>
 				</div>
 			</div>

@@ -33,8 +33,7 @@ export const bookingRouter = router({
 				roomId: z.number().positive(),
 				startTime: z.string().datetime().or(z.date()),
 				endTime: z.string().datetime().or(z.date()),
-				guestCount: z.number().positive().optional(),
-				status: z.enum(['pending', 'confirmed', 'cancelled']).optional()
+				guestCount: z.number().positive().optional()
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -43,9 +42,20 @@ export const bookingRouter = router({
 				roomId: input.roomId,
 				startTime: new Date(input.startTime),
 				endTime: new Date(input.endTime),
-				guestCount: input.guestCount,
-				status: input.status
+				guestCount: input.guestCount
 			});
+		}),
+	cancelMyBooking: protectedProcedure
+		.input(z.number())
+		.mutation(async ({ input, ctx }) => {
+			const bk = await bookingController.getBooking(input);
+			if (bk.userId !== ctx.user.id) {
+				throw new Error('Bạn không có quyền hủy đơn này.');
+			}
+			if (bk.status !== 'pending') {
+				throw new Error('Chỉ có thể hủy đơn đang chờ duyệt.');
+			}
+			return await bookingController.changeStatus(input, 'cancelled');
 		}),
 	changeStatus: adminProcedure
 		.input(

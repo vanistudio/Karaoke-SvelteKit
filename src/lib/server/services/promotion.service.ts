@@ -40,11 +40,18 @@ export class PromotionService {
 		if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) throw new Error('Voucher đã hết hạn');
 		if (promo.currentUsage >= promo.maxUsage) throw new Error('Voucher đã hết lượt sử dụng');
 		if (orderAmount < promo.minOrderAmount) throw new Error(`Đơn hàng tối thiểu ${promo.minOrderAmount.toLocaleString('vi-VN')}₫`);
-		return promo;
+		return {
+			code: promo.code,
+			type: promo.type,
+			value: promo.value,
+			minOrderAmount: promo.minOrderAmount
+		};
 	}
 
 	async applyVoucher(code: string, orderAmount: number) {
-		const promo = await this.validateVoucher(code, orderAmount);
+		await this.validateVoucher(code, orderAmount);
+		const promo = await promotionRepository.findByCode(code.toUpperCase());
+		if (!promo) throw new Error('Mã voucher không tồn tại');
 		let discount = 0;
 		if (promo.type === 'percent') {
 			discount = Math.round(orderAmount * promo.value / 100);

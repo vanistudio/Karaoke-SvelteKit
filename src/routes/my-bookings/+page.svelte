@@ -46,11 +46,11 @@
 
 	async function cancelBooking(id: number) {
 		try {
-			await trpc().booking.changeStatus.mutate({ id, status: 'cancelled' });
+			await trpc().booking.cancelMyBooking.mutate(id);
 			addToast('Đã hủy đặt phòng thành công.', 'success');
 			await fetchData();
-		} catch (error) {
-			addToast('Hủy đặt phòng thất bại.', 'error');
+		} catch (error: any) {
+			addToast(error?.message || 'Hủy đặt phòng thất bại.', 'error');
 		}
 	}
 
