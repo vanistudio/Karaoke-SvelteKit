@@ -169,7 +169,8 @@
 				roomId,
 				startTime: startTime.toISOString(),
 				endTime: endTime.toISOString(),
-				guestCount
+				guestCount,
+				pointsToUse: usedPoints()
 			});
 			addToast('Đặt phòng thành công! Vui lòng chờ xác nhận từ quản lý.', 'success');
 			await goto('/my-bookings', { invalidateAll: true });
@@ -383,6 +384,25 @@
 								</div>
 							{/if}
 
+							<!-- Loyalty Points -->
+							{#if loyaltyInfo && loyaltyInfo.points > 0}
+								<div class="divider my-0 text-[10px] font-bold tracking-widest text-base-content/40">DÙNG ĐIỂM KARA</div>
+								<label class="flex items-start gap-3 p-3 border border-base-300 rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+									<input type="checkbox" bind:checked={isUsingPoints} class="checkbox checkbox-primary checkbox-sm mt-0.5 rounded" />
+									<div class="flex-1">
+										<p class="text-sm font-bold text-primary flex items-center gap-1.5">
+											<Icon icon="solar:wallet-money-bold-duotone" class="text-base"/>
+											Sử dụng điểm tích lũy
+										</p>
+										{#if isUsingPoints}
+											<p class="text-xs text-base-content/60 font-medium mt-1">Trừ <strong class="text-base-content">{usedPoints().toLocaleString('vi-VN')}</strong> điểm / {loyaltyInfo.points.toLocaleString('vi-VN')} điểm có sẵn</p>
+										{:else}
+											<p class="text-xs text-base-content/60 font-medium mt-1">Bạn đang có <strong class="text-base-content">{loyaltyInfo.points.toLocaleString('vi-VN')}</strong> điểm.</p>
+										{/if}
+									</div>
+								</label>
+							{/if}
+
 							<div class="divider my-0 text-[10px] font-bold tracking-widest text-base-content/40">VOUCHER</div>
 							{#if voucherResult}
 								<div class="flex items-center justify-between bg-emerald-500/5 rounded-lg p-2.5 border border-emerald-500/15">
@@ -411,8 +431,20 @@
 									<span>{formatVND(totalCost())}</span>
 								</div>
 								<div class="flex justify-between text-sm font-medium text-emerald-600">
-									<span>Giảm giá</span>
+									<span>Voucher giảm giá</span>
 									<span>−{formatVND(discountAmount())}</span>
+								</div>
+							{/if}
+							{#if isUsingPoints && usedPoints() > 0}
+								{#if !voucherResult}
+									<div class="flex justify-between text-sm font-medium">
+										<span class="text-base-content/60">Tạm tính</span>
+										<span>{formatVND(totalCost())}</span>
+									</div>
+								{/if}
+								<div class="flex justify-between text-sm font-medium text-emerald-600">
+									<span>Khấu trừ điểm Kara</span>
+									<span>−{formatVND(usedPoints())}</span>
 								</div>
 							{/if}
 							<div class="flex justify-between items-center">
