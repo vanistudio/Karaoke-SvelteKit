@@ -227,5 +227,54 @@
 				</div>
 			</div>
 		</div>
+		{#if loyaltyInfo}
+			<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden mb-6">
+				<div class="p-6 flex items-center gap-3 border-b border-base-200">
+					<Icon icon="solar:history-bold-duotone" class="text-xl text-primary" />
+					<h3 class="font-bold text-lg">Lịch Sử Tích Lũy Bằng Điểm</h3>
+				</div>
+				<div class="p-0">
+					{#if pointHistory && pointHistory.length > 0}
+						<div class="overflow-x-auto w-full">
+							<table class="table w-full">
+								<thead class="bg-base-200/50 text-base-content/50 text-xs uppercase font-bold tracking-wider">
+									<tr>
+										<th>Thời Gian</th>
+										<th>Loại Giao Dịch</th>
+										<th class="text-right">Biến Động</th>
+										<th>Ghi Chú</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each pointHistory as item}
+										<tr class="hover whitespace-nowrap">
+											<td class="font-medium text-base-content/70">{fmtDate(new Date(item.createdAt))}</td>
+											<td>
+												{#if item.type === 'reward'}
+													<span class="badge badge-success badge-sm font-bold/80 text-success bg-success/10 border-success/20">Tích Điểm</span>
+												{:else if item.type === 'redeem'}
+													<span class="badge badge-error badge-sm font-bold/80 text-error bg-error/10 border-error/20">Sử Dụng Điểm</span>
+												{:else}
+													<span class="badge badge-ghost badge-sm font-bold/80 text-base-content/60">{item.type}</span>
+												{/if}
+											</td>
+											<td class="text-right font-black {item.amount > 0 ? 'text-success' : 'text-error'}">
+												{item.amount > 0 ? '+' : ''}{item.amount.toLocaleString('vi-VN')}
+											</td>
+											<td class="text-sm font-medium text-base-content/60 text-wrap max-w-xs">{item.description}</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					{:else}
+						<div class="p-8 text-center text-base-content/40">
+							<Icon icon="solar:inbox-line-duotone" class="text-4xl mx-auto mb-2 opacity-50" />
+							<p class="text-sm font-medium">Chưa có giao dịch tích điểm nào.</p>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	</div>
 {/if}
