@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { promotion } from '$lib/server/db/schema';
-import { eq, count } from 'drizzle-orm';
+import { eq, count, sql } from 'drizzle-orm';
 
 export class PromotionRepository {
 	async findAll() {
@@ -40,21 +40,23 @@ export class PromotionRepository {
 	async incrementUsage(id: number) {
 		const promo = await this.findById(id);
 		if (!promo) return null;
-		return await db
+		const result = await db
 			.update(promotion)
-			.set({ currentUsage: promo.currentUsage + 1 })
+			.set({ currentUsage: sql`${promotion.currentUsage} + 1` })
 			.where(eq(promotion.id, id))
 			.returning();
+		return result[0];
 	}
 
 	async decrementUsage(id: number) {
 		const promo = await this.findById(id);
 		if (!promo || promo.currentUsage <= 0) return null;
-		return await db
+		const result = await db
 			.update(promotion)
-			.set({ currentUsage: promo.currentUsage - 1 })
+			.set({ currentUsage: sql`GREATEST(${promotion.currentUsage} - 1, 0)` })
 			.where(eq(promotion.id, id))
 			.returning();
+		return result[0];
 	}
 }
 
