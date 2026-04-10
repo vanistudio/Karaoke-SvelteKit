@@ -1,18 +1,18 @@
-import { router, protectedProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { serviceController } from '$lib/server/controllers/service.controller';
 
 export const serviceRouter = router({
-	list: protectedProcedure.query(async () => {
+	list: publicProcedure.query(async () => {
 		return await serviceController.listServices();
 	}),
-	getById: protectedProcedure.input(z.number()).query(async ({ input }) => {
+	getById: publicProcedure.input(z.number()).query(async ({ input }) => {
 		return await serviceController.getService(input);
 	}),
-	count: protectedProcedure.query(async () => {
+	count: adminProcedure.query(async () => {
 		return await serviceController.countServices();
 	}),
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				name: z.string().min(1),
@@ -25,7 +25,7 @@ export const serviceRouter = router({
 		.mutation(async ({ input }) => {
 			return await serviceController.addService(input);
 		}),
-	update: protectedProcedure
+	update: adminProcedure
 		.input(
 			z.object({
 				id: z.number(),
@@ -40,7 +40,7 @@ export const serviceRouter = router({
 			const { id, ...data } = input;
 			return await serviceController.updateService(id, data);
 		}),
-	delete: protectedProcedure
+	delete: adminProcedure
 		.input(z.number())
 		.mutation(async ({ input }) => {
 			return await serviceController.deleteService(input);

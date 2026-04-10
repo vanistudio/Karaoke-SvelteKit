@@ -1,12 +1,12 @@
-import { router, publicProcedure, protectedProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, protectedProcedure, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { bookingController } from '$lib/server/controllers/booking.controller';
 
 export const bookingRouter = router({
-	list: publicProcedure.query(async () => {
+	list: adminProcedure.query(async () => {
 		return await bookingController.listBookings();
 	}),
-	getById: publicProcedure.input(z.number()).query(async ({ input }) => {
+	getById: protectedProcedure.input(z.number()).query(async ({ input }) => {
 		return await bookingController.getBooking(input);
 	}),
 	myBookings: protectedProcedure.query(async ({ ctx }) => {
@@ -33,6 +33,7 @@ export const bookingRouter = router({
 				roomId: z.number().positive(),
 				startTime: z.string().datetime().or(z.date()),
 				endTime: z.string().datetime().or(z.date()),
+				guestCount: z.number().positive().optional(),
 				status: z.enum(['pending', 'confirmed', 'cancelled']).optional()
 			})
 		)
@@ -42,10 +43,11 @@ export const bookingRouter = router({
 				roomId: input.roomId,
 				startTime: new Date(input.startTime),
 				endTime: new Date(input.endTime),
+				guestCount: input.guestCount,
 				status: input.status
 			});
 		}),
-	changeStatus: protectedProcedure
+	changeStatus: adminProcedure
 		.input(
 			z.object({
 				id: z.number(),

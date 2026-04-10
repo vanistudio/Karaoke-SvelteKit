@@ -1,4 +1,4 @@
-import { router, publicProcedure, protectedProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { roomController } from '$lib/server/controllers/room.controller';
 
@@ -12,7 +12,7 @@ export const roomRouter = router({
 	count: publicProcedure.query(async () => {
 		return await roomController.countRooms();
 	}),
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				name: z.string().min(1),
@@ -24,7 +24,7 @@ export const roomRouter = router({
 		.mutation(async ({ input }) => {
 			return await roomController.addRoom(input);
 		}),
-	update: protectedProcedure
+	update: adminProcedure
 		.input(
 			z.object({
 				id: z.number(),
@@ -38,7 +38,7 @@ export const roomRouter = router({
 			const { id, ...data } = input;
 			return await roomController.updateRoom(id, data);
 		}),
-	delete: protectedProcedure
+	delete: adminProcedure
 		.input(z.number())
 		.mutation(async ({ input }) => {
 			return await roomController.deleteRoom(input);

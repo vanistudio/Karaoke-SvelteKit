@@ -1,17 +1,17 @@
-import { router, protectedProcedure } from '$lib/server/trpc/t';
+import { router, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { dashboardService } from '$lib/server/services/dashboard.service';
 
 export const dashboardRouter = router({
-	stats: protectedProcedure.query(async () => {
+	stats: adminProcedure.query(async () => {
 		return await dashboardService.getStats();
 	}),
-	recentBookings: protectedProcedure
+	recentBookings: adminProcedure
 		.input(z.number().optional())
 		.query(async ({ input }) => {
 			return await dashboardService.getRecentBookings(input || 5);
 		}),
-	enrichedBookings: protectedProcedure.query(async () => {
+	enrichedBookings: adminProcedure.query(async () => {
 		return await dashboardService.getEnrichedBookings();
 	})
 });

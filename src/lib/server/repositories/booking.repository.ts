@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { booking } from '$lib/server/db/schema';
-import { eq, and, not, lt, gt } from 'drizzle-orm';
+import { eq, and, not, lt, gt, or } from 'drizzle-orm';
 
 export class BookingRepository {
 	async findAll() {
@@ -14,6 +14,18 @@ export class BookingRepository {
 
 	async findByUserId(userId: string) {
 		return await db.select().from(booking).where(eq(booking.userId, userId));
+	}
+
+	async findActiveByRoomId(roomId: number) {
+		return await db
+			.select()
+			.from(booking)
+			.where(
+				and(
+					eq(booking.roomId, roomId),
+					or(eq(booking.status, 'pending'), eq(booking.status, 'confirmed'))
+				)
+			);
 	}
 
 	async create(data: typeof booking.$inferInsert) {

@@ -8,6 +8,7 @@ export const booking = pgTable('booking', {
 	roomId: integer('room_id').notNull().references(() => room.id, { onDelete: 'cascade' }),
 	startTime: timestamp('start_time').notNull(),
 	endTime: timestamp('end_time').notNull(),
+	guestCount: integer('guest_count'),
 	status: text('status').notNull().default('pending'),
 	totalCost: integer('total_cost'),
 	createdAt: timestamp('created_at').defaultNow().notNull()

@@ -27,6 +27,14 @@
 		fetchData();
 	});
 
+	$effect(() => {
+		selectedDate;
+		selectedStartTime;
+		selectedEndTime;
+		availabilityChecked = false;
+		isAvailable = false;
+	});
+
 	async function fetchData() {
 		try {
 			const [roomData, serviceData] = await Promise.all([
@@ -136,7 +144,8 @@
 			await trpc().booking.create.mutate({
 				roomId,
 				startTime: startTime.toISOString(),
-				endTime: endTime.toISOString()
+				endTime: endTime.toISOString(),
+				guestCount
 			});
 			addToast('Đặt phòng thành công! Vui lòng chờ xác nhận từ quản lý.', 'success');
 			await goto('/my-bookings', { invalidateAll: true });

@@ -17,3 +17,18 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 		}
 	});
 });
+
+export const adminProcedure = t.procedure.use(({ ctx, next }) => {
+	if (!ctx.user) {
+		throw new TRPCError({ code: 'UNAUTHORIZED', message: 'You must be logged in to perform this action' });
+	}
+	if (ctx.user.role !== 'admin') {
+		throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have permission to perform this action' });
+	}
+	return next({
+		ctx: {
+			...ctx,
+			user: ctx.user
+		}
+	});
+});

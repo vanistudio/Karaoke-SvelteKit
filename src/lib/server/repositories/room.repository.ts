@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { room } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
 
 export class RoomRepository {
 	async findAll() {
@@ -28,8 +28,8 @@ export class RoomRepository {
 	}
 
 	async count() {
-		const result = await db.select().from(room);
-		return result.length;
+		const result = await db.select({ count: count() }).from(room);
+		return result[0].count;
 	}
 }
 

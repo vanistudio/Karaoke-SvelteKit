@@ -28,6 +28,12 @@ export class BookingService {
 		if (data.startTime >= data.endTime) {
 			throw new Error('Start time must be before end time');
 		}
+
+		const now = new Date();
+		if (data.startTime < now) {
+			throw new Error('Cannot book a time slot in the past');
+		}
+
 		const isAvailable = await this.checkAvailability(data.roomId, data.startTime, data.endTime);
 		if (!isAvailable) {
 			throw new Error('Room is not available for the selected time slot');

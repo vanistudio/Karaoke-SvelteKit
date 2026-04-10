@@ -25,6 +25,10 @@ export class RoomService {
 	async deleteRoom(id: number) {
 		const existing = await roomRepository.findById(id);
 		if (!existing) throw new Error('Room not found');
+		const activeBookings = await bookingRepository.findActiveByRoomId(id);
+		if (activeBookings.length > 0) {
+			throw new Error(`Cannot delete room: ${activeBookings.length} active booking(s) exist`);
+		}
 		return await roomRepository.delete(id);
 	}
 

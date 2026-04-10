@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { service } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
 
 export class ServiceRepository {
 	async findAll() {
@@ -28,8 +28,8 @@ export class ServiceRepository {
 	}
 
 	async count() {
-		const result = await db.select().from(service);
-		return result.length;
+		const result = await db.select({ count: count() }).from(service);
+		return result[0].count;
 	}
 }
 
