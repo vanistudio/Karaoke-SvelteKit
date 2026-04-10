@@ -111,7 +111,7 @@
 									</div>
 								</div>
 								<div class="card-actions justify-end mt-4">
-									<button class="btn btn-outline btn-primary btn-sm rounded-md w-full">CHỌN PHÒNG NÀY</button>
+									<a href="/booking/{room.id}" class="btn btn-outline btn-primary btn-sm rounded-md w-full font-bold tracking-widest uppercase">ĐẶT PHÒNG</a>
 								</div>
 							</div>
 						</div>

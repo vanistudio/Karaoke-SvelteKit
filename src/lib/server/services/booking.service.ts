@@ -12,6 +12,10 @@ export class BookingService {
 		return booking;
 	}
 
+	async getBookingsByUser(userId: string) {
+		return await bookingRepository.findByUserId(userId);
+	}
+
 	async checkAvailability(roomId: number, startTime: Date, endTime: Date) {
 		const overlaps = await bookingRepository.findOverlappingBookings(roomId, startTime, endTime);
 		return overlaps.length === 0;

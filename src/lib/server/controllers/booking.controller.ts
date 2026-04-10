@@ -9,6 +9,10 @@ export class BookingController {
 		return await bookingService.getBooking(id);
 	}
 
+	async getBookingsByUser(userId: string) {
+		return await bookingService.getBookingsByUser(userId);
+	}
+
 	async checkAvailability(roomId: number, startTime: Date, endTime: Date) {
 		return await bookingService.checkAvailability(roomId, startTime, endTime);
 	}

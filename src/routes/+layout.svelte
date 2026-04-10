@@ -15,8 +15,7 @@
 	const navigation = [
 		{ name: 'TRANG CHỦ', href: '/', icon: 'solar:home-2-line-duotone' },
 		{ name: 'PHÒNG HÁT', href: '/rooms', icon: 'solar:soundwave-circle-line-duotone' },
-		{ name: 'DỊCH VỤ', href: '/services', icon: 'solar:cup-hot-line-duotone' },
-		{ name: 'KHÁCH HÀNG', href: '/customers', icon: 'solar:users-group-two-rounded-line-duotone' }
+		{ name: 'DỊCH VỤ', href: '/services', icon: 'solar:cup-hot-line-duotone' }
 	];
 </script>
 
@@ -79,6 +78,7 @@
 						{#if user.role === 'admin'}
 							<a href="/admin" class="text-[11px] font-bold tracking-widest uppercase hidden md:flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors shrink-0"><Icon icon="solar:pie-chart-2-bold-duotone" class="text-sm"/> ADMIN AREA</a>
 						{/if}
+						<a href="/my-bookings" class="text-[11px] font-bold tracking-widest uppercase hidden md:flex items-center gap-1.5 text-base-content/60 hover:text-primary px-3 py-1.5 rounded-full hover:bg-base-200 transition-colors shrink-0"><Icon icon="solar:ticket-line-duotone" class="text-sm"/> LỊCH SỬ</a>
 						<span class="text-sm font-medium tracking-widest uppercase hidden md:block text-base-content/70 shrink-0">Xin chào, {user.name}</span>
 						<button onclick={async () => { await signOut(); addToast('Hẹn gặp lại bạn!', 'info'); await goto('/login', { invalidateAll: true }); }} class="btn btn-outline border-base-300 hover:border-error hover:bg-error hover:text-white rounded-md font-semibold uppercase tracking-widest px-6 h-11 min-h-0 text-xs sm:text-sm shadow-sm transition-colors">
 							ĐĂNG XUẤT
@@ -198,6 +198,12 @@
 						</a>
 					</li>
 				{/if}
+				<li class="mb-1">
+					<a href="/my-bookings" class="rounded-md font-bold text-sm tracking-wider {String($page.url.pathname) === '/my-bookings' ? 'bg-primary/10 text-primary' : ''}">
+						<Icon icon="solar:ticket-line-duotone" class="text-xl" />
+						Lịch Sử Đặt Phòng
+					</a>
+				</li>
 				<li>
 					<button onclick={async () => { await signOut(); addToast('Hẹn gặp lại bạn!', 'info'); await goto('/login', { invalidateAll: true }); }} class="rounded-md font-bold text-sm tracking-wider text-error">
 						<Icon icon="solar:logout-2-line-duotone" class="text-xl" />

@@ -9,6 +9,9 @@ export const bookingRouter = router({
 	getById: publicProcedure.input(z.number()).query(async ({ input }) => {
 		return await bookingController.getBooking(input);
 	}),
+	myBookings: protectedProcedure.query(async ({ ctx }) => {
+		return await bookingController.getBookingsByUser(ctx.user.id);
+	}),
 	checkAvailability: publicProcedure
 		.input(
 			z.object({
@@ -42,7 +45,7 @@ export const bookingRouter = router({
 				status: input.status
 			});
 		}),
-	changeStatus: publicProcedure
+	changeStatus: protectedProcedure
 		.input(
 			z.object({
 				id: z.number(),

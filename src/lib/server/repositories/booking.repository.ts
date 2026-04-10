@@ -12,6 +12,10 @@ export class BookingRepository {
 		return result[0];
 	}
 
+	async findByUserId(userId: string) {
+		return await db.select().from(booking).where(eq(booking.userId, userId));
+	}
+
 	async create(data: typeof booking.$inferInsert) {
 		const result = await db.insert(booking).values(data).returning();
 		return result[0];
