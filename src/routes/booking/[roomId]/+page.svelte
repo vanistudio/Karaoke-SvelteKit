@@ -217,6 +217,7 @@
 	const typeLabel: Record<string, string> = { standard: 'Cơ Bản', vip: 'VIP', super_vip: 'Super VIP' };
 	const typeBadge: Record<string, string> = { standard: 'badge-ghost', vip: 'badge-secondary', super_vip: 'badge-accent' };
 	const categoryLabel: Record<string, string> = { food: 'Đồ Ăn', drink: 'Thức Uống', decoration: 'Trang Trí', other: 'Khác' };
+	const categoryIcon: Record<string, string> = { food: 'solar:chef-hat-heart-line-duotone', drink: 'solar:wineglass-triangle-line-duotone', decoration: 'solar:star-shine-line-duotone', other: 'solar:box-line-duotone' };
 
 	function formatVND(value: number) {
 		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -325,20 +326,29 @@
 							</h3>
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 								{#each services as svc}
-									<div class="flex items-center gap-3 p-3 rounded-md border transition-colors {selectedServices[svc.id] ? 'border-primary bg-primary/5' : 'border-base-300 bg-base-200/30 hover:border-base-content/20'}">
-										<input type="checkbox" checked={!!selectedServices[svc.id]} onchange={() => toggleService(svc.id)} class="checkbox checkbox-primary checkbox-sm rounded" />
-										<div class="flex-1 min-w-0">
-											<p class="font-bold text-sm truncate">{svc.name}</p>
-											<p class="text-xs text-base-content/50">{categoryLabel[svc.category] || svc.category} · {formatVND(svc.price)}</p>
-										</div>
-										{#if selectedServices[svc.id]}
-											<div class="join">
-												<button onclick={() => updateServiceQty(svc.id, (selectedServices[svc.id] || 1) - 1)} class="btn btn-xs join-item btn-ghost">−</button>
-												<span class="btn btn-xs join-item btn-ghost pointer-events-none font-mono font-bold">{selectedServices[svc.id]}</span>
-												<button onclick={() => updateServiceQty(svc.id, (selectedServices[svc.id] || 1) + 1)} class="btn btn-xs join-item btn-ghost">+</button>
+									<label class="flex items-center gap-3 p-3 rounded-md border cursor-pointer transition-colors {selectedServices[svc.id] ? 'border-primary bg-primary/5' : 'border-base-300 bg-base-200/30 hover:border-base-content/20'}">
+										<input type="checkbox" checked={!!selectedServices[svc.id]} onchange={() => toggleService(svc.id)} class="checkbox checkbox-primary checkbox-sm rounded shrink-0" />
+										{#if svc.imageUrl}
+											<div class="w-10 h-10 rounded-md overflow-hidden shrink-0 border border-base-300/50">
+												<img src={svc.imageUrl} alt={svc.name} class="w-full h-full object-cover" />
+											</div>
+										{:else}
+											<div class="w-10 h-10 rounded-md bg-base-300/30 flex items-center justify-center shrink-0 border border-base-300/50">
+												<Icon icon={categoryIcon[svc.category] || 'solar:box-line-duotone'} class="text-xl text-base-content/30" />
 											</div>
 										{/if}
-									</div>
+										<div class="flex-1 min-w-0">
+											<p class="font-bold text-sm truncate">{svc.name}</p>
+											<p class="text-xs text-base-content/50">{categoryLabel[svc.category] || svc.category} · <span class="font-bold text-primary">{formatVND(svc.price)}</span></p>
+										</div>
+										{#if selectedServices[svc.id]}
+											<div class="join" role="presentation" onclick={(e) => e.preventDefault()}>
+												<button onclick={() => updateServiceQty(svc.id, (selectedServices[svc.id] || 1) - 1)} class="btn btn-xs join-item btn-ghost w-8">−</button>
+												<span class="btn btn-xs join-item btn-ghost pointer-events-none font-mono font-bold w-6 px-0">{selectedServices[svc.id]}</span>
+												<button onclick={() => updateServiceQty(svc.id, (selectedServices[svc.id] || 1) + 1)} class="btn btn-xs join-item btn-ghost w-8">+</button>
+											</div>
+										{/if}
+									</label>
 								{/each}
 							</div>
 						</div>

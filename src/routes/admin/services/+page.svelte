@@ -98,10 +98,7 @@
 		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 	}
 
-	async function handleUpload(e: Event) {
-		const target = e.target as HTMLInputElement;
-		if (!target.files || target.files.length === 0) return;
-		const file = target.files[0];
+	async function uploadFileAction(file: File) {
 		isUploading = true;
 		try {
 			const formData = new FormData();
@@ -122,6 +119,36 @@
 		} finally {
 			isUploading = false;
 			if (uploaderInput) uploaderInput.value = '';
+		}
+	}
+
+	async function handleUpload(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (!target.files || target.files.length === 0) return;
+		await uploadFileAction(target.files[0]);
+	}
+
+	async function handlePaste(e: ClipboardEvent) {
+		const items = e.clipboardData?.items;
+		if (!items) return;
+		
+		const activeTag = document.activeElement?.tagName.toLowerCase();
+		const isInputFocused = activeTag === 'input' || activeTag === 'textarea';
+
+		for (const item of items) {
+			if (item.type.startsWith('image/')) {
+				e.preventDefault();
+				const file = item.getAsFile();
+				if (file) await uploadFileAction(file);
+				break;
+			} else if (item.type === 'text/plain' && !isInputFocused) {
+				const text = e.clipboardData?.getData('text/plain');
+				if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
+					form.imageUrl = text.trim();
+					addToast('Đã nhận link ảnh!', 'success');
+					break;
+				}
+			}
 		}
 	}
 </script>
@@ -234,7 +261,7 @@
 </div>
 
 <dialog id="svc_modal" class="modal">
-	<div class="modal-box rounded-xl max-w-lg">
+	<div class="modal-box rounded-xl max-w-lg" role="presentation" onpaste={handlePaste}>
 		<h3 class="font-bold text-lg mb-5 flex items-center gap-2">
 			<Icon icon={editTarget ? 'solar:pen-2-line-duotone' : 'solar:wineglass-triangle-line-duotone'} class="text-xl {editTarget ? 'text-blue-500' : 'text-primary'}"/>
 			{editTarget ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới'}

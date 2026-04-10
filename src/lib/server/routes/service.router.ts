@@ -19,7 +19,7 @@ export const serviceRouter = router({
 				category: z.enum(['food', 'drink', 'decoration', 'other']),
 				price: z.number().positive(),
 				description: z.string().optional(),
-				imageUrl: z.string().url().optional(),
+				imageUrl: z.string().optional(),
 				isAvailable: z.boolean().optional()
 			})
 		)
@@ -34,7 +34,7 @@ export const serviceRouter = router({
 				category: z.enum(['food', 'drink', 'decoration', 'other']).optional(),
 				price: z.number().positive().optional(),
 				description: z.string().optional(),
-				imageUrl: z.string().url().optional(),
+				imageUrl: z.string().optional(),
 				isAvailable: z.boolean().optional()
 			})
 		)
