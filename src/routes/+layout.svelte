@@ -19,7 +19,7 @@
 		{ name: 'Trang Chủ', href: '/', icon: 'solar:home-2-line-duotone', iconActive: 'solar:home-2-bold-duotone' },
 		{ name: 'Phòng Hát', href: '/rooms', icon: 'solar:soundwave-circle-line-duotone', iconActive: 'solar:soundwave-circle-bold-duotone' },
 		{ name: 'Dịch Vụ', href: '/services', icon: 'solar:cup-hot-line-duotone', iconActive: 'solar:cup-hot-bold-duotone' },
-		{ name: 'Đặt Chỗ', href: '/my-bookings', icon: 'solar:ticket-line-duotone', iconActive: 'solar:ticket-bold-duotone' }
+		{ name: 'Ưu Đãi', href: '/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone' }
 	];
 
 	function isActive(href: string) {
@@ -128,6 +128,10 @@
 									<p class="text-sm font-bold truncate">{user.name}</p>
 									<p class="text-xs text-base-content/50 truncate">{user.email}</p>
 								</div>
+								<a href="/profile" onclick={() => userMenuOpen = false} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-base-200/60 transition-colors">
+									<Icon icon="solar:user-circle-line-duotone" class="text-lg text-base-content/50" />
+									Hồ Sơ Cá Nhân
+								</a>
 								<a href="/my-bookings" onclick={() => userMenuOpen = false} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-base-200/60 transition-colors">
 									<Icon icon="solar:ticket-line-duotone" class="text-lg text-base-content/50" />
 									Lịch Sử Đặt Phòng

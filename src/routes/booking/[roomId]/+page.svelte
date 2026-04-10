@@ -20,6 +20,11 @@
 	let availabilityChecked = $state(false);
 	let isAvailable = $state(false);
 
+	let voucherCode = $state('');
+	let voucherResult = $state<{ discount: number; code: string; type: string; value: number } | null>(null);
+	let voucherError = $state('');
+	let isApplyingVoucher = $state(false);
+
 	let user = $derived($page.data.user);
 	let roomId = $derived(Number($page.params.roomId));
 
@@ -83,6 +88,8 @@
 	});
 
 	let totalCost = $derived(() => roomCost() + serviceCost());
+	let discountAmount = $derived(() => voucherResult?.discount ?? 0);
+	let finalCost = $derived(() => Math.max(0, totalCost() - discountAmount()));
 
 	function toggleService(id: number) {
 		if (selectedServices[id]) {
@@ -154,6 +161,39 @@
 		} finally {
 			isSubmitting = false;
 		}
+	}
+
+	async function applyVoucher() {
+		if (!voucherCode.trim()) return;
+		isApplyingVoucher = true;
+		voucherError = '';
+		voucherResult = null;
+		try {
+			const result = await trpc().promotion.validate.query({
+				code: voucherCode.trim().toUpperCase(),
+				orderAmount: totalCost()
+			});
+			let discount = 0;
+			if (result.type === 'percent') {
+				discount = Math.round(totalCost() * result.value / 100);
+			} else {
+				discount = result.value;
+			}
+			discount = Math.min(discount, totalCost());
+			voucherResult = { discount, code: result.code, type: result.type, value: result.value };
+			addToast(`Áp dụng mã ${result.code} thành công! Giảm ${formatVND(discount)}`, 'success');
+		} catch (e: any) {
+			voucherError = e?.message || 'Mã voucher không hợp lệ.';
+			addToast(voucherError, 'error');
+		} finally {
+			isApplyingVoucher = false;
+		}
+	}
+
+	function clearVoucher() {
+		voucherCode = '';
+		voucherResult = null;
+		voucherError = '';
 	}
 
 	const typeLabel: Record<string, string> = { standard: 'Cơ Bản', vip: 'VIP', super_vip: 'Super VIP' };
@@ -326,10 +366,41 @@
 								</div>
 							{/if}
 
+							<div class="divider my-0 text-[10px] font-bold tracking-widest text-base-content/40">VOUCHER</div>
+							{#if voucherResult}
+								<div class="flex items-center justify-between bg-emerald-500/5 rounded-lg p-2.5 border border-emerald-500/15">
+									<div class="flex items-center gap-2">
+										<Icon icon="solar:tag-price-bold-duotone" class="text-emerald-500"/>
+										<span class="text-xs font-bold text-emerald-600 font-mono">{voucherResult.code}</span>
+										<span class="text-xs text-emerald-500 font-medium">−{formatVND(voucherResult.discount)}</span>
+									</div>
+									<button onclick={clearVoucher} class="btn btn-xs btn-ghost btn-circle text-base-content/30 hover:text-red-500">
+										<Icon icon="solar:close-circle-bold" class="text-sm"/>
+									</button>
+								</div>
+							{:else}
+								<div class="flex gap-2">
+									<input type="text" bind:value={voucherCode} placeholder="Nhập mã voucher..." class="input input-bordered input-sm flex-1 rounded-lg font-mono uppercase text-xs" />
+									<button onclick={applyVoucher} class="btn btn-sm btn-primary rounded-lg font-bold text-xs px-3" disabled={isApplyingVoucher || !voucherCode.trim()}>
+										{#if isApplyingVoucher}<span class="loading loading-spinner loading-xs"></span>{:else}Áp Dụng{/if}
+									</button>
+								</div>
+							{/if}
+
 							<div class="divider my-1"></div>
+							{#if voucherResult}
+								<div class="flex justify-between text-sm font-medium">
+									<span class="text-base-content/60">Tạm tính</span>
+									<span>{formatVND(totalCost())}</span>
+								</div>
+								<div class="flex justify-between text-sm font-medium text-emerald-600">
+									<span>Giảm giá</span>
+									<span>−{formatVND(discountAmount())}</span>
+								</div>
+							{/if}
 							<div class="flex justify-between items-center">
 								<span class="font-bold tracking-widest uppercase text-sm">Tổng Cộng</span>
-								<span class="text-2xl font-black text-primary">{formatVND(totalCost())}</span>
+								<span class="text-2xl font-black text-primary">{formatVND(finalCost())}</span>
 							</div>
 						</div>
 

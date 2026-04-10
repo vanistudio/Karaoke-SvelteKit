@@ -14,7 +14,8 @@
 		{ label: 'Tổng Quan', href: '/admin', icon: 'solar:pie-chart-2-line-duotone', iconActive: 'solar:pie-chart-2-bold-duotone', exact: true },
 		{ label: 'Lịch Đặt Phòng', href: '/admin/bookings', icon: 'solar:ticket-line-duotone', iconActive: 'solar:ticket-bold-duotone' },
 		{ label: 'Hệ Thống Phòng', href: '/admin/rooms', icon: 'solar:home-smile-angle-line-duotone', iconActive: 'solar:home-smile-angle-bold-duotone' },
-		{ label: 'Menu Dịch Vụ', href: '/admin/services', icon: 'solar:wineglass-triangle-line-duotone', iconActive: 'solar:wineglass-triangle-bold-duotone' }
+		{ label: 'Menu Dịch Vụ', href: '/admin/services', icon: 'solar:wineglass-triangle-line-duotone', iconActive: 'solar:wineglass-triangle-bold-duotone' },
+		{ label: 'Khuyến Mãi', href: '/admin/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone' }
 	];
 
 	function isActive(href: string, exact = false) {
