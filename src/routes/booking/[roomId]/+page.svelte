@@ -25,6 +25,9 @@
 	let voucherError = $state('');
 	let isApplyingVoucher = $state(false);
 
+	let loyaltyInfo = $state<any>(null);
+	let isUsingPoints = $state(false);
+
 	let user = $derived($page.data.user);
 	let roomId = $derived(Number($page.params.roomId));
 
@@ -42,12 +45,20 @@
 
 	async function fetchData() {
 		try {
-			const [roomData, serviceData] = await Promise.all([
+			const promises: Promise<any>[] = [
 				trpc().room.getById.query(roomId),
 				trpc().service.list.query()
-			]);
+			];
+			if (user) {
+				promises.push(trpc().loyalty.getInfo.query().catch(() => null));
+			}
+
+			const [roomData, serviceData, loyaltyData] = await Promise.all(promises);
 			room = roomData;
 			services = serviceData.filter((s: any) => s.isAvailable);
+			if (loyaltyData) {
+				loyaltyInfo = loyaltyData;
+			}
 		} catch (error) {
 			addToast('Không tìm thấy phòng yêu cầu.', 'error');
 			await goto('/', { invalidateAll: true });
@@ -89,7 +100,13 @@
 
 	let totalCost = $derived(() => roomCost() + serviceCost());
 	let discountAmount = $derived(() => voucherResult?.discount ?? 0);
-	let finalCost = $derived(() => Math.max(0, totalCost() - discountAmount()));
+	let availablePointsToUse = $derived(() => {
+		if (!loyaltyInfo) return 0;
+		return Math.min(loyaltyInfo.points, Math.max(0, totalCost() - discountAmount()));
+	});
+	let usedPoints = $derived(() => isUsingPoints ? availablePointsToUse() : 0);
+	
+	let finalCost = $derived(() => Math.max(0, totalCost() - discountAmount() - usedPoints()));
 
 	function toggleService(id: number) {
 		if (selectedServices[id]) {
