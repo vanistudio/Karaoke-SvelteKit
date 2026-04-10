@@ -4,6 +4,7 @@ import { serviceRepository } from '$lib/server/repositories/service.repository';
 import { promotionService } from './promotion.service';
 import { promotionRepository } from '$lib/server/repositories/promotion.repository';
 import { loyaltyService } from './loyalty.service';
+import { pricingService } from './pricing.service';
 
 export class BookingService {
 	async getAllBookings() {
@@ -47,13 +48,7 @@ export class BookingService {
 		if (!isAvailable) {
 			throw new Error('Room is not available for the selected time slot');
 		}
-
-		// Calculate room cost
-		const durationMs = data.endTime.getTime() - data.startTime.getTime();
-		const durationHours = durationMs / (1000 * 60 * 60);
-		const roomCost = Math.round(durationHours * room.pricePerHour);
-
-		// Calculate extra services cost
+		const roomCost = await pricingService.calculateRoomCost(room.pricePerHour, data.startTime, data.endTime);
 		let extraServicesCost = 0;
 		const validServicesToInsert = [];
 		for (const svc of selectedServices) {
@@ -64,8 +59,6 @@ export class BookingService {
 		}
 
 		const initialTotal = roomCost + extraServicesCost;
-
-		// Calculate voucher
 		let discountAmount = 0;
 		if (voucherCode) {
 			const promoResult = await promotionService.applyVoucher(voucherCode, initialTotal);
@@ -83,8 +76,6 @@ export class BookingService {
 		};
 
 		const booking = await bookingRepository.create(bookingData);
-
-		// Insert relational services
 		for (const item of validServicesToInsert) {
 			await bookingRepository.createServiceItem({
 				bookingId: booking.id,
@@ -106,7 +97,6 @@ export class BookingService {
 		const oldStatus = booking.status;
 		const updated = await bookingRepository.updateStatus(id, status);
 
-		// Thưởng điểm khi xác nhận
 		if (status === 'confirmed' && oldStatus !== 'confirmed') {
 			try {
 				await loyaltyService.rewardPoints(booking.userId, booking.id, booking.totalCost ?? 0);
@@ -115,18 +105,14 @@ export class BookingService {
 			}
 		}
 
-		// Xử lý Hủy Đơn
 		if (status === 'cancelled' && oldStatus !== 'cancelled') {
 			try {
-				// 1. Hoàn lại điểm đã cọc
 				if (booking.usedPoints > 0) {
 					await loyaltyService.refundPoints(booking.userId, booking.usedPoints, booking.id);
 				}
-				// 2. Thu hồi điểm nếu lỡ confirm rồi mới bị cancel
 				if (oldStatus === 'confirmed') {
 					await loyaltyService.revertRewardedPoints(booking.userId, booking.id);
 				}
-				// 3. Trả lại lượt sử dụng cho Voucher
 				if (booking.voucherCode) {
 					const promo = await promotionRepository.findByCode(booking.voucherCode);
 					if (promo) {

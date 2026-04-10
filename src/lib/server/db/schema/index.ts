@@ -9,4 +9,5 @@ export * from './promotion.schema';
 export * from './task.schema';
 export * from './point_history.schema';
 export * from './booking_service.schema';
+export * from './pricing_rule.schema';
 export * from './relations';
