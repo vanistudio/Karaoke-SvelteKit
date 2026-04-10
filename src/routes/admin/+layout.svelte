@@ -5,121 +5,129 @@
 	import { signOut } from '$lib/auth-client';
 	import { addToast } from '$lib/stores/toast';
 	let { children } = $props();
-	
+
 	let user = $derived($page.data.user);
+	let sidebarOpen = $state(false);
+	let sidebarCollapsed = $state(false);
+
+	const navItems = [
+		{ label: 'Tổng Quan', href: '/admin', icon: 'solar:pie-chart-2-line-duotone', iconActive: 'solar:pie-chart-2-bold-duotone', exact: true },
+		{ label: 'Lịch Đặt Phòng', href: '/admin/bookings', icon: 'solar:ticket-line-duotone', iconActive: 'solar:ticket-bold-duotone' },
+		{ label: 'Hệ Thống Phòng', href: '/admin/rooms', icon: 'solar:home-smile-angle-line-duotone', iconActive: 'solar:home-smile-angle-bold-duotone' },
+		{ label: 'Menu Dịch Vụ', href: '/admin/services', icon: 'solar:wineglass-triangle-line-duotone', iconActive: 'solar:wineglass-triangle-bold-duotone' }
+	];
+
+	function isActive(href: string, exact = false) {
+		const path = String($page.url.pathname);
+		if (exact) return path === href;
+		return path.startsWith(href);
+	}
+
+	async function handleLogout() {
+		await signOut();
+		addToast('Đăng xuất phiên quản trị.', 'info');
+		await goto('/login', { invalidateAll: true });
+	}
 </script>
 
-<div class="drawer lg:drawer-open font-sans bg-base-200">
-	<input id="admin-drawer" type="checkbox" class="drawer-toggle" />
-	
-	<div class="drawer-content flex flex-col min-h-screen">
-		<div class="sticky top-0 z-40 w-full navbar bg-base-100/80 backdrop-blur-md border-b border-base-300/50 px-4 md:px-8 py-2">
-			<div class="flex-none lg:hidden">
-				<label for="admin-drawer" class="btn btn-square btn-ghost text-base-content/70 hover:text-primary">
-					<Icon icon="solar:hamburger-menu-line-duotone" class="text-2xl" />
-				</label>
+<div class="flex min-h-screen bg-base-200 font-sans">
+	{#if sidebarOpen}
+		<button class="fixed inset-0 bg-black/40 z-40 lg:hidden" onclick={() => sidebarOpen = false}></button>
+	{/if}
+
+	<aside class="fixed lg:sticky top-0 left-0 z-50 h-screen flex flex-col bg-base-100 border-r border-base-300/80 transition-all duration-300
+		{sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+		{sidebarCollapsed ? 'w-[72px]' : 'w-64'}">
+
+		<div class="h-16 flex items-center px-4 border-b border-base-200 shrink-0 {sidebarCollapsed ? 'justify-center' : 'gap-3'}">
+			{#if !sidebarCollapsed}
+				<a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+					<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-2xl shrink-0" />
+					<span class="text-lg font-black uppercase tracking-[0.1em] leading-none">KARA<span class="text-primary">SYSTEM</span></span>
+				</a>
+			{:else}
+				<a href="/" class="hover:opacity-80 transition-opacity">
+					<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-2xl" />
+				</a>
+			{/if}
+		</div>
+
+		<nav class="flex-1 overflow-y-auto py-4 px-3">
+			{#if !sidebarCollapsed}
+				<p class="text-[10px] font-bold tracking-[0.2em] uppercase text-base-content/30 px-3 mb-2">Điều Hành</p>
+			{/if}
+			<div class="flex flex-col gap-1">
+				{#each navItems as item}
+					{@const active = isActive(item.href, item.exact)}
+					<a
+						href={item.href}
+						onclick={() => sidebarOpen = false}
+						class="flex items-center gap-3 px-3 h-10 rounded-lg text-[13px] font-medium transition-all duration-200
+							{sidebarCollapsed ? 'justify-center' : ''}
+							{active
+								? 'bg-primary/10 text-primary font-semibold'
+								: 'text-base-content/50 hover:text-base-content hover:bg-base-200/60'}"
+						title={sidebarCollapsed ? item.label : ''}
+					>
+						<Icon icon={active ? item.iconActive : item.icon} class="text-xl shrink-0" />
+						{#if !sidebarCollapsed}
+							<span>{item.label}</span>
+						{/if}
+						{#if active && !sidebarCollapsed}
+							<span class="ml-auto w-1.5 h-1.5 rounded-full bg-primary"></span>
+						{/if}
+					</a>
+				{/each}
 			</div>
-			<div class="flex-1 flex flex-col">
-				<h1 class="text-lg md:text-xl font-bold tracking-widest uppercase text-base-content">
-					Trung Tâm Điều Hành
-				</h1>
-				<span class="text-xs font-medium text-base-content/50 uppercase tracking-wider hidden md:block">Karaoke Booking & Management</span>
+		</nav>
+
+		<div class="border-t border-base-200 p-3 shrink-0">
+			{#if !sidebarCollapsed}
+				<a href="/" class="flex items-center gap-3 px-3 h-10 rounded-lg text-[13px] font-medium text-base-content/50 hover:text-base-content hover:bg-base-200/60 transition-colors mb-1">
+					<Icon icon="solar:arrow-left-line-duotone" class="text-xl" />
+					Về Trang Chủ
+				</a>
+			{/if}
+			<button onclick={() => sidebarCollapsed = !sidebarCollapsed} class="hidden lg:flex items-center gap-3 px-3 h-10 rounded-lg text-[13px] font-medium text-base-content/30 hover:text-base-content/60 hover:bg-base-200/40 transition-colors w-full {sidebarCollapsed ? 'justify-center' : ''}">
+				<Icon icon={sidebarCollapsed ? 'solar:arrow-right-line-duotone' : 'solar:arrow-left-line-duotone'} class="text-lg" />
+				{#if !sidebarCollapsed}<span>Thu Gọn</span>{/if}
+			</button>
+		</div>
+	</aside>
+
+	<div class="flex-1 flex flex-col min-h-screen min-w-0">
+		<header class="sticky top-0 z-30 bg-base-100/95 backdrop-blur-lg border-b border-base-300/60 h-16 flex items-center justify-between px-4 lg:px-8 shrink-0">
+			<div class="flex items-center gap-3">
+				<button onclick={() => sidebarOpen = true} class="btn btn-ghost btn-sm btn-square rounded-lg lg:hidden">
+					<Icon icon="solar:hamburger-menu-line-duotone" class="text-xl" />
+				</button>
+				<div>
+					<h1 class="text-base lg:text-lg font-bold tracking-wide text-base-content">Trung Tâm Điều Hành</h1>
+					<p class="text-[10px] text-base-content/40 font-medium tracking-widest uppercase hidden sm:block">Karaoke Management System</p>
+				</div>
 			</div>
-			
-			<div class="flex-none gap-2 md:gap-4">
-				<div class="tooltip tooltip-bottom" data-tip="Thông báo mới">
-					<button class="btn btn-ghost btn-circle text-base-content/70 hover:text-primary hover:bg-primary/10 transition-colors">
-						<div class="indicator">
-							<Icon icon="solar:bell-bing-line-duotone" class="text-[22px]" />
-							<span class="badge badge-error badge-xs indicator-item"></span>
-						</div>
+
+			<div class="flex items-center gap-2">
+				<button class="btn btn-ghost btn-sm btn-square rounded-lg text-base-content/40 hover:text-primary">
+					<Icon icon="solar:bell-bing-line-duotone" class="text-xl" />
+				</button>
+				<div class="flex items-center gap-2.5 pl-2 ml-1 border-l border-base-200">
+					<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+						<Icon icon="solar:user-bold-duotone" class="text-primary text-base" />
+					</div>
+					<div class="hidden sm:block">
+						<p class="text-sm font-semibold leading-none">{user?.name || 'Admin'}</p>
+						<p class="text-[10px] text-base-content/40 font-medium uppercase tracking-wider mt-0.5">{user?.role || 'admin'}</p>
+					</div>
+					<button onclick={handleLogout} class="btn btn-ghost btn-xs btn-square rounded-lg text-base-content/30 hover:text-error ml-1" title="Đăng xuất">
+						<Icon icon="solar:logout-2-line-duotone" class="text-base" />
 					</button>
 				</div>
-				
-				<div class="dropdown dropdown-end ml-2">
-					<div role="button" class="flex items-center gap-3 btn btn-ghost px-2 hover:bg-base-200 rounded-md">
-						<div class="text-right hidden sm:block">
-							<div class="text-sm font-bold leading-none">{user?.name || 'Admin Manager'}</div>
-							<div class="text-[10px] uppercase font-bold tracking-widest text-base-content/50 mt-1">{user?.role || 'Super Admin'}</div>
-						</div>
-						<div class="avatar">
-							<div class="w-9 rounded-md border border-base-300 shadow-sm overflow-hidden">
-								{#if user?.image}
-									<img alt="Admin Avatar" src={user.image} />
-								{:else}
-									<img alt="Admin Avatar" src={`https://ui-avatars.com/api/?name=${user?.name || 'Admin'}&background=random`} />
-								{/if}
-							</div>
-						</div>
-						<Icon icon="solar:alt-arrow-down-line-duotone" class="text-base-content/40 hidden sm:block" />
-					</div>
-					<ul class="mt-3 z-1 p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-md w-56 border border-base-300/50">
-						<li class="menu-title px-4 py-2 border-b border-base-200 mb-1">
-							<span class="text-xs uppercase tracking-widest font-bold">Tài Khoản</span>
-						</li>
-						<li><a href="#profile" class="py-2 hover:bg-base-200 rounded-sm font-medium"><Icon icon="solar:user-circle-line-duotone" class="text-lg opacity-70"/> Hồ sơ cá nhân</a></li>
-						<li><a href="#settings" class="py-2 hover:bg-base-200 rounded-sm font-medium"><Icon icon="solar:settings-line-duotone" class="text-lg opacity-70"/> Cài đặt hệ thống</a></li>
-						<div class="divider my-1"></div>
-						<li><button onclick={async () => {
-							await signOut();
-							addToast('Đăng xuất phiên quản trị.', 'info');
-							await goto('/login', { invalidateAll: true });
-						}} class="py-2 hover:bg-error/10 text-error hover:text-error rounded-sm font-bold w-full text-left transition-colors"><Icon icon="solar:logout-2-line-duotone" class="text-lg"/> Đăng xuất</button></li>
-					</ul>
-				</div>
 			</div>
-		</div>
-		<main class="flex-1 p-4 md:p-8 xl:px-10">
+		</header>
+
+		<main class="flex-1 p-4 lg:p-8">
 			{@render children()}
 		</main>
-	</div> 
-	<div class="drawer-side border-r border-base-300 shadow-sm z-50">
-		<label for="admin-drawer" aria-label="close sidebar" class="drawer-overlay"></label> 
-		<ul class="menu p-4 w-72 min-h-full bg-base-100 text-base-content gap-2">
-			<li class="mb-8 mt-2">
-				<a href="/" class="text-xl font-black uppercase tracking-widest text-base-content px-2 hover:bg-transparent flex gap-3 items-center group">
-					<div class="bg-primary/10 p-2 rounded-md group-hover:scale-105 transition-transform">
-						<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-2xl"/>
-					</div>
-					<span>KARA<span class="text-primary">SYSTEM</span></span>
-				</a>
-			</li>
-			
-			<li class="menu-title text-[10px] font-bold tracking-[0.2em] uppercase text-base-content/40 mt-2 mb-1 px-4">Điều Hành</li>
-			
-			<li>
-				<a href="/admin" class="group {$page.url.pathname === '/admin' ? 'active font-bold bg-primary/10 text-primary border-r-4 border-primary rounded-none rounded-l-md' : 'rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors'} py-3 px-4">
-					<Icon icon="solar:pie-chart-2-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform {$page.url.pathname === '/admin' ? 'text-primary' : 'opacity-70'}" />
-					<span class="ml-2 tracking-wide">Tổng Quan</span>
-				</a>
-			</li>
-			<li>
-				<a href="/admin/bookings" class="group {$page.url.pathname.startsWith('/admin/bookings') ? 'active font-bold bg-primary/10 text-primary border-r-4 border-primary rounded-none rounded-l-md' : 'rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors'} py-3 px-4">
-					<Icon icon="solar:ticket-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform {$page.url.pathname.startsWith('/admin/bookings') ? 'text-primary' : 'opacity-70'}" />
-					<span class="ml-2 tracking-wide flex-1">Lịch Đặt Phòng</span>
-				</a>
-			</li>
-			
-			<div class="divider my-0"></div>
-			<li class="menu-title text-[10px] font-bold tracking-[0.2em] uppercase text-base-content/40 mt-2 mb-1 px-4">Quản Lý Cơ Sở</li>
-			
-			<li>
-				<a href="/admin/rooms" class="group {$page.url.pathname.startsWith('/admin/rooms') ? 'active font-bold bg-primary/10 text-primary border-r-4 border-primary rounded-none rounded-l-md' : 'rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors'} py-3 px-4">
-					<Icon icon="solar:home-smile-angle-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform {$page.url.pathname.startsWith('/admin/rooms') ? 'text-primary' : 'opacity-70'}" />
-					<span class="ml-2 tracking-wide">Danh Sách Phòng</span>
-				</a>
-			</li>
-			<li>
-				<a href="/admin/services" class="group {$page.url.pathname.startsWith('/admin/services') ? 'active font-bold bg-primary/10 text-primary border-r-4 border-primary rounded-none rounded-l-md' : 'rounded-md font-medium text-base-content/70 hover:bg-base-200 hover:text-base-content transition-colors'} py-3 px-4">
-					<Icon icon="solar:wineglass-triangle-line-duotone" class="text-[22px] group-hover:scale-110 transition-transform {$page.url.pathname.startsWith('/admin/services') ? 'text-primary' : 'opacity-70'}" />
-					<span class="ml-2 tracking-wide">Menu Dịch Vụ</span>
-				</a>
-			</li>
-			<div class="flex-1"></div>
-			<div class="p-4 bg-base-200/50 rounded-md border border-base-200 mt-4 mx-2">
-				<p class="text-xs font-medium text-base-content/70 mb-3">Cần hỗ trợ kỹ thuật?</p>
-				<button class="btn btn-sm btn-outline btn-primary w-full tracking-widest text-xs uppercase font-bold">Liên Hệ IT</button>
-			</div>
-		</ul>
 	</div>
 </div>
