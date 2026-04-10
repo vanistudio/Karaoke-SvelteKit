@@ -69,17 +69,27 @@
 	{:else}
 		<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 			{#each filteredServices as svc}
-				<div class="card bg-base-100 rounded-md border border-base-300 hover:border-primary transition-colors duration-300 group">
-					<div class="card-body p-6">
-						<div class="flex items-start justify-between mb-3">
-							<div class="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
-								<Icon icon={categoryIcon[svc.category] || 'solar:box-line-duotone'} class="text-2xl text-primary"/>
-							</div>
-							<div class="badge badge-sm badge-ghost rounded-md font-bold uppercase">
+				<div class="card bg-base-100 rounded-md border border-base-300 hover:border-primary transition-colors duration-300 group overflow-hidden">
+					{#if svc.imageUrl}
+						<figure class="h-48 w-full bg-base-200 border-b border-base-300 overflow-hidden relative">
+							<img src={svc.imageUrl} alt={svc.name} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+							<div class="absolute top-3 right-3 badge badge-sm badge-base-100/90 backdrop-blur-md rounded-md font-bold uppercase border-none shadow-sm">
 								{categoryLabel[svc.category] || svc.category}
 							</div>
-						</div>
-						<h3 class="font-bold text-lg">{svc.name}</h3>
+						</figure>
+					{/if}
+					<div class="card-body p-6">
+						{#if !svc.imageUrl}
+							<div class="flex items-start justify-between mb-3">
+								<div class="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+									<Icon icon={categoryIcon[svc.category] || 'solar:box-line-duotone'} class="text-2xl text-primary"/>
+								</div>
+								<div class="badge badge-sm badge-ghost rounded-md font-bold uppercase">
+									{categoryLabel[svc.category] || svc.category}
+								</div>
+							</div>
+						{/if}
+						<h3 class="font-bold text-lg {svc.imageUrl ? 'mt-1' : ''}">{svc.name}</h3>
 						{#if svc.description}
 							<p class="text-sm text-base-content/60 font-medium mt-1 line-clamp-2">{svc.description}</p>
 						{/if}

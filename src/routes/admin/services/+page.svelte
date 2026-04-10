@@ -9,9 +9,11 @@
 	let isDeleting = $state(false);
 	let filterCategory = $state('all');
 
-	let form = $state({ name: '', category: 'food', price: 10000, description: '', isAvailable: true });
+	let form = $state({ name: '', category: 'food', price: 10000, description: '', imageUrl: '', isAvailable: true });
 	let editTarget = $state<{ id: number } | null>(null);
 	let deleteTarget = $state<{ id: number; name: string } | null>(null);
+	let uploaderInput = $state<HTMLInputElement | null>(null);
+	let isUploading = $state(false);
 
 	$effect(() => {
 		loadData();
@@ -33,13 +35,13 @@
 
 	function openCreateModal() {
 		editTarget = null;
-		form = { name: '', category: 'food', price: 10000, description: '', isAvailable: true };
+		form = { name: '', category: 'food', price: 10000, description: '', imageUrl: '', isAvailable: true };
 		(document.getElementById('svc_modal') as HTMLDialogElement)?.showModal();
 	}
 
 	function openEditModal(s: any) {
 		editTarget = { id: s.id };
-		form = { name: s.name, category: s.category, price: s.price, description: s.description || '', isAvailable: s.isAvailable };
+		form = { name: s.name, category: s.category, price: s.price, description: s.description || '', imageUrl: s.imageUrl || '', isAvailable: s.isAvailable };
 		(document.getElementById('svc_modal') as HTMLDialogElement)?.showModal();
 	}
 
@@ -52,10 +54,10 @@
 		isSaving = true;
 		try {
 			if (editTarget) {
-				await trpc().service.update.mutate({ id: editTarget.id, name: form.name, category: form.category as any, price: form.price, description: form.description || undefined, isAvailable: form.isAvailable });
+				await trpc().service.update.mutate({ id: editTarget.id, name: form.name, category: form.category as any, price: form.price, description: form.description || undefined, imageUrl: form.imageUrl || undefined, isAvailable: form.isAvailable });
 				addToast('Cập nhật dịch vụ thành công!', 'success');
 			} else {
-				await trpc().service.create.mutate({ name: form.name, category: form.category as any, price: form.price, description: form.description || undefined, isAvailable: form.isAvailable });
+				await trpc().service.create.mutate({ name: form.name, category: form.category as any, price: form.price, description: form.description || undefined, imageUrl: form.imageUrl || undefined, isAvailable: form.isAvailable });
 				addToast('Thêm dịch vụ thành công!', 'success');
 			}
 			closeModal();
@@ -94,6 +96,33 @@
 
 	function fmtVND(v: number) {
 		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
+	}
+
+	async function handleUpload(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (!target.files || target.files.length === 0) return;
+		const file = target.files[0];
+		isUploading = true;
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+			const res = await fetch('/api/upload', {
+				method: 'POST',
+				body: formData
+			});
+			const data = await res.json();
+			if (data.success) {
+				form.imageUrl = data.url;
+				addToast('Tải ảnh lên thành công', 'success');
+			} else {
+				throw new Error(data.message || 'Lỗi tải ảnh');
+			}
+		} catch (error: any) {
+			addToast(error.message, 'error');
+		} finally {
+			isUploading = false;
+			if (uploaderInput) uploaderInput.value = '';
+		}
 	}
 </script>
 
@@ -164,11 +193,22 @@
 							<tr class="hover">
 								<td class="font-mono text-xs font-bold text-base-content/30">#{s.id}</td>
 								<td>
-									<div class="flex flex-col">
-										<span class="font-bold text-sm">{s.name}</span>
-										{#if s.description}
-											<span class="text-[11px] text-base-content/30 max-w-[200px] truncate">{s.description}</span>
+									<div class="flex items-center gap-3">
+										{#if s.imageUrl}
+											<div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-base-200 border border-base-300">
+												<img src={s.imageUrl} alt={s.name} class="w-full h-full object-cover" />
+											</div>
+										{:else}
+											<div class="w-10 h-10 rounded-lg bg-base-200 border border-base-300 flex items-center justify-center shrink-0">
+												<Icon icon={catIcon[s.category] || 'solar:box-line-duotone'} class="text-xl text-base-content/30" />
+											</div>
 										{/if}
+										<div class="flex flex-col">
+											<span class="font-bold text-sm">{s.name}</span>
+											{#if s.description}
+												<span class="text-[11px] text-base-content/30 max-w-[200px] truncate">{s.description}</span>
+											{/if}
+										</div>
 									</div>
 								</td>
 								<td><span class="badge badge-xs rounded-md font-bold uppercase {catCls[s.category] || 'badge-ghost'}">{catLabel[s.category] || s.category}</span></td>
@@ -200,10 +240,35 @@
 			{editTarget ? 'Chỉnh Sửa Dịch Vụ' : 'Thêm Dịch Vụ Mới'}
 		</h3>
 		<div class="flex flex-col gap-4">
-			<label class="form-control w-full">
-				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Tên Dịch Vụ</span></div>
-				<input type="text" bind:value={form.name} placeholder="VD: Bia Tiger, Trái Cây..." class="input input-bordered w-full rounded-lg" />
-			</label>
+			<div class="flex gap-4 items-end">
+				<!-- Image Upload -->
+				<div class="flex flex-col gap-2 shrink-0">
+					<span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Hình Ảnh</span>
+					<div class="relative w-20 h-20 rounded-xl border-dashed border-2 border-base-300 bg-base-200 overflow-hidden flex items-center justify-center group">
+						{#if form.imageUrl}
+							<img src={form.imageUrl} alt="preview" class="w-full h-full object-cover" />
+							<button onclick={() => form.imageUrl = ''} class="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+								<Icon icon="solar:trash-bin-trash-line-duotone" class="text-xl" />
+							</button>
+						{:else}
+							<button onclick={() => uploaderInput?.click()} class="w-full h-full flex flex-col items-center justify-center text-base-content/40 hover:text-primary transition-colors disabled:opacity-50" disabled={isUploading}>
+								{#if isUploading}
+									<span class="loading loading-spinner loading-md"></span>
+								{:else}
+									<Icon icon="solar:camera-add-line-duotone" class="text-2xl" />
+									<span class="text-[10px] font-bold mt-1">Upload</span>
+								{/if}
+							</button>
+						{/if}
+						<input type="file" accept="image/*" bind:this={uploaderInput} onchange={handleUpload} class="hidden" />
+					</div>
+				</div>
+
+				<label class="form-control w-full">
+					<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Tên Dịch Vụ</span></div>
+					<input type="text" bind:value={form.name} placeholder="VD: Bia Tiger, Trái Cây..." class="input input-bordered w-full rounded-lg" />
+				</label>
+			</div>
 			<div class="grid grid-cols-2 gap-4">
 				<label class="form-control w-full">
 					<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Danh Mục</span></div>
