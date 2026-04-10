@@ -124,7 +124,7 @@
 								<Icon icon="solar:alt-arrow-down-line-duotone" class="text-xs text-base-content/40 hidden md:block" />
 							</button>
 							{#if userMenuOpen}
-								<div class="absolute right-0 top-full mt-2 w-56 bg-base-100 border border-base-300 rounded-xl shadow-xl py-2 z-60" onclick={(e) => e.stopPropagation()}>
+								<div class="absolute right-0 top-full mt-2 w-56 bg-base-100 border border-base-300 rounded-xl shadow-xl py-2 z-60">
 									<div class="px-4 py-3 border-b border-base-200">
 										<p class="text-sm font-bold truncate">{user.name}</p>
 										<p class="text-xs text-base-content/50 truncate">{user.email}</p>
