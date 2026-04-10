@@ -92,9 +92,12 @@
 		}
 	}
 
-	function fmtDate(d: string | Date | null) {
-		if (!d) return '—';
-		return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'long' }).format(new Date(d));
+	function fmtDate(d: Date) {
+		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
+	}
+
+	function fmtVND(v: number) {
+		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 	}
 
 	const roleLabel: Record<string, string> = { admin: 'Quản Trị Viên', user: 'Thành Viên' };
@@ -122,11 +125,42 @@
 					<p class="text-lg font-bold truncate">{user.name}</p>
 					<p class="text-sm text-base-content/40 font-medium truncate">{user.email}</p>
 					<div class="flex items-center gap-2 mt-1.5">
-						<span class="badge badge-primary badge-xs rounded-md font-bold uppercase">{roleLabel[user.role] || user.role}</span>
+						<span class="badge badge-primary badge-xs rounded-md font-bold uppercase">{roleLabel[(user as any).role] || (user as any).role}</span>
 						<span class="text-[11px] text-base-content/30 font-medium">Tham gia {fmtDate(user.createdAt)}</span>
 					</div>
 				</div>
 			</div>
+			{#if loyaltyInfo}
+				<div class="p-6 border-b border-base-200">
+					<div class="flex flex-col md:flex-row gap-6">
+						<div class="flex-1">
+							<div class="flex items-center gap-2 text-sm font-bold text-base-content/60 mb-2">
+								<Icon icon="solar:star-fall-line-duotone" class="text-base text-warning"/>
+								Hạng Thành Viên
+							</div>
+							<div class="flex items-center gap-3">
+								<div class="badge badge-outline border-warning text-warning capitalize font-black text-lg p-4">{loyaltyInfo.tier}</div>
+								{#if loyaltyInfo.nextTier}
+									<p class="text-xs text-base-content/40 font-medium">
+										Chi tiêu thêm <span class="font-bold text-primary">{fmtVND(loyaltyInfo.pointsNeeded)}</span> để lên hạng <span class="capitalize">{loyaltyInfo.nextTier}</span>
+									</p>
+								{/if}
+							</div>
+						</div>
+						<div class="flex-1">
+							<div class="flex items-center gap-2 text-sm font-bold text-base-content/60 mb-2">
+								<Icon icon="solar:wallet-money-bold-duotone" class="text-base text-success"/>
+								Điểm Kara Tích Lũy
+							</div>
+							<div class="flex items-end gap-2">
+								<span class="text-3xl font-black text-success">{loyaltyInfo.points.toLocaleString('vi-VN')}</span>
+								<span class="text-sm font-bold text-base-content/40 mb-1">Điểm</span>
+							</div>
+							<p class="text-[11px] mt-1 text-base-content/40 font-medium whitespace-nowrap">Tổng đã chi tiêu: {fmtVND(loyaltyInfo.totalSpent)}</p>
+						</div>
+					</div>
+				</div>
+			{/if}
 
 			<div class="divide-y divide-base-200">
 				<div class="p-6">
