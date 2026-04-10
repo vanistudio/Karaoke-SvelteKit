@@ -1,35 +1,5 @@
 <script lang="ts">
-	import { trpc } from '$lib/trpc/client';
 	import Icon from '@iconify/svelte';
-
-	let promotions = $state<any[]>([]);
-	let isReady = $state(false);
-
-	$effect(() => {
-		loadData();
-	});
-
-	async function loadData() {
-		try {
-			const all = await trpc().promotion.validate.query({ code: '__LIST__', orderAmount: 1 }).catch(() => null);
-			const res = await fetch('/api/promotions');
-			if (res.ok) {
-				promotions = await res.json();
-			}
-		} catch {
-		} finally {
-			isReady = true;
-		}
-	}
-
-	function fmtVND(v: number) {
-		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
-	}
-
-	function fmtDate(d: string | Date | null) {
-		if (!d) return '';
-		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(d));
-	}
 </script>
 
 <svelte:head><title>Ưu Đãi | KaraSystem</title></svelte:head>

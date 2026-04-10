@@ -17,8 +17,8 @@ export class BookingController {
 		return await bookingService.checkAvailability(roomId, startTime, endTime);
 	}
 
-	async addBooking(data: Parameters<typeof bookingService.createBooking>[0]) {
-		return await bookingService.createBooking(data);
+	async addBooking(data: Parameters<typeof bookingService.createBooking>[0], usedPoints: number = 0) {
+		return await bookingService.createBooking(data, usedPoints);
 	}
 	
 	async changeStatus(id: number, status: string) {

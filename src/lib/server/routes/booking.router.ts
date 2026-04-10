@@ -33,7 +33,8 @@ export const bookingRouter = router({
 				roomId: z.number().positive(),
 				startTime: z.string().datetime().or(z.date()),
 				endTime: z.string().datetime().or(z.date()),
-				guestCount: z.number().positive().optional()
+				guestCount: z.number().positive().optional(),
+				pointsToUse: z.number().min(0).optional()
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -43,7 +44,7 @@ export const bookingRouter = router({
 				startTime: new Date(input.startTime),
 				endTime: new Date(input.endTime),
 				guestCount: input.guestCount
-			});
+			}, input.pointsToUse || 0);
 		}),
 	cancelMyBooking: protectedProcedure
 		.input(z.number())

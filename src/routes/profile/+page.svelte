@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import Icon from '@iconify/svelte';
 	import { authClient } from '$lib/auth-client';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import Icon from '@iconify/svelte';
+	import { trpc } from '$lib/trpc/client';
 	import { addToast } from '$lib/stores/toast';
-	import { invalidateAll, goto } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 
-	let user = $derived($page.data.user);
-
-	$effect(() => {
-		if (!user) goto('/login', { invalidateAll: true });
-	});
+	const session = authClient.useSession();
+	let user = $derived($session.data?.user);
 
 	let editingName = $state(false);
 	let nameInput = $state('');
@@ -20,6 +19,30 @@
 	let newPassword = $state('');
 	let confirmPassword = $state('');
 	let isSavingPassword = $state(false);
+
+	let loyaltyInfo = $state<any>(null);
+	let pointHistory = $state<any[]>([]);
+
+	$effect(() => {
+		if (browser) {
+			if (!$session.data?.user && !$session.isPending) {
+				goto('/login');
+			}
+			if ($session.data?.user) {
+				nameInput = $session.data.user.name || '';
+				loadLoyalty();
+			}
+		}
+	});
+
+	async function loadLoyalty() {
+		try {
+			loyaltyInfo = await trpc().loyalty.getInfo.query();
+			pointHistory = await trpc().loyalty.getHistory.query();
+		} catch (e) {
+			console.error('Error load loyalty', e);
+		}
+	}
 
 	function startEditName() {
 		nameInput = user?.name || '';
