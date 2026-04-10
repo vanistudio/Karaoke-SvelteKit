@@ -97,7 +97,16 @@
 	</aside>
 
 	<div class="flex-1 flex flex-col min-h-screen min-w-0">
-		<main class="flex-1 px-4 lg:px-8">
+		<header class="lg:hidden h-16 bg-base-100 border-b border-base-200 flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
+			<a href="/admin" class="flex items-center gap-2">
+				<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-xl" />
+				<span class="text-xs font-black uppercase tracking-[0.1em]">KARA<span class="text-primary">ADMIN</span></span>
+			</a>
+			<button onclick={() => sidebarOpen = true} class="btn btn-ghost btn-sm btn-square rounded-lg">
+				<Icon icon="solar:hamburger-menu-line-duotone" class="text-2xl text-base-content/70" />
+			</button>
+		</header>
+		<main class="flex-1 px-4 lg:px-8 py-6">
 			{@render children()}
 		</main>
 	</div>
