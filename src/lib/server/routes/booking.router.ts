@@ -23,9 +23,9 @@ export const bookingRouter = router({
 		.query(async ({ input }) => {
 			const start = new Date(input.startTime);
 			const end = new Date(input.endTime);
-			return {
-				isAvailable: await bookingController.checkAvailability(input.roomId, start, end)
-			};
+			const isAvailable = await bookingController.checkAvailability(input.roomId, start, end);
+			const roomCost = await bookingController.estimateRoomCost(input.roomId, start, end);
+			return { isAvailable, roomCost };
 		}),
 	create: protectedProcedure
 		.input(

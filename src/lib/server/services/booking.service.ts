@@ -21,6 +21,12 @@ export class BookingService {
 		return await bookingRepository.findByUserId(userId);
 	}
 
+	async estimateRoomCost(roomId: number, startTime: Date, endTime: Date) {
+		const room = await roomRepository.findById(roomId);
+		if (!room) throw new Error('Room does not exist');
+		return await pricingService.calculateRoomCost(room.pricePerHour, startTime, endTime);
+	}
+
 	async checkAvailability(roomId: number, startTime: Date, endTime: Date) {
 		const overlaps = await bookingRepository.findOverlappingBookings(roomId, startTime, endTime);
 		return overlaps.length === 0;

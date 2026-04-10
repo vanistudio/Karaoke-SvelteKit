@@ -35,12 +35,15 @@
 		fetchData();
 	});
 
+	let serverRoomCost = $state(0);
+
 	$effect(() => {
 		selectedDate;
 		selectedStartTime;
 		selectedEndTime;
 		availabilityChecked = false;
 		isAvailable = false;
+		serverRoomCost = 0;
 	});
 
 	async function fetchData() {
@@ -85,6 +88,7 @@
 	});
 
 	let roomCost = $derived(() => {
+		if (serverRoomCost > 0) return serverRoomCost;
 		if (!room) return 0;
 		return durationHours() * room.pricePerHour;
 	});
@@ -141,6 +145,7 @@
 				endTime: endTime.toISOString()
 			});
 			isAvailable = result.isAvailable;
+			serverRoomCost = result.roomCost;
 			availabilityChecked = true;
 			if (isAvailable) {
 				addToast('Phòng trống! Bạn có thể xác nhận đặt chỗ.', 'success');

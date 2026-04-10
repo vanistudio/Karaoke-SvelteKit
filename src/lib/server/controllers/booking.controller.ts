@@ -13,6 +13,10 @@ export class BookingController {
 		return await bookingService.getBookingsByUser(userId);
 	}
 
+	async estimateRoomCost(roomId: number, startTime: Date, endTime: Date) {
+		return await bookingService.estimateRoomCost(roomId, startTime, endTime);
+	}
+
 	async checkAvailability(roomId: number, startTime: Date, endTime: Date) {
 		return await bookingService.checkAvailability(roomId, startTime, endTime);
 	}
