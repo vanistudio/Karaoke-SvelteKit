@@ -1,5 +1,8 @@
 import { bookingRepository } from '$lib/server/repositories/booking.repository';
 import { roomRepository } from '$lib/server/repositories/room.repository';
+import { serviceRepository } from '$lib/server/repositories/service.repository';
+import { promotionService } from './promotion.service';
+import { promotionRepository } from '$lib/server/repositories/promotion.repository';
 import { loyaltyService } from './loyalty.service';
 
 export class BookingService {
@@ -22,7 +25,12 @@ export class BookingService {
 		return overlaps.length === 0;
 	}
 
-	async createBooking(data: Parameters<typeof bookingRepository.create>[0], usedPoints: number = 0) {
+	async createBooking(
+		data: Parameters<typeof bookingRepository.create>[0],
+		usedPoints: number = 0,
+		selectedServices: { id: number; qty: number }[] = [],
+		voucherCode?: string
+	) {
 		const room = await roomRepository.findById(data.roomId);
 		if (!room) throw new Error('Room does not exist');
 
@@ -39,19 +47,51 @@ export class BookingService {
 		if (!isAvailable) {
 			throw new Error('Room is not available for the selected time slot');
 		}
+
+		// Calculate room cost
 		const durationMs = data.endTime.getTime() - data.startTime.getTime();
 		const durationHours = durationMs / (1000 * 60 * 60);
-		
-		const baseCost = Math.round(durationHours * room.pricePerHour);
-		const finalCost = Math.max(0, baseCost - usedPoints);
-		
+		const roomCost = Math.round(durationHours * room.pricePerHour);
+
+		// Calculate extra services cost
+		let extraServicesCost = 0;
+		const validServicesToInsert = [];
+		for (const svc of selectedServices) {
+			const s = await serviceRepository.findById(svc.id);
+			if (!s || !s.isAvailable) throw new Error(`Service ${svc.id} is invalid or unavailable`);
+			extraServicesCost += s.price * svc.qty;
+			validServicesToInsert.push({ serviceId: s.id, quantity: svc.qty, priceAtBooking: s.price });
+		}
+
+		const initialTotal = roomCost + extraServicesCost;
+
+		// Calculate voucher
+		let discountAmount = 0;
+		if (voucherCode) {
+			const promoResult = await promotionService.applyVoucher(voucherCode, initialTotal);
+			discountAmount = promoResult.discount;
+		}
+
+		const finalCost = Math.max(0, initialTotal - discountAmount - usedPoints);
+
 		const bookingData = {
 			...data,
-			totalCost: finalCost
+			totalCost: finalCost,
+			voucherCode: voucherCode || null,
+			discountAmount: discountAmount,
+			usedPoints: usedPoints
 		};
 
 		const booking = await bookingRepository.create(bookingData);
-		
+
+		// Insert relational services
+		for (const item of validServicesToInsert) {
+			await bookingRepository.createServiceItem({
+				bookingId: booking.id,
+				...item
+			});
+		}
+
 		if (usedPoints > 0) {
 			await loyaltyService.redeemPoints(data.userId, usedPoints, booking.id);
 		}
@@ -62,17 +102,42 @@ export class BookingService {
 	async updateBookingStatus(id: number, status: string) {
 		const booking = await bookingRepository.findById(id);
 		if (!booking) throw new Error('Booking not found');
-		
+
+		const oldStatus = booking.status;
 		const updated = await bookingRepository.updateStatus(id, status);
-		
-		if (status === 'confirmed' && booking.status !== 'confirmed') {
+
+		// Thưởng điểm khi xác nhận
+		if (status === 'confirmed' && oldStatus !== 'confirmed') {
 			try {
 				await loyaltyService.rewardPoints(booking.userId, booking.id, booking.totalCost ?? 0);
 			} catch (e) {
 				console.error('Lỗi khi tính điểm thưởng:', e);
 			}
 		}
-		
+
+		// Xử lý Hủy Đơn
+		if (status === 'cancelled' && oldStatus !== 'cancelled') {
+			try {
+				// 1. Hoàn lại điểm đã cọc
+				if (booking.usedPoints > 0) {
+					await loyaltyService.refundPoints(booking.userId, booking.usedPoints, booking.id);
+				}
+				// 2. Thu hồi điểm nếu lỡ confirm rồi mới bị cancel
+				if (oldStatus === 'confirmed') {
+					await loyaltyService.revertRewardedPoints(booking.userId, booking.id);
+				}
+				// 3. Trả lại lượt sử dụng cho Voucher
+				if (booking.voucherCode) {
+					const promo = await promotionRepository.findByCode(booking.voucherCode);
+					if (promo) {
+						await promotionRepository.decrementUsage(promo.id);
+					}
+				}
+			} catch (e) {
+				console.error('Lỗi khi rollback Hủy Đơn Booking:', e);
+			}
+		}
+
 		return updated;
 	}
 }

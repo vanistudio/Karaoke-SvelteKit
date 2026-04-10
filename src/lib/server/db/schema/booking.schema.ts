@@ -9,7 +9,10 @@ export const booking = pgTable('booking', {
 	startTime: timestamp('start_time').notNull(),
 	endTime: timestamp('end_time').notNull(),
 	guestCount: integer('guest_count'),
-	status: text('status').notNull().default('pending'),
+	status: text('status').default('pending').notNull(),
 	totalCost: integer('total_cost'),
+	voucherCode: text('voucher_code'),
+	discountAmount: integer('discount_amount').default(0).notNull(),
+	usedPoints: integer('used_points').default(0).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });

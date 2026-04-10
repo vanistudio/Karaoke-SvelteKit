@@ -34,17 +34,24 @@ export const bookingRouter = router({
 				startTime: z.string().datetime().or(z.date()),
 				endTime: z.string().datetime().or(z.date()),
 				guestCount: z.number().positive().optional(),
-				pointsToUse: z.number().min(0).optional()
+				pointsToUse: z.number().min(0).optional(),
+				services: z.array(z.object({ id: z.number(), qty: z.number() })).optional(),
+				voucherCode: z.string().optional()
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
-			return await bookingController.addBooking({
-				userId: ctx.user.id,
-				roomId: input.roomId,
-				startTime: new Date(input.startTime),
-				endTime: new Date(input.endTime),
-				guestCount: input.guestCount
-			}, input.pointsToUse || 0);
+			return await bookingController.addBooking(
+				{
+					userId: ctx.user.id,
+					roomId: input.roomId,
+					startTime: new Date(input.startTime),
+					endTime: new Date(input.endTime),
+					guestCount: input.guestCount
+				},
+				input.pointsToUse || 0,
+				input.services || [],
+				input.voucherCode
+			);
 		}),
 	cancelMyBooking: protectedProcedure
 		.input(z.number())

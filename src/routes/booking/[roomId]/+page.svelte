@@ -165,17 +165,24 @@
 		}
 		isSubmitting = true;
 		try {
+			const servicesToSubmit = Object.entries(selectedServices)
+				.map(([id, qty]) => ({ id: Number(id), qty }))
+				.filter(s => s.qty > 0);
+			const codeToSubmit = voucherResult ? voucherResult.code : undefined;
+
 			await trpc().booking.create.mutate({
 				roomId,
 				startTime: startTime.toISOString(),
 				endTime: endTime.toISOString(),
 				guestCount,
-				pointsToUse: usedPoints()
+				pointsToUse: usedPoints(),
+				services: servicesToSubmit,
+				voucherCode: codeToSubmit
 			});
 			addToast('Đặt phòng thành công! Vui lòng chờ xác nhận từ quản lý.', 'success');
 			await goto('/my-bookings', { invalidateAll: true });
-		} catch (error) {
-			addToast('Đặt phòng thất bại. Phòng có thể đã hết chỗ.', 'error');
+		} catch (error: any) {
+			addToast(error?.message || 'Đặt phòng thất bại. Vui lòng kiểm tra lại.', 'error');
 		} finally {
 			isSubmitting = false;
 		}

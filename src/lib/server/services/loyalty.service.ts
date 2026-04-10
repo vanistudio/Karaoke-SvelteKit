@@ -4,9 +4,6 @@ import { eq, sql } from 'drizzle-orm';
 import { calculateNewTier, calculateReward, type Tier } from '../config/loyalty';
 
 export class LoyaltyService {
-	/**
-	 * Nạp điểm cho user, tăng tổng chi tiêu và tự động xét nâng hạng.
-	 */
 	async rewardPoints(userId: string, bookingId: number, totalCost: number) {
 		const u = await db.select({ id: user.id, tier: user.tier, totalSpent: user.totalSpent }).from(user).where(eq(user.id, userId)).then(res => res[0]);
 		if (!u) throw new Error('User not found');
@@ -17,7 +14,6 @@ export class LoyaltyService {
 		const newTier = calculateNewTier(newTotalSpent);
 
 		await db.transaction(async (tx) => {
-			// Cập nhật user
 			await tx.update(user)
 				.set({
 					points: sql`${user.points} + ${earnedPoints}`,
@@ -25,8 +21,6 @@ export class LoyaltyService {
 					tier: newTier
 				})
 				.where(eq(user.id, userId));
-
-			// Ghi log giao dịch
 			if (earnedPoints > 0) {
 				await tx.insert(pointHistory).values({
 					userId,
@@ -40,10 +34,6 @@ export class LoyaltyService {
 
 		return { earnedPoints, newTier };
 	}
-
-	/**
-	 * Khấu trừ điểm khi khách dùng điểm thanh toán.
-	 */
 	async redeemPoints(userId: string, amount: number, bookingId?: number) {
 		if (amount <= 0) return true;
 
@@ -67,10 +57,48 @@ export class LoyaltyService {
 
 		return true;
 	}
+	async refundPoints(userId: string, amount: number, bookingId: number) {
+		if (amount <= 0) return true;
+		await db.transaction(async (tx) => {
+			await tx.update(user)
+				.set({ points: sql`${user.points} + ${amount}` })
+				.where(eq(user.id, userId));
 
-	/**
-	 * Lấy thông tin xếp hạng và điểm hiện tại của user.
-	 */
+			await tx.insert(pointHistory).values({
+				userId,
+				bookingId,
+				amount: amount,
+				type: 'admin_adjustment',
+				description: `Hoàn điểm cọc do hủy đơn hàng #${bookingId}`
+			});
+		});
+		return true;
+	}
+	async revertRewardedPoints(userId: string, bookingId: number) {
+		const historyRecord = await db.select().from(pointHistory).where(
+			sql`${pointHistory.bookingId} = ${bookingId} AND ${pointHistory.type} = 'reward'`
+		).then(res => res[0]);
+
+		if (!historyRecord) return true;
+		
+		const amountToRevert = historyRecord.amount;
+		
+		await db.transaction(async (tx) => {
+			await tx.update(user)
+				.set({ points: sql`${user.points} - ${amountToRevert}` })
+				.where(eq(user.id, userId));
+
+			await tx.insert(pointHistory).values({
+				userId,
+				bookingId,
+				amount: -amountToRevert,
+				type: 'admin_adjustment',
+				description: `Thu hồi điểm thưởng của đơn hàng #${bookingId}`
+			});
+		});
+		
+		return true;
+	}
 	async getLoyaltyInfo(userId: string) {
 		const u = await db.select({ points: user.points, tier: user.tier, totalSpent: user.totalSpent }).from(user).where(eq(user.id, userId)).then(res => res[0]);
 		if (!u) throw new Error('User not found');

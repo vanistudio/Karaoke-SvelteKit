@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { booking } from '$lib/server/db/schema';
+import { booking, bookingServiceItem } from '$lib/server/db/schema';
 import { eq, and, not, lt, gt, or } from 'drizzle-orm';
 
 export class BookingRepository {
@@ -49,6 +49,11 @@ export class BookingRepository {
 
 	async updateStatus(id: number, status: string) {
 		const result = await db.update(booking).set({ status }).where(eq(booking.id, id)).returning();
+		return result[0];
+	}
+
+	async createServiceItem(data: typeof bookingServiceItem.$inferInsert) {
+		const result = await db.insert(bookingServiceItem).values(data).returning();
 		return result[0];
 	}
 }

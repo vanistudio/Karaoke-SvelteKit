@@ -8,4 +8,5 @@ export * from './service.schema';
 export * from './promotion.schema';
 export * from './task.schema';
 export * from './point_history.schema';
+export * from './booking_service.schema';
 export * from './relations';

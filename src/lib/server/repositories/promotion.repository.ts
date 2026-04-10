@@ -46,6 +46,16 @@ export class PromotionRepository {
 			.where(eq(promotion.id, id))
 			.returning();
 	}
+
+	async decrementUsage(id: number) {
+		const promo = await this.findById(id);
+		if (!promo || promo.currentUsage <= 0) return null;
+		return await db
+			.update(promotion)
+			.set({ currentUsage: promo.currentUsage - 1 })
+			.where(eq(promotion.id, id))
+			.returning();
+	}
 }
 
 export const promotionRepository = new PromotionRepository();
