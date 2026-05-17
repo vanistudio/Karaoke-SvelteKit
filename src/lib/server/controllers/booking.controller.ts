@@ -21,6 +21,10 @@ export class BookingController {
 		return await bookingService.checkAvailability(roomId, startTime, endTime);
 	}
 
+	async createBooking(data: any) {
+		return await bookingService.createBooking(data);
+	}
+
 	async addBooking(
 		data: Parameters<typeof bookingService.createBooking>[0],
 		usedPoints: number = 0,
@@ -33,6 +37,11 @@ export class BookingController {
 	async changeStatus(id: number, status: string) {
 		return await bookingService.updateBookingStatus(id, status);
 	}
+
+	async findAvailableRooms(startTime: Date, endTime: Date, minCapacity?: number) {
+		return await bookingService.findAvailableRooms(startTime, endTime, minCapacity);
+	}
 }
 
 export const bookingController = new BookingController();
+

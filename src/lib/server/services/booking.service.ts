@@ -165,5 +165,18 @@ export class BookingService {
 
 		return updated;
 	}
+
+	async findAvailableRooms(startTime: Date, endTime: Date, minCapacity?: number) {
+		const allRooms = await roomRepository.findAll();
+		const availableRooms = [];
+
+		for (const r of allRooms) {
+			if (minCapacity && r.capacity < minCapacity) continue;
+			const isAvailable = await this.checkAvailability(r.id, startTime, endTime);
+			if (isAvailable) availableRooms.push(r);
+		}
+
+		return availableRooms;
+	}
 }
 export const bookingService = new BookingService();

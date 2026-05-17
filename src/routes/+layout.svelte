@@ -34,7 +34,8 @@
 		{ name: 'Trang Chủ', href: '/', icon: 'solar:home-2-line-duotone', iconActive: 'solar:home-2-bold-duotone' },
 		{ name: 'Phòng Hát', href: '/rooms', icon: 'solar:soundwave-circle-line-duotone', iconActive: 'solar:soundwave-circle-bold-duotone' },
 		{ name: 'Dịch Vụ', href: '/services', icon: 'solar:cup-hot-line-duotone', iconActive: 'solar:cup-hot-bold-duotone' },
-		{ name: 'Ưu Đãi', href: '/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone' }
+		{ name: 'Ưu Đãi', href: '/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone' },
+		{ name: 'Liên Hệ', href: '/contact', icon: 'solar:chat-round-dots-line-duotone', iconActive: 'solar:chat-round-dots-bold-duotone' }
 	];
 
 	function isActive(href: string) {
