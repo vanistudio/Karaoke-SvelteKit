@@ -1,4 +1,4 @@
-import { router, publicProcedure, adminProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, adminProcedure, managerProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { serviceController } from '$lib/server/controllers/service.controller';
 
@@ -12,7 +12,7 @@ export const serviceRouter = router({
 	count: adminProcedure.query(async () => {
 		return await serviceController.countServices();
 	}),
-	create: adminProcedure
+	create: managerProcedure
 		.input(
 			z.object({
 				name: z.string().min(1),
@@ -26,7 +26,7 @@ export const serviceRouter = router({
 		.mutation(async ({ input }) => {
 			return await serviceController.addService(input);
 		}),
-	update: adminProcedure
+	update: managerProcedure
 		.input(
 			z.object({
 				id: z.number(),

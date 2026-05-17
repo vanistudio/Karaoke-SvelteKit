@@ -1,4 +1,4 @@
-import { router, publicProcedure, protectedProcedure, adminProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, protectedProcedure, managerProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { reviewService } from '$lib/server/services/review.service';
 
@@ -34,7 +34,7 @@ export const reviewRouter = router({
 	allRoomStats: publicProcedure.query(async () => {
 		return await reviewService.getAllRoomStats();
 	}),
-	list: adminProcedure
+	list: managerProcedure
 		.input(
 			z.object({
 				page: z.number().min(1).optional().default(1),
@@ -44,7 +44,7 @@ export const reviewRouter = router({
 		.query(async ({ input }) => {
 			return await reviewService.getAll(input);
 		}),
-	overallStats: adminProcedure.query(async () => {
+	overallStats: managerProcedure.query(async () => {
 		return await reviewService.getOverallStats();
 	})
 });
