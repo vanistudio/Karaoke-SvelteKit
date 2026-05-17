@@ -11,4 +11,5 @@ export * from './point_history.schema';
 export * from './booking_service.schema';
 export * from './pricing_rule.schema';
 export * from './setting.schema';
+export * from './activity_log.schema';
 export * from './relations';

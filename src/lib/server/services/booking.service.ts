@@ -5,6 +5,7 @@ import { promotionService } from './promotion.service';
 import { promotionRepository } from '$lib/server/repositories/promotion.repository';
 import { loyaltyService } from './loyalty.service';
 import { pricingService } from './pricing.service';
+import { activityService } from './activity.service';
 
 export class BookingService {
 	async getAllBookings() {
@@ -93,6 +94,8 @@ export class BookingService {
 			await loyaltyService.redeemPoints(data.userId, usedPoints, booking.id);
 		}
 
+		await activityService.log(data.userId, 'create', 'booking', booking.id, `Đặt phòng #${booking.id}, tổng ${finalCost.toLocaleString('vi-VN')}₫`);
+
 		return booking;
 	}
 
@@ -129,6 +132,8 @@ export class BookingService {
 				console.error('Lỗi khi rollback Hủy Đơn Booking:', e);
 			}
 		}
+
+		await activityService.log(booking.userId, 'status_change', 'booking', booking.id, `Đơn #${id}: ${oldStatus} → ${status}`);
 
 		return updated;
 	}
