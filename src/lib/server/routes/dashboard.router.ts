@@ -13,5 +13,13 @@ export const dashboardRouter = router({
 		}),
 	enrichedBookings: adminProcedure.query(async () => {
 		return await dashboardService.getEnrichedBookings();
+	}),
+	revenueChart: adminProcedure
+		.input(z.number().min(1).max(90).optional())
+		.query(async ({ input }) => {
+			return await dashboardService.getRevenueChart(input || 7);
+		}),
+	occupancy: adminProcedure.query(async () => {
+		return await dashboardService.getOccupancyRate();
 	})
 });

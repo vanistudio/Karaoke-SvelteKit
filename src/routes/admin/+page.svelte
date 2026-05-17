@@ -4,7 +4,10 @@
 
 	let stats = $state<any>(null);
 	let recentBookings = $state<any[]>([]);
+	let chartData = $state<any[]>([]);
+	let occupancy = $state<any>(null);
 	let isReady = $state(false);
+	let chartDays = $state(7);
 
 	$effect(() => {
 		loadData();
@@ -12,17 +15,26 @@
 
 	async function loadData() {
 		try {
-			const [s, rb] = await Promise.all([
+			const [s, rb, cd, oc] = await Promise.all([
 				trpc().dashboard.stats.query(),
-				trpc().dashboard.recentBookings.query(5)
+				trpc().dashboard.recentBookings.query(5),
+				trpc().dashboard.revenueChart.query(chartDays),
+				trpc().dashboard.occupancy.query()
 			]);
 			stats = s;
 			recentBookings = rb;
+			chartData = cd;
+			occupancy = oc;
 		} catch (e) {
 			console.error(e);
 		} finally {
 			isReady = true;
 		}
+	}
+
+	async function changeChartDays(days: number) {
+		chartDays = days;
+		chartData = await trpc().dashboard.revenueChart.query(days);
 	}
 
 	function fmtVND(v: number) {
@@ -33,6 +45,13 @@
 		if (!d) return '—';
 		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
 	}
+
+	function fmtShortDate(d: string) {
+		const date = new Date(d);
+		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(date);
+	}
+
+	let maxRevenue = $derived(Math.max(...chartData.map(d => d.revenue), 1));
 
 	const statusMap: Record<string, { text: string; cls: string }> = {
 		pending: { text: 'Chờ Duyệt', cls: 'badge-warning' },
@@ -109,6 +128,46 @@
 			</div>
 		</div>
 
+		<!-- Revenue Chart -->
+		<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
+			<div class="flex items-center justify-between px-5 py-4 border-b border-base-200">
+				<div class="flex items-center gap-2 text-sm font-bold text-base-content/60">
+					<Icon icon="solar:chart-2-line-duotone" class="text-base"/>
+					Biểu Đồ Doanh Thu
+				</div>
+				<div class="flex gap-1">
+					{#each [7, 14, 30] as days}
+						<button
+							onclick={() => changeChartDays(days)}
+							class="btn btn-xs rounded-lg font-bold {chartDays === days ? 'btn-primary' : 'btn-ghost'}"
+						>
+							{days} ngày
+						</button>
+					{/each}
+				</div>
+			</div>
+			<div class="p-5">
+				{#if chartData.length > 0}
+					<div class="flex items-end gap-1 h-40">
+						{#each chartData as day}
+							<div class="flex-1 flex flex-col items-center gap-1 group relative">
+								<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-base-300 text-base-content text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+									{fmtVND(day.revenue)} • {day.bookings} đơn
+								</div>
+								<div
+									class="w-full rounded-t-md bg-primary/80 hover:bg-primary transition-colors min-h-[4px]"
+									style="height: {Math.max((day.revenue / maxRevenue) * 100, 3)}%"
+								></div>
+								<span class="text-[9px] font-bold text-base-content/30 mt-1">{fmtShortDate(day.date)}</span>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="text-center py-8 text-base-content/30 font-medium text-sm">Chưa có dữ liệu doanh thu.</div>
+				{/if}
+			</div>
+		</div>
+
 		<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
 			<div class="xl:col-span-2 bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
 				<div class="flex items-center justify-between px-5 py-4 border-b border-base-200">
@@ -161,6 +220,19 @@
 					</div>
 				</div>
 				<div class="p-4 flex flex-col gap-3 flex-1">
+					{#if occupancy}
+						<div class="bg-primary/5 border border-primary/15 rounded-lg p-4">
+							<div class="flex items-center justify-between mb-2">
+								<span class="text-xs font-bold text-base-content/50 uppercase tracking-widest">Tỷ Lệ Lấp Đầy Hôm Nay</span>
+								<span class="text-lg font-black text-primary">{occupancy.rate}%</span>
+							</div>
+							<div class="w-full bg-base-200 rounded-full h-2">
+								<div class="bg-primary rounded-full h-2 transition-all" style="width: {occupancy.rate}%"></div>
+							</div>
+							<p class="text-[11px] text-base-content/40 font-medium mt-2">{occupancy.occupied}/{occupancy.total} phòng có booking</p>
+						</div>
+					{/if}
+
 					{#if stats.pendingBookings > 0}
 						<div class="bg-amber-500/5 border border-amber-500/15 rounded-lg p-4">
 							<div class="flex items-center gap-2 mb-1">
@@ -179,6 +251,7 @@
 							<p class="text-xs text-base-content/40 font-medium">Không có đơn nào đang chờ duyệt.</p>
 						</div>
 					{/if}
+
 					<div class="bg-base-200/40 rounded-lg p-4 flex-1">
 						<p class="text-xs font-bold text-base-content/50 uppercase tracking-widest mb-3">Tổng Quan Cơ Sở</p>
 						<div class="flex flex-col gap-2.5">

@@ -1,10 +1,25 @@
 import { router, publicProcedure, protectedProcedure, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { promotionController } from '$lib/server/controllers/promotion.controller';
+import { db } from '$lib/server/db';
+import { promotion } from '$lib/server/db/schema';
+import { eq, and, gt, sql } from 'drizzle-orm';
 
 export const promotionRouter = router({
 	list: adminProcedure.query(async () => {
 		return await promotionController.listPromotions();
+	}),
+	listPublic: publicProcedure.query(async () => {
+		const now = new Date();
+		const results = await db.select().from(promotion).where(
+			and(
+				eq(promotion.isActive, true),
+				eq(promotion.isPublic, true),
+				sql`(${promotion.expiresAt} IS NULL OR ${promotion.expiresAt} > ${now})`,
+				sql`${promotion.currentUsage} < ${promotion.maxUsage}`
+			)
+		);
+		return results;
 	}),
 	getById: adminProcedure.input(z.number()).query(async ({ input }) => {
 		return await promotionController.getPromotion(input);
@@ -21,7 +36,8 @@ export const promotionRouter = router({
 				minOrderAmount: z.number().min(0).optional(),
 				maxUsage: z.number().positive().optional(),
 				expiresAt: z.string().datetime().or(z.date()).nullable().optional(),
-				isActive: z.boolean().optional()
+				isActive: z.boolean().optional(),
+				isPublic: z.boolean().optional()
 			})
 		)
 		.mutation(async ({ input }) => {
@@ -40,7 +56,8 @@ export const promotionRouter = router({
 				minOrderAmount: z.number().min(0).optional(),
 				maxUsage: z.number().positive().optional(),
 				expiresAt: z.string().datetime().or(z.date()).nullable().optional(),
-				isActive: z.boolean().optional()
+				isActive: z.boolean().optional(),
+				isPublic: z.boolean().optional()
 			})
 		)
 		.mutation(async ({ input }) => {
@@ -66,3 +83,4 @@ export const promotionRouter = router({
 			return await promotionController.applyVoucher(input.code, input.orderAmount);
 		})
 });
+

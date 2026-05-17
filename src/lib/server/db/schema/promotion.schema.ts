@@ -10,5 +10,7 @@ export const promotion = pgTable('promotion', {
 	currentUsage: integer('current_usage').default(0).notNull(),
 	expiresAt: timestamp('expires_at'),
 	isActive: boolean('is_active').default(true).notNull(),
+	isPublic: boolean('is_public').default(false).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
+

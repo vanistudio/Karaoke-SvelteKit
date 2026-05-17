@@ -6,6 +6,8 @@ import { dashboardRouter } from './dashboard.router';
 import { promotionRouter } from './promotion.router';
 import { loyaltyRouter } from './loyalty.router';
 import { settingRouter } from './setting.router';
+import { userRouter } from './user.router';
+import { pricingRouter } from './pricing.router';
 
 export const appRouter = router({
 	healthcheck: publicProcedure.query(() => 'TRPC System is ready'),
@@ -15,7 +17,9 @@ export const appRouter = router({
 	dashboard: dashboardRouter,
 	promotion: promotionRouter,
 	loyalty: loyaltyRouter,
-	setting: settingRouter
+	setting: settingRouter,
+	user: userRouter,
+	pricing: pricingRouter
 });
 
 export type AppRouter = typeof appRouter;

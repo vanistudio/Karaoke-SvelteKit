@@ -84,6 +84,79 @@ export class DashboardService {
 
 		return results;
 	}
+
+	async getRevenueChart(days: number = 7) {
+		const results: { date: string; revenue: number; bookings: number }[] = [];
+		const today = new Date();
+		today.setHours(23, 59, 59, 999);
+
+		for (let i = days - 1; i >= 0; i--) {
+			const dayStart = new Date(today);
+			dayStart.setDate(today.getDate() - i);
+			dayStart.setHours(0, 0, 0, 0);
+
+			const dayEnd = new Date(dayStart);
+			dayEnd.setHours(23, 59, 59, 999);
+
+			const revenue = await db
+				.select({ total: sql<number>`COALESCE(SUM(${booking.totalCost}), 0)` })
+				.from(booking)
+				.where(
+					and(
+						eq(booking.status, 'confirmed'),
+						gte(booking.createdAt, dayStart),
+						lte(booking.createdAt, dayEnd)
+					)
+				);
+
+			const bookingCount = await db
+				.select({ count: count() })
+				.from(booking)
+				.where(
+					and(
+						gte(booking.createdAt, dayStart),
+						lte(booking.createdAt, dayEnd)
+					)
+				);
+
+			results.push({
+				date: dayStart.toISOString().slice(0, 10),
+				revenue: Number(revenue[0]?.total || 0),
+				bookings: bookingCount[0].count
+			});
+		}
+
+		return results;
+	}
+
+	async getOccupancyRate() {
+		const totalRooms = await db.select({ count: count() }).from(room);
+		const todayStart = new Date();
+		todayStart.setHours(0, 0, 0, 0);
+		const todayEnd = new Date();
+		todayEnd.setHours(23, 59, 59, 999);
+
+		const bookedRooms = await db
+			.select({ roomId: booking.roomId })
+			.from(booking)
+			.where(
+				and(
+					gte(booking.startTime, todayStart),
+					lte(booking.startTime, todayEnd),
+					sql`${booking.status} != 'cancelled'`
+				)
+			)
+			.groupBy(booking.roomId);
+
+		const total = totalRooms[0].count || 1;
+		const occupied = bookedRooms.length;
+
+		return {
+			total,
+			occupied,
+			rate: Math.round((occupied / total) * 100)
+		};
+	}
 }
 
 export const dashboardService = new DashboardService();
