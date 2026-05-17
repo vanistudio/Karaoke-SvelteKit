@@ -18,7 +18,8 @@ export const roomRouter = router({
 				name: z.string().min(1),
 				capacity: z.number().positive(),
 				type: z.enum(['standard', 'vip', 'super_vip']),
-				pricePerHour: z.number().positive()
+				pricePerHour: z.number().positive(),
+				branchId: z.number().nullable().optional()
 			})
 		)
 		.mutation(async ({ input }) => {
@@ -31,7 +32,8 @@ export const roomRouter = router({
 				name: z.string().min(1).optional(),
 				capacity: z.number().positive().optional(),
 				type: z.enum(['standard', 'vip', 'super_vip']).optional(),
-				pricePerHour: z.number().positive().optional()
+				pricePerHour: z.number().positive().optional(),
+				branchId: z.number().nullable().optional()
 			})
 		)
 		.mutation(async ({ input }) => {

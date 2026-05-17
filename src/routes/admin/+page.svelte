@@ -6,6 +6,7 @@
 	let recentBookings = $state<any[]>([]);
 	let chartData = $state<any[]>([]);
 	let occupancy = $state<any>(null);
+	let heatmapData = $state<number[][]>([]);
 	let isReady = $state(false);
 	let chartDays = $state(7);
 
@@ -15,16 +16,18 @@
 
 	async function loadData() {
 		try {
-			const [s, rb, cd, oc] = await Promise.all([
+			const [s, rb, cd, oc, hm] = await Promise.all([
 				trpc().dashboard.stats.query(),
 				trpc().dashboard.recentBookings.query(5),
 				trpc().dashboard.revenueChart.query(chartDays),
-				trpc().dashboard.occupancy.query()
+				trpc().dashboard.occupancy.query(),
+				trpc().dashboard.heatmap.query()
 			]);
 			stats = s;
 			recentBookings = rb;
 			chartData = cd;
 			occupancy = oc;
+			heatmapData = hm;
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -276,5 +279,57 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Heatmap -->
+		{#if heatmapData.length > 0}
+			{@const maxVal = Math.max(...heatmapData.flat(), 1)}
+			{@const dayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']}
+			{@const hours = Array.from({ length: 18 }, (_, i) => i + 6)}
+			<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
+				<div class="px-5 py-4 border-b border-base-200 flex items-center gap-2 text-sm font-bold text-base-content/60">
+					<Icon icon="solar:fire-bold-duotone" class="text-base"/>
+					Giờ Cao Điểm (30 Ngày Gần Nhất)
+				</div>
+				<div class="p-5 overflow-x-auto">
+					<div class="flex gap-0.5 min-w-[600px]">
+						<div class="flex flex-col gap-0.5 pr-2">
+							<div class="h-5"></div>
+							{#each dayLabels as day}
+								<div class="h-6 flex items-center text-[10px] font-bold text-base-content/40">{day}</div>
+							{/each}
+						</div>
+						<div class="flex-1 flex flex-col gap-0.5">
+							<div class="flex gap-0.5">
+								{#each hours as h}
+									<div class="flex-1 text-center text-[9px] font-bold text-base-content/30 h-5 flex items-center justify-center">{h}</div>
+								{/each}
+							</div>
+							{#each heatmapData as row}
+								<div class="flex gap-0.5">
+									{#each hours as _, hi}
+										{@const val = row[hi + 6] || 0}
+										{@const intensity = val / maxVal}
+										<div
+											class="flex-1 h-6 rounded-sm transition-colors"
+											style="background-color: oklch(0.65 0.2 270 / {Math.max(intensity * 0.9, 0.05)})"
+											title="{val} booking(s)"
+										></div>
+									{/each}
+								</div>
+							{/each}
+						</div>
+					</div>
+					<div class="flex items-center gap-2 mt-3 justify-end">
+						<span class="text-[10px] text-base-content/30 font-medium">Ít</span>
+						<div class="flex gap-0.5">
+							{#each [0.1, 0.3, 0.5, 0.7, 0.9] as op}
+								<div class="w-4 h-4 rounded-sm" style="background-color: oklch(0.65 0.2 270 / {op})"></div>
+							{/each}
+						</div>
+						<span class="text-[10px] text-base-content/30 font-medium">Nhiều</span>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 {/if}

@@ -1,4 +1,4 @@
-import { router, publicProcedure, protectedProcedure, adminProcedure, rateLimitedProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, protectedProcedure, adminProcedure, rateLimitedProcedure, staffProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { bookingController } from '$lib/server/controllers/booking.controller';
 
@@ -69,10 +69,19 @@ export const bookingRouter = router({
 		.input(
 			z.object({
 				id: z.number(),
-				status: z.enum(['pending', 'confirmed', 'cancelled'])
+				status: z.enum(['pending', 'confirmed', 'cancelled', 'checked_in'])
 			})
 		)
 		.mutation(async ({ input }) => {
 			return await bookingController.changeStatus(input.id, input.status);
+		}),
+	checkin: staffProcedure
+		.input(z.number())
+		.mutation(async ({ input }) => {
+			const bk = await bookingController.getBooking(input);
+			if (bk.status !== 'confirmed') {
+				throw new Error('Chỉ có thể check-in đơn đã xác nhận.');
+			}
+			return await bookingController.changeStatus(input, 'checked_in');
 		})
 });

@@ -24,5 +24,11 @@ export const dashboardRouter = router({
 	}),
 	heatmap: adminProcedure.query(async () => {
 		return await dashboardService.getHeatmapData();
+	}),
+	topRooms: adminProcedure.query(async () => {
+		return await dashboardService.getTopRooms(5);
+	}),
+	topCustomers: adminProcedure.query(async () => {
+		return await dashboardService.getTopCustomers(5);
 	})
 });

@@ -192,6 +192,45 @@ export class DashboardService {
 
 		return grid;
 	}
+
+	async getTopRooms(limit: number = 5) {
+		const results = await db
+			.select({
+				roomId: booking.roomId,
+				roomName: room.name,
+				roomType: room.type,
+				bookingCount: count(),
+				totalRevenue: sql<number>`COALESCE(SUM(${booking.totalCost}), 0)`
+			})
+			.from(booking)
+			.innerJoin(room, eq(booking.roomId, room.id))
+			.where(sql`${booking.status} != 'cancelled'`)
+			.groupBy(booking.roomId, room.name, room.type)
+			.orderBy(sql`count(*) DESC`)
+			.limit(limit);
+
+		return results;
+	}
+
+	async getTopCustomers(limit: number = 5) {
+		const results = await db
+			.select({
+				userId: booking.userId,
+				userName: user.name,
+				userEmail: user.email,
+				userTier: user.tier,
+				bookingCount: count(),
+				totalSpent: sql<number>`COALESCE(SUM(${booking.totalCost}), 0)`
+			})
+			.from(booking)
+			.innerJoin(user, eq(booking.userId, user.id))
+			.where(eq(booking.status, 'confirmed'))
+			.groupBy(booking.userId, user.name, user.email, user.tier)
+			.orderBy(sql`COALESCE(SUM(${booking.totalCost}), 0) DESC`)
+			.limit(limit);
+
+		return results;
+	}
 }
 
 export const dashboardService = new DashboardService();

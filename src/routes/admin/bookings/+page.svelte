@@ -50,8 +50,19 @@
 	const statusMap: Record<string, { text: string; cls: string }> = {
 		pending: { text: 'Chờ Duyệt', cls: 'badge-warning' },
 		confirmed: { text: 'Xác Nhận', cls: 'badge-success' },
+		checked_in: { text: 'Đã Đến', cls: 'badge-info' },
 		cancelled: { text: 'Đã Hủy', cls: 'badge-error text-white' }
 	};
+
+	async function handleCheckin(id: number) {
+		try {
+			await trpc().booking.checkin.mutate(id);
+			addToast(`Đơn #${id} đã check-in!`, 'success');
+			await loadData();
+		} catch (e: any) {
+			addToast(e?.message || 'Check-in thất bại.', 'error');
+		}
+	}
 </script>
 
 <svelte:head><title>Lịch Đặt Phòng | KaraSystem Admin</title></svelte:head>
@@ -62,10 +73,16 @@
 			<h2 class="text-xl font-bold">Lịch Đặt Phòng</h2>
 			<p class="text-sm text-base-content/40 font-medium mt-0.5">Quản lý tất cả đơn đặt phòng karaoke</p>
 		</div>
-		<button onclick={loadData} class="btn btn-ghost btn-sm rounded-lg text-base-content/40 hover:text-primary">
-			<Icon icon="solar:refresh-line-duotone" class="text-lg"/>
-			Làm Mới
-		</button>
+		<div class="flex items-center gap-2">
+			<a href="/api/export/bookings" target="_blank" class="btn btn-ghost btn-sm rounded-lg text-base-content/40 hover:text-primary">
+				<Icon icon="solar:file-download-line-duotone" class="text-lg"/>
+				Xuất CSV
+			</a>
+			<button onclick={loadData} class="btn btn-ghost btn-sm rounded-lg text-base-content/40 hover:text-primary">
+				<Icon icon="solar:refresh-line-duotone" class="text-lg"/>
+				Làm Mới
+			</button>
+		</div>
 	</div>
 
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
@@ -132,19 +149,26 @@
 								<td class="text-center"><span class="badge {st.cls} badge-xs rounded-md font-bold">{st.text}</span></td>
 								<td class="text-right">
 									{#if bk.status === 'pending'}
-										<div class="join">
-											<button onclick={() => changeStatus(bk.id, 'confirmed')} class="btn btn-xs btn-success text-white join-item" title="Phê Duyệt">
-												<Icon icon="solar:check-circle-bold" class="text-sm"/>
-											</button>
-											<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item" title="Từ Chối">
-												<Icon icon="solar:close-circle-bold" class="text-sm"/>
-											</button>
-										</div>
-									{:else if bk.status === 'confirmed'}
-										<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-outline btn-error rounded-md font-bold">Hủy</button>
-									{:else}
-										<span class="text-[10px] font-bold text-base-content/20 uppercase tracking-widest">—</span>
-									{/if}
+									<div class="join">
+										<button onclick={() => changeStatus(bk.id, 'confirmed')} class="btn btn-xs btn-success text-white join-item" title="Phê Duyệt">
+											<Icon icon="solar:check-circle-bold" class="text-sm"/>
+										</button>
+										<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item" title="Từ Chối">
+											<Icon icon="solar:close-circle-bold" class="text-sm"/>
+										</button>
+									</div>
+								{:else if bk.status === 'confirmed'}
+									<div class="join">
+										<button onclick={() => handleCheckin(bk.id)} class="btn btn-xs btn-info text-white join-item" title="Check-in">
+											<Icon icon="solar:login-3-bold" class="text-sm"/>
+										</button>
+										<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item" title="Hủy">
+											<Icon icon="solar:close-circle-bold" class="text-sm"/>
+										</button>
+									</div>
+								{:else}
+									<span class="text-[10px] font-bold text-base-content/20 uppercase tracking-widest">—</span>
+								{/if}
 								</td>
 							</tr>
 						{/each}
