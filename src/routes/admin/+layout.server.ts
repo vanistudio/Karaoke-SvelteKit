@@ -6,7 +6,8 @@ export const load: LayoutServerLoad = async ({ parent }) => {
 	if (!data.session) {
 		throw redirect(302, '/login');
 	}
-	if (data.user?.role !== 'admin') {
+	const allowedRoles = ['admin', 'manager', 'staff'];
+	if (!allowedRoles.includes(data.user?.role ?? '')) {
 		throw redirect(302, '/');
 	}
 	return data;
