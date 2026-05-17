@@ -1,17 +1,42 @@
 import { db } from '$lib/server/db';
 import { user, pointHistory } from '$lib/server/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { calculateNewTier, calculateReward, type Tier } from '../config/loyalty';
+import { calculateNewTier as staticCalculateNewTier, calculateReward as staticCalculateReward, type Tier, TIER_THRESHOLDS as STATIC_THRESHOLDS, REWARD_RATES as STATIC_RATES } from '../config/loyalty';
+import { settingService } from './setting.service';
 
 export class LoyaltyService {
+	private async getConfig() {
+		try {
+			return await settingService.getLoyaltyConfig();
+		} catch {
+			return {
+				thresholds: STATIC_THRESHOLDS,
+				rates: STATIC_RATES
+			};
+		}
+	}
+
+	private calculateTier(totalSpent: number, thresholds: Record<string, number>): Tier {
+		if (totalSpent >= thresholds.diamond) return 'diamond';
+		if (totalSpent >= thresholds.gold) return 'gold';
+		if (totalSpent >= thresholds.silver) return 'silver';
+		return 'bronze';
+	}
+
+	private calculateRewardPoints(tier: Tier, amount: number, rates: Record<string, number>): number {
+		const rate = rates[tier] || rates.bronze || 0.02;
+		return Math.floor(amount * rate);
+	}
+
 	async rewardPoints(userId: string, bookingId: number, totalCost: number) {
 		const u = await db.select({ id: user.id, tier: user.tier, totalSpent: user.totalSpent }).from(user).where(eq(user.id, userId)).then(res => res[0]);
 		if (!u) throw new Error('User not found');
 
+		const config = await this.getConfig();
 		const currentTier = u.tier as Tier;
-		const earnedPoints = calculateReward(currentTier, totalCost);
+		const earnedPoints = this.calculateRewardPoints(currentTier, totalCost, config.rates);
 		const newTotalSpent = u.totalSpent + totalCost;
-		const newTier = calculateNewTier(newTotalSpent);
+		const newTier = this.calculateTier(newTotalSpent, config.thresholds);
 
 		await db.transaction(async (tx) => {
 			await tx.update(user)
@@ -102,12 +127,15 @@ export class LoyaltyService {
 	async getLoyaltyInfo(userId: string) {
 		const u = await db.select({ points: user.points, tier: user.tier, totalSpent: user.totalSpent }).from(user).where(eq(user.id, userId)).then(res => res[0]);
 		if (!u) throw new Error('User not found');
-		
+
+		const config = await this.getConfig();
+		const thresholds = config.thresholds;
+
 		const nextTierMap: Record<string, { next: Tier | null, threshold: number }> = {
-			bronze: { next: 'silver', threshold: 5_000_000 },
-			silver: { next: 'gold', threshold: 20_000_000 },
-			gold: { next: 'diamond', threshold: 50_000_000 },
-			diamond: { next: null, threshold: 50_000_000 }
+			bronze: { next: 'silver', threshold: thresholds.silver },
+			silver: { next: 'gold', threshold: thresholds.gold },
+			gold: { next: 'diamond', threshold: thresholds.diamond },
+			diamond: { next: null, threshold: thresholds.diamond }
 		};
 
 		const mapping = nextTierMap[u.tier] || nextTierMap.bronze;
