@@ -4,11 +4,12 @@
 	import { addToast } from '$lib/stores/toast';
 
 	let rooms = $state<any[]>([]);
+	let branches = $state<any[]>([]);
 	let isReady = $state(false);
 	let isSaving = $state(false);
 	let isDeleting = $state(false);
 
-	let form = $state({ name: '', capacity: 5, type: 'standard', pricePerHour: 100000 });
+	let form = $state({ name: '', capacity: 5, type: 'standard', pricePerHour: 100000, branchId: null as number | null });
 	let editTarget = $state<{ id: number; name: string; capacity: number; type: string; pricePerHour: number } | null>(null);
 	let deleteTarget = $state<{ id: number; name: string } | null>(null);
 
@@ -18,7 +19,12 @@
 
 	async function loadData() {
 		try {
-			rooms = await trpc().room.list.query();
+			const [r, b] = await Promise.all([
+				trpc().room.list.query(),
+				trpc().branch.listAll.query()
+			]);
+			rooms = r;
+			branches = b;
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -27,13 +33,13 @@
 	}
 
 	function openCreateModal() {
-		form = { name: '', capacity: 5, type: 'standard', pricePerHour: 100000 };
+		form = { name: '', capacity: 5, type: 'standard', pricePerHour: 100000, branchId: null };
 		(document.getElementById('room_modal') as HTMLDialogElement)?.showModal();
 	}
 
 	function openEditModal(r: any) {
 		editTarget = { id: r.id, name: r.name, capacity: r.capacity, type: r.type, pricePerHour: r.pricePerHour };
-		form = { name: r.name, capacity: r.capacity, type: r.type, pricePerHour: r.pricePerHour };
+		form = { name: r.name, capacity: r.capacity, type: r.type, pricePerHour: r.pricePerHour, branchId: r.branchId ?? null };
 		(document.getElementById('room_modal') as HTMLDialogElement)?.showModal();
 	}
 
@@ -46,10 +52,10 @@
 		isSaving = true;
 		try {
 			if (editTarget) {
-				await trpc().room.update.mutate({ id: editTarget.id, name: form.name, capacity: form.capacity, type: form.type as any, pricePerHour: form.pricePerHour });
+				await trpc().room.update.mutate({ id: editTarget.id, name: form.name, capacity: form.capacity, type: form.type as any, pricePerHour: form.pricePerHour, branchId: form.branchId });
 				addToast('Cập nhật phòng thành công!', 'success');
 			} else {
-				await trpc().room.create.mutate({ name: form.name, capacity: form.capacity, type: form.type as any, pricePerHour: form.pricePerHour });
+				await trpc().room.create.mutate({ name: form.name, capacity: form.capacity, type: form.type as any, pricePerHour: form.pricePerHour, branchId: form.branchId });
 				addToast('Tạo phòng mới thành công!', 'success');
 			}
 			closeModal();
@@ -87,6 +93,11 @@
 
 	function fmtVND(v: number) {
 		return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
+	}
+
+	function getBranchName(branchId: number | null) {
+		if (!branchId) return '—';
+		return branches.find(b => b.id === branchId)?.name || '—';
 	}
 </script>
 
@@ -131,6 +142,7 @@
 						<th class="font-bold">ID</th>
 						<th class="font-bold">Tên Phòng</th>
 						<th class="font-bold">Loại</th>
+						<th class="font-bold">Chi Nhánh</th>
 						<th class="font-bold text-center">Sức Chứa</th>
 						<th class="font-bold text-right">Đơn Giá / Giờ</th>
 						<th class="font-bold text-right">Thao Tác</th>
@@ -138,15 +150,16 @@
 				</thead>
 				<tbody>
 					{#if !isReady}
-						<tr><td colspan="6" class="text-center py-12"><span class="loading loading-spinner text-primary"></span></td></tr>
+						<tr><td colspan="7" class="text-center py-12"><span class="loading loading-spinner text-primary"></span></td></tr>
 					{:else if rooms.length === 0}
-						<tr><td colspan="6" class="text-center py-12 text-base-content/30 font-medium">Chưa thiết lập phòng nào.</td></tr>
+						<tr><td colspan="7" class="text-center py-12 text-base-content/30 font-medium">Chưa thiết lập phòng nào.</td></tr>
 					{:else}
 						{#each rooms as r}
 							<tr class="hover">
 								<td class="font-mono text-xs font-bold text-base-content/30">#{r.id}</td>
 								<td class="font-bold text-sm">{r.name}</td>
 								<td><span class="badge badge-xs rounded-md font-bold uppercase {typeCls[r.type] || 'badge-ghost'}">{typeLabel[r.type] || r.type}</span></td>
+								<td class="text-xs text-base-content/50 font-medium">{getBranchName(r.branchId)}</td>
 								<td class="text-center font-medium">{r.capacity} người</td>
 								<td class="text-right font-mono text-sm font-bold text-primary">{fmtVND(r.pricePerHour)}</td>
 								<td class="text-right">
@@ -190,6 +203,15 @@
 			<label class="form-control w-full">
 				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Đơn Giá (VNĐ / Giờ)</span></div>
 				<input type="number" bind:value={form.pricePerHour} min="1000" class="input input-bordered w-full rounded-lg font-mono" />
+			</label>
+			<label class="form-control w-full">
+				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Chi Nhánh</span></div>
+				<select bind:value={form.branchId} class="select select-bordered w-full rounded-lg text-sm font-medium">
+					<option value={null}>-- Không gán --</option>
+					{#each branches as b}
+						<option value={b.id}>{b.name}</option>
+					{/each}
+				</select>
 			</label>
 			<div class="modal-action border-t border-base-200 pt-4">
 				<button onclick={closeModal} class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button>
