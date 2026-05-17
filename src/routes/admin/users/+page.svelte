@@ -104,6 +104,8 @@
 
 	const roleLabel: Record<string, { text: string; cls: string }> = {
 		admin: { text: 'Admin', cls: 'badge-primary' },
+		manager: { text: 'Quản Lý', cls: 'badge-secondary' },
+		staff: { text: 'Nhân Viên', cls: 'badge-accent' },
 		user: { text: 'Thành Viên', cls: 'badge-ghost' },
 		banned: { text: 'Đã Khóa', cls: 'badge-error text-white' }
 	};
@@ -145,6 +147,8 @@
 			<select bind:value={filterRole} onchange={handleSearch} class="select select-bordered rounded-lg text-sm font-medium w-full md:w-40">
 				<option value="">Tất Cả Role</option>
 				<option value="admin">Admin</option>
+				<option value="manager">Quản Lý</option>
+				<option value="staff">Nhân Viên</option>
 				<option value="user">Thành Viên</option>
 				<option value="banned">Đã Khóa</option>
 			</select>
@@ -255,6 +259,8 @@
 			<p class="text-sm text-base-content/50 mb-4">Thay đổi quyền cho <span class="font-bold text-base-content">{roleTarget.name}</span></p>
 			<select bind:value={selectedRole} class="select select-bordered w-full rounded-lg text-sm font-medium">
 				<option value="admin">Admin (Toàn quyền)</option>
+				<option value="manager">Quản Lý (Duyệt đơn, quản lý phòng/dịch vụ)</option>
+				<option value="staff">Nhân Viên (Xem đơn, lịch phòng)</option>
 				<option value="user">Thành Viên (Mặc định)</option>
 				<option value="banned">Khóa Tài Khoản</option>
 			</select>

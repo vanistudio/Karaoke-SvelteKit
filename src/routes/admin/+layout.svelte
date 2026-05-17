@@ -10,20 +10,22 @@
 	let sidebarOpen = $state(false);
 	let sidebarCollapsed = $state(false);
 
-	const navItems = [
-		{ label: 'Tổng Quan', href: '/admin', icon: 'solar:pie-chart-2-line-duotone', iconActive: 'solar:pie-chart-2-bold-duotone', exact: true },
-		{ label: 'Lịch Đặt Phòng', href: '/admin/bookings', icon: 'solar:ticket-line-duotone', iconActive: 'solar:ticket-bold-duotone' },
-		{ label: 'Lịch Phòng', href: '/admin/calendar', icon: 'solar:calendar-line-duotone', iconActive: 'solar:calendar-bold-duotone' },
-		{ label: 'Hệ Thống Phòng', href: '/admin/rooms', icon: 'solar:home-smile-angle-line-duotone', iconActive: 'solar:home-smile-angle-bold-duotone' },
-		{ label: 'Menu Dịch Vụ', href: '/admin/services', icon: 'solar:wineglass-triangle-line-duotone', iconActive: 'solar:wineglass-triangle-bold-duotone' },
-		{ label: 'Khuyến Mãi', href: '/admin/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone' },
-		{ label: 'Thành Viên', href: '/admin/users', icon: 'solar:users-group-two-rounded-line-duotone', iconActive: 'solar:users-group-two-rounded-bold-duotone' },
-		{ label: 'Đánh Giá', href: '/admin/reviews', icon: 'solar:star-line-duotone', iconActive: 'solar:star-bold-duotone' },
-		{ label: 'Bảng Giá', href: '/admin/pricing', icon: 'solar:dollar-minimalistic-line-duotone', iconActive: 'solar:dollar-minimalistic-bold-duotone' },
-		{ label: 'Chi Nhánh', href: '/admin/branches', icon: 'solar:buildings-line-duotone', iconActive: 'solar:buildings-bold-duotone' },
-		{ label: 'Nhật Ký', href: '/admin/activity', icon: 'solar:history-line-duotone', iconActive: 'solar:history-bold-duotone' },
-		{ label: 'Cài Đặt', href: '/admin/settings', icon: 'solar:settings-line-duotone', iconActive: 'solar:settings-bold-duotone' }
+	const allNavItems = [
+		{ label: 'Tổng Quan', href: '/admin', icon: 'solar:pie-chart-2-line-duotone', iconActive: 'solar:pie-chart-2-bold-duotone', exact: true, roles: ['admin', 'manager'] },
+		{ label: 'Lịch Đặt Phòng', href: '/admin/bookings', icon: 'solar:ticket-line-duotone', iconActive: 'solar:ticket-bold-duotone', roles: ['admin', 'manager', 'staff'] },
+		{ label: 'Lịch Phòng', href: '/admin/calendar', icon: 'solar:calendar-line-duotone', iconActive: 'solar:calendar-bold-duotone', roles: ['admin', 'manager', 'staff'] },
+		{ label: 'Hệ Thống Phòng', href: '/admin/rooms', icon: 'solar:home-smile-angle-line-duotone', iconActive: 'solar:home-smile-angle-bold-duotone', roles: ['admin', 'manager'] },
+		{ label: 'Menu Dịch Vụ', href: '/admin/services', icon: 'solar:wineglass-triangle-line-duotone', iconActive: 'solar:wineglass-triangle-bold-duotone', roles: ['admin', 'manager'] },
+		{ label: 'Khuyến Mãi', href: '/admin/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone', roles: ['admin', 'manager'] },
+		{ label: 'Thành Viên', href: '/admin/users', icon: 'solar:users-group-two-rounded-line-duotone', iconActive: 'solar:users-group-two-rounded-bold-duotone', roles: ['admin'] },
+		{ label: 'Đánh Giá', href: '/admin/reviews', icon: 'solar:star-line-duotone', iconActive: 'solar:star-bold-duotone', roles: ['admin', 'manager'] },
+		{ label: 'Bảng Giá', href: '/admin/pricing', icon: 'solar:dollar-minimalistic-line-duotone', iconActive: 'solar:dollar-minimalistic-bold-duotone', roles: ['admin'] },
+		{ label: 'Chi Nhánh', href: '/admin/branches', icon: 'solar:buildings-line-duotone', iconActive: 'solar:buildings-bold-duotone', roles: ['admin'] },
+		{ label: 'Nhật Ký', href: '/admin/activity', icon: 'solar:history-line-duotone', iconActive: 'solar:history-bold-duotone', roles: ['admin', 'manager'] },
+		{ label: 'Cài Đặt', href: '/admin/settings', icon: 'solar:settings-line-duotone', iconActive: 'solar:settings-bold-duotone', roles: ['admin'] }
 	];
+
+	let navItems = $derived(allNavItems.filter(item => item.roles.includes(user?.role ?? '')));
 
 	function isActive(href: string, exact = false) {
 		const path = String($page.url.pathname);

@@ -12,7 +12,7 @@ export class UserService {
 	}
 
 	async updateRole(id: string, role: string) {
-		const validRoles = ['admin', 'user', 'banned'];
+		const validRoles = ['admin', 'manager', 'staff', 'user', 'banned'];
 		if (!validRoles.includes(role)) throw new Error('Role không hợp lệ');
 		const u = await userRepository.findById(id);
 		if (!u) throw new Error('User not found');
