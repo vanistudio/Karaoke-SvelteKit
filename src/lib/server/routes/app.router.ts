@@ -9,6 +9,10 @@ import { settingRouter } from './setting.router';
 import { userRouter } from './user.router';
 import { pricingRouter } from './pricing.router';
 import { activityRouter } from './activity.router';
+import { reviewRouter } from './review.router';
+import { calendarRouter } from './calendar.router';
+import { recommendationRouter } from './recommendation.router';
+import { branchRouter } from './branch.router';
 
 export const appRouter = router({
 	healthcheck: publicProcedure.query(() => 'TRPC System is ready'),
@@ -21,7 +25,11 @@ export const appRouter = router({
 	setting: settingRouter,
 	user: userRouter,
 	pricing: pricingRouter,
-	activity: activityRouter
+	activity: activityRouter,
+	review: reviewRouter,
+	calendar: calendarRouter,
+	recommendation: recommendationRouter,
+	branch: branchRouter
 });
 
 export type AppRouter = typeof appRouter;

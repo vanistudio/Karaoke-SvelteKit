@@ -6,6 +6,10 @@ import { promotionRepository } from '$lib/server/repositories/promotion.reposito
 import { loyaltyService } from './loyalty.service';
 import { pricingService } from './pricing.service';
 import { activityService } from './activity.service';
+import { emailService } from './email.service';
+import { db } from '$lib/server/db';
+import { user } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 
 export class BookingService {
 	async getAllBookings() {
@@ -134,6 +138,30 @@ export class BookingService {
 		}
 
 		await activityService.log(booking.userId, 'status_change', 'booking', booking.id, `Đơn #${id}: ${oldStatus} → ${status}`);
+
+		// Send email notification
+		try {
+			const u = await db.select({ email: user.email }).from(user).where(eq(user.id, booking.userId)).then(res => res[0]);
+			const rm = await roomRepository.findById(booking.roomId);
+			if (u && rm) {
+				if (status === 'confirmed') {
+					await emailService.sendBookingConfirmed(u.email, {
+						bookingId: booking.id,
+						roomName: rm.name,
+						startTime: booking.startTime,
+						endTime: booking.endTime,
+						totalCost: booking.totalCost ?? 0
+					});
+				} else if (status === 'cancelled') {
+					await emailService.sendBookingCancelled(u.email, {
+						bookingId: booking.id,
+						roomName: rm.name
+					});
+				}
+			}
+		} catch (e) {
+			console.error('Lỗi gửi email:', e);
+		}
 
 		return updated;
 	}

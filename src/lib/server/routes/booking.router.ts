@@ -1,4 +1,4 @@
-import { router, publicProcedure, protectedProcedure, adminProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, protectedProcedure, adminProcedure, rateLimitedProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { bookingController } from '$lib/server/controllers/booking.controller';
 
@@ -27,7 +27,7 @@ export const bookingRouter = router({
 			const roomCost = await bookingController.estimateRoomCost(input.roomId, start, end);
 			return { isAvailable, roomCost };
 		}),
-	create: protectedProcedure
+	create: rateLimitedProcedure
 		.input(
 			z.object({
 				roomId: z.number().positive(),

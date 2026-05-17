@@ -21,5 +21,8 @@ export const dashboardRouter = router({
 		}),
 	occupancy: adminProcedure.query(async () => {
 		return await dashboardService.getOccupancyRate();
+	}),
+	heatmap: adminProcedure.query(async () => {
+		return await dashboardService.getHeatmapData();
 	})
 });

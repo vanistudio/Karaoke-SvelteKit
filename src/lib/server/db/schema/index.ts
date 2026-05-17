@@ -12,4 +12,6 @@ export * from './booking_service.schema';
 export * from './pricing_rule.schema';
 export * from './setting.schema';
 export * from './activity_log.schema';
+export * from './review.schema';
+export * from './branch.schema';
 export * from './relations';

@@ -157,6 +157,41 @@ export class DashboardService {
 			rate: Math.round((occupied / total) * 100)
 		};
 	}
+
+	async getHeatmapData() {
+		const thirtyDaysAgo = new Date();
+		thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+		const bookings = await db
+			.select({
+				startTime: booking.startTime,
+				endTime: booking.endTime
+			})
+			.from(booking)
+			.where(
+				and(
+					gte(booking.createdAt, thirtyDaysAgo),
+					sql`${booking.status} != 'cancelled'`
+				)
+			);
+
+		// Build 7×24 grid (dayOfWeek × hour)
+		const grid: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+
+		for (const bk of bookings) {
+			const start = new Date(bk.startTime);
+			const end = new Date(bk.endTime);
+			const day = start.getDay();
+			const startHour = start.getHours();
+			const endHour = end.getDate() === start.getDate() ? end.getHours() : 24;
+
+			for (let h = startHour; h < endHour; h++) {
+				grid[day][h]++;
+			}
+		}
+
+		return grid;
+	}
 }
 
 export const dashboardService = new DashboardService();
