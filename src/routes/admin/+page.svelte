@@ -7,6 +7,8 @@
 	let chartData = $state<any[]>([]);
 	let occupancy = $state<any>(null);
 	let heatmapData = $state<number[][]>([]);
+	let topRooms = $state<any[]>([]);
+	let topCustomers = $state<any[]>([]);
 	let isReady = $state(false);
 	let chartDays = $state(7);
 
@@ -16,18 +18,22 @@
 
 	async function loadData() {
 		try {
-			const [s, rb, cd, oc, hm] = await Promise.all([
+			const [s, rb, cd, oc, hm, tr, tc] = await Promise.all([
 				trpc().dashboard.stats.query(),
 				trpc().dashboard.recentBookings.query(5),
 				trpc().dashboard.revenueChart.query(chartDays),
 				trpc().dashboard.occupancy.query(),
-				trpc().dashboard.heatmap.query()
+				trpc().dashboard.heatmap.query(),
+				trpc().dashboard.topRooms.query(),
+				trpc().dashboard.topCustomers.query()
 			]);
 			stats = s;
 			recentBookings = rb;
 			chartData = cd;
 			occupancy = oc;
 			heatmapData = hm;
+			topRooms = tr;
+			topCustomers = tc;
 		} catch (e) {
 			console.error(e);
 		} finally {
@@ -331,5 +337,60 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Top Rooms + Top Customers -->
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+			{#if topRooms.length > 0}
+				<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
+					<div class="px-5 py-4 border-b border-base-200 flex items-center gap-2 text-sm font-bold text-base-content/60">
+						<Icon icon="solar:crown-star-bold-duotone" class="text-base text-amber-500"/>
+						Top Phòng Được Đặt Nhiều Nhất
+					</div>
+					<div class="p-4">
+						<div class="flex flex-col gap-2">
+							{#each topRooms as rm, i}
+								<div class="flex items-center gap-3 p-2 rounded-lg {i === 0 ? 'bg-amber-500/5' : ''}">
+									<span class="w-6 h-6 rounded-full {i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-base-300 text-base-content/60' : 'bg-base-200 text-base-content/40'} flex items-center justify-center text-[10px] font-black">{i + 1}</span>
+									<div class="flex-1 min-w-0">
+										<p class="font-bold text-sm truncate">{rm.roomName}</p>
+										<p class="text-[10px] text-base-content/40 font-medium uppercase">{rm.roomType}</p>
+									</div>
+									<div class="text-right">
+										<p class="text-sm font-black">{rm.bookingCount} đơn</p>
+										<p class="text-[10px] text-base-content/40 font-medium">{fmtVND(rm.totalRevenue)}</p>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			{#if topCustomers.length > 0}
+				<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
+					<div class="px-5 py-4 border-b border-base-200 flex items-center gap-2 text-sm font-bold text-base-content/60">
+						<Icon icon="solar:users-group-rounded-bold-duotone" class="text-base text-primary"/>
+						Top Khách Hàng Chi Tiêu Cao
+					</div>
+					<div class="p-4">
+						<div class="flex flex-col gap-2">
+							{#each topCustomers as cust, i}
+								<div class="flex items-center gap-3 p-2 rounded-lg {i === 0 ? 'bg-primary/5' : ''}">
+									<span class="w-6 h-6 rounded-full {i === 0 ? 'bg-primary text-white' : i === 1 ? 'bg-base-300 text-base-content/60' : 'bg-base-200 text-base-content/40'} flex items-center justify-center text-[10px] font-black">{i + 1}</span>
+									<div class="flex-1 min-w-0">
+										<p class="font-bold text-sm truncate">{cust.userName || 'N/A'}</p>
+										<p class="text-[10px] text-base-content/40 font-medium truncate">{cust.userEmail}</p>
+									</div>
+									<div class="text-right">
+										<p class="text-sm font-black text-primary">{fmtVND(cust.totalSpent)}</p>
+										<p class="text-[10px] text-base-content/40 font-medium">{cust.bookingCount} đơn</p>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				</div>
+			{/if}
+		</div>
 	</div>
 {/if}
