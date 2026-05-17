@@ -1,6 +1,7 @@
 import { router, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { pricingService } from '$lib/server/services/pricing.service';
+import { activityService } from '$lib/server/services/activity.service';
 
 export const pricingRouter = router({
 	list: adminProcedure.query(async () => {
@@ -24,8 +25,10 @@ export const pricingRouter = router({
 				isActive: z.boolean().optional().default(true)
 			})
 		)
-		.mutation(async ({ input }) => {
-			return await pricingService.createRule(input);
+		.mutation(async ({ input, ctx }) => {
+			const created = await pricingService.createRule(input);
+			await activityService.log(ctx.user.id, 'create', 'pricing', created.id, `Tạo rule giá ${created.name}`);
+			return created;
 		}),
 	update: adminProcedure
 		.input(
@@ -41,13 +44,17 @@ export const pricingRouter = router({
 				isActive: z.boolean().optional()
 			})
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			const { id, ...data } = input;
-			return await pricingService.updateRule(id, data);
+			const updated = await pricingService.updateRule(id, data);
+			await activityService.log(ctx.user.id, 'update', 'pricing', id, `Cập nhật rule giá #${id}`);
+			return updated;
 		}),
 	delete: adminProcedure
 		.input(z.number())
-		.mutation(async ({ input }) => {
-			return await pricingService.deleteRule(input);
+		.mutation(async ({ input, ctx }) => {
+			const deleted = await pricingService.deleteRule(input);
+			await activityService.log(ctx.user.id, 'delete', 'pricing', input, `Xóa rule giá #${input}`);
+			return deleted;
 		})
 });

@@ -30,11 +30,26 @@ export const GET: RequestHandler = async ({ locals }) => {
 		.leftJoin(room, eq(booking.roomId, room.id))
 		.orderBy(sql`${booking.createdAt} DESC`);
 
-	const headers = ['Mã', 'Khách Hàng', 'Email', 'Phòng', 'Loại Phòng', 'Bắt Đầu', 'Kết Thúc', 'Số Khách', 'Tổng Tiền', 'Trạng Thái', 'Voucher', 'Giảm Giá', 'Điểm Dùng', 'Ngày Tạo'];
+	const headers = [
+		'Mã',
+		'Khách Hàng',
+		'Email',
+		'Phòng',
+		'Loại Phòng',
+		'Bắt Đầu',
+		'Kết Thúc',
+		'Số Khách',
+		'Tổng Tiền',
+		'Trạng Thái',
+		'Voucher',
+		'Giảm Giá',
+		'Điểm Dùng',
+		'Ngày Tạo'
+	];
 
-	const fmtDate = (d: Date | null) => d ? new Date(d).toLocaleString('vi-VN') : '';
+	const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleString('vi-VN') : '');
 
-	const rows = bookings.map(b => [
+	const rows = bookings.map((b) => [
 		b.id,
 		b.userName || '',
 		b.userEmail || '',
@@ -53,7 +68,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 	const csvContent = [
 		headers.join(','),
-		...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+		...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
 	].join('\n');
 
 	const bom = '\uFEFF';

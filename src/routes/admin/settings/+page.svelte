@@ -83,6 +83,7 @@
 		try {
 			const entries = getCurrentSettings();
 			await trpc().setting.update.mutate(entries);
+			window.dispatchEvent(new CustomEvent('site-settings-updated'));
 			addToast('Lưu cài đặt thành công!', 'success');
 		} catch (e: any) {
 			addToast(e?.message || 'Có lỗi xảy ra.', 'error');
@@ -190,3 +191,4 @@
 		{/if}
 	</div>
 {/if}
+

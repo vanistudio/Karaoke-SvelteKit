@@ -24,10 +24,26 @@
 		site_email: 'contact@karasystem.vn'
 	});
 
+	async function refreshSiteSettings() {
+		try {
+			siteSettings = await trpc().setting.getPublic.query();
+		} catch {}
+	}
+
 	$effect(() => {
 		if (!isAdminRoute) {
-			trpc().setting.getPublic.query().then(data => { siteSettings = data; }).catch(() => {});
+			refreshSiteSettings();
 		}
+	});
+
+	$effect(() => {
+		const handleSettingsUpdated = () => {
+			refreshSiteSettings();
+		};
+		window.addEventListener('site-settings-updated', handleSettingsUpdated);
+		return () => {
+			window.removeEventListener('site-settings-updated', handleSettingsUpdated);
+		};
 	});
 
 	const navigation = [

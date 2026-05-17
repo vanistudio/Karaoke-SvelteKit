@@ -1,6 +1,7 @@
 import { router, adminProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { userService } from '$lib/server/services/user.service';
+import { activityService } from '$lib/server/services/activity.service';
 
 export const userRouter = router({
 	list: adminProcedure
@@ -28,17 +29,23 @@ export const userRouter = router({
 				role: z.enum(['admin', 'manager', 'staff', 'user', 'banned'])
 			})
 		)
-		.mutation(async ({ input }) => {
-			return await userService.updateRole(input.id, input.role);
+		.mutation(async ({ input, ctx }) => {
+			const updated = await userService.updateRole(input.id, input.role);
+			await activityService.log(ctx.user.id, 'update', 'user', input.id, `Đổi quyền thành ${input.role}`);
+			return updated;
 		}),
 	ban: adminProcedure
 		.input(z.string())
-		.mutation(async ({ input }) => {
-			return await userService.banUser(input);
+		.mutation(async ({ input, ctx }) => {
+			const banned = await userService.banUser(input);
+			await activityService.log(ctx.user.id, 'status_change', 'user', input, 'Khóa tài khoản');
+			return banned;
 		}),
 	unban: adminProcedure
 		.input(z.string())
-		.mutation(async ({ input }) => {
-			return await userService.unbanUser(input);
+		.mutation(async ({ input, ctx }) => {
+			const unbanned = await userService.unbanUser(input);
+			await activityService.log(ctx.user.id, 'status_change', 'user', input, 'Mở khóa tài khoản');
+			return unbanned;
 		})
 });

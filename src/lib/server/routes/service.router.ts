@@ -1,6 +1,7 @@
 import { router, publicProcedure, adminProcedure, managerProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { serviceController } from '$lib/server/controllers/service.controller';
+import { activityService } from '$lib/server/services/activity.service';
 
 export const serviceRouter = router({
 	list: publicProcedure.query(async () => {
@@ -23,8 +24,10 @@ export const serviceRouter = router({
 				isAvailable: z.boolean().optional()
 			})
 		)
-		.mutation(async ({ input }) => {
-			return await serviceController.addService(input);
+		.mutation(async ({ input, ctx }) => {
+			const created = await serviceController.addService(input);
+			await activityService.log(ctx.user.id, 'create', 'service', created.id, `Tạo dịch vụ ${created.name}`);
+			return created;
 		}),
 	update: managerProcedure
 		.input(
@@ -38,13 +41,17 @@ export const serviceRouter = router({
 				isAvailable: z.boolean().optional()
 			})
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			const { id, ...data } = input;
-			return await serviceController.updateService(id, data);
+			const updated = await serviceController.updateService(id, data);
+			await activityService.log(ctx.user.id, 'update', 'service', id, `Cập nhật dịch vụ #${id}`);
+			return updated;
 		}),
 	delete: adminProcedure
 		.input(z.number())
-		.mutation(async ({ input }) => {
-			return await serviceController.deleteService(input);
+		.mutation(async ({ input, ctx }) => {
+			const deleted = await serviceController.deleteService(input);
+			await activityService.log(ctx.user.id, 'delete', 'service', input, `Xóa dịch vụ #${input}`);
+			return deleted;
 		})
 });

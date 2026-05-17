@@ -59,7 +59,9 @@
 		service: 'Dịch Vụ',
 		promotion: 'Khuyến Mãi',
 		user: 'Thành Viên',
-		setting: 'Cài Đặt'
+		setting: 'Cài Đặt',
+		branch: 'Chi Nhánh',
+		pricing: 'Giá/Khung Gi�'
 	};
 
 	const actionLabels: Record<string, string> = {
@@ -92,6 +94,9 @@
 			<button onclick={() => { filterEntity = 'service'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'service' ? 'btn-primary' : 'btn-ghost'}">Dịch Vụ</button>
 			<button onclick={() => { filterEntity = 'promotion'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'promotion' ? 'btn-primary' : 'btn-ghost'}">Khuyến Mãi</button>
 			<button onclick={() => { filterEntity = 'user'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'user' ? 'btn-primary' : 'btn-ghost'}">Thành Viên</button>
+			<button onclick={() => { filterEntity = 'branch'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'branch' ? 'btn-primary' : 'btn-ghost'}">Chi Nhánh</button>
+			<button onclick={() => { filterEntity = 'pricing'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'pricing' ? 'btn-primary' : 'btn-ghost'}">Giá/Khung Gi�</button>
+			<button onclick={() => { filterEntity = 'setting'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'setting' ? 'btn-primary' : 'btn-ghost'}">Cài Đặt</button>
 		</div>
 
 		<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
@@ -152,3 +157,5 @@
 		{/if}
 	</div>
 {/if}
+
+

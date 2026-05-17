@@ -1,6 +1,7 @@
 import { router, publicProcedure, adminProcedure, managerProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { roomController } from '$lib/server/controllers/room.controller';
+import { activityService } from '$lib/server/services/activity.service';
 
 export const roomRouter = router({
 	list: publicProcedure.query(async () => {
@@ -22,8 +23,10 @@ export const roomRouter = router({
 				branchId: z.number().nullable().optional()
 			})
 		)
-		.mutation(async ({ input }) => {
-			return await roomController.addRoom(input);
+		.mutation(async ({ input, ctx }) => {
+			const created = await roomController.addRoom(input);
+			await activityService.log(ctx.user.id, 'create', 'room', created.id, `Tạo phòng ${created.name}`);
+			return created;
 		}),
 	update: managerProcedure
 		.input(
@@ -36,14 +39,18 @@ export const roomRouter = router({
 				branchId: z.number().nullable().optional()
 			})
 		)
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			const { id, ...data } = input;
-			return await roomController.updateRoom(id, data);
+			const updated = await roomController.updateRoom(id, data);
+			await activityService.log(ctx.user.id, 'update', 'room', id, `Cập nhật phòng #${id}`);
+			return updated;
 		}),
 	delete: adminProcedure
 		.input(z.number())
-		.mutation(async ({ input }) => {
-			return await roomController.deleteRoom(input);
+		.mutation(async ({ input, ctx }) => {
+			const deleted = await roomController.deleteRoom(input);
+			await activityService.log(ctx.user.id, 'delete', 'room', input, `Xóa phòng #${input}`);
+			return deleted;
 		}),
 	findAvailable: publicProcedure
 		.input(

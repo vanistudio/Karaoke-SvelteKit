@@ -1,6 +1,7 @@
 import { router, publicProcedure, protectedProcedure, adminProcedure, rateLimitedProcedure, staffProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { bookingController } from '$lib/server/controllers/booking.controller';
+import { activityService } from '$lib/server/services/activity.service';
 
 export const bookingRouter = router({
 	list: staffProcedure.query(async () => {
@@ -72,16 +73,20 @@ export const bookingRouter = router({
 				status: z.enum(['pending', 'confirmed', 'cancelled', 'checked_in'])
 			})
 		)
-		.mutation(async ({ input }) => {
-			return await bookingController.changeStatus(input.id, input.status);
+		.mutation(async ({ input, ctx }) => {
+			const updated = await bookingController.changeStatus(input.id, input.status);
+			await activityService.log(ctx.user.id, 'status_change', 'booking', input.id, `Admin d?i tr?ng th�i th�nh ${input.status}`);
+			return updated;
 		}),
 	checkin: staffProcedure
 		.input(z.number())
-		.mutation(async ({ input }) => {
+		.mutation(async ({ input, ctx }) => {
 			const bk = await bookingController.getBooking(input);
 			if (bk.status !== 'confirmed') {
 				throw new Error('Chỉ có thể check-in đơn đã xác nhận.');
 			}
-			return await bookingController.changeStatus(input, 'checked_in');
+			const checkedIn = await bookingController.changeStatus(input, 'checked_in');
+			await activityService.log(ctx.user.id, 'status_change', 'booking', input, 'Check-in don');
+			return checkedIn;
 		})
 });
