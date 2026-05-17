@@ -7,7 +7,7 @@ import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 
 export const auth = betterAuth({
-	baseURL: env.APP_ORIGIN_URL,
+	baseURL: env.APP_ORIGIN_URL?.replace(/\/+$/, ''),
 	secret: env.APP_BETTER_SECRET,
 	database: drizzleAdapter(db, { provider: 'pg' }),
 	emailAndPassword: { enabled: true },
