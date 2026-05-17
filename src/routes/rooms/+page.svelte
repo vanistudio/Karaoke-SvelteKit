@@ -53,7 +53,6 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<!-- Hero -->
 	<div class="gradient-karaoke rounded-2xl p-8 lg:p-10 relative overflow-hidden">
 		<div class="absolute top-4 right-8 opacity-10">
 			<Icon icon="solar:soundwave-bold-duotone" class="text-[100px] text-white" />
@@ -69,8 +68,6 @@
 			<p class="text-white/50 font-medium text-sm">Đa dạng từ Tiêu Chuẩn đến Super VIP — âm thanh đẳng cấp, không gian sang trọng.</p>
 		</div>
 	</div>
-
-	<!-- Filter -->
 	<div class="flex gap-2 flex-wrap justify-center">
 		<button onclick={() => activeFilter = 'all'} class={`btn btn-sm rounded-lg font-bold tracking-wider ${activeFilter === 'all' ? 'btn-primary' : 'btn-ghost'}`}>
 			<Icon icon="solar:widget-2-line-duotone" class="text-base"/>
@@ -83,8 +80,6 @@
 			</button>
 		{/each}
 	</div>
-
-	<!-- Room Grid -->
 	{#if !isReady}
 		<div class="flex items-center justify-center min-h-[30vh]">
 			<span class="loading loading-spinner loading-lg text-primary"></span>

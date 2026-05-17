@@ -22,7 +22,6 @@
 			return;
 		}
 		isSending = true;
-		// Mock send — in production, this would call an API endpoint
 		await new Promise(r => setTimeout(r, 1000));
 		sent = true;
 		isSending = false;

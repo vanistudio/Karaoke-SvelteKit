@@ -405,8 +405,6 @@
 									<span class="font-bold">{formatVND(serviceCost())}</span>
 								</div>
 							{/if}
-
-							<!-- Loyalty Points -->
 							{#if loyaltyInfo && loyaltyInfo.points > 0}
 								<div class="divider my-0 text-[10px] font-bold tracking-widest text-base-content/40">DÙNG ĐIỂM KARA</div>
 								<label class="flex items-start gap-3 p-3 border border-base-300 rounded-lg cursor-pointer hover:border-primary/50 transition-colors">

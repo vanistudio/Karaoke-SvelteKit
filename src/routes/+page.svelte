@@ -44,7 +44,6 @@
 </svelte:head>
 
 <div class="flex flex-col gap-10 lg:gap-14">
-	<!-- HERO -->
 	<div class="relative rounded-2xl overflow-hidden">
 		<img
 			src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1400&q=80"
@@ -80,8 +79,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- STATS -->
 	<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
 		<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 text-center">
 			<Icon icon="solar:microphone-3-bold-duotone" class="text-2xl text-primary mx-auto mb-1.5" />
@@ -104,8 +101,6 @@
 			<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest mt-0.5">Dịch Vụ</p>
 		</div>
 	</div>
-
-	<!-- BOOKING SEARCH -->
 	<div id="booking" class="bg-base-100 rounded-2xl border border-base-300/50 p-5 lg:p-8">
 		<div class="flex items-center gap-3 mb-5">
 			<div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -146,8 +141,6 @@
 			Tìm Phòng Trống
 		</button>
 	</div>
-
-	<!-- SEARCH RESULTS -->
 	{#if searchResults}
 		<div>
 			<h3 class="text-base font-bold mb-4 flex items-center gap-2">
@@ -182,8 +175,6 @@
 			{/if}
 		</div>
 	{/if}
-
-	<!-- ROOM SHOWCASE -->
 	<div>
 		<div class="flex items-center justify-between mb-5">
 			<div>
@@ -223,8 +214,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- WHY CHOOSE US -->
 	<div>
 		<div class="text-center mb-6">
 			<h2 class="text-xl font-black">Tại Sao Chọn KaraSystem?</h2>
@@ -262,8 +251,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- HOW IT WORKS -->
 	<div>
 		<div class="text-center mb-6">
 			<h2 class="text-xl font-black">Đặt Phòng Trong 3 Bước</h2>
@@ -297,8 +284,6 @@
 			</div>
 		</div>
 	</div>
-
-	<!-- MEMBERSHIP BANNER -->
 	<div class="bg-neutral text-neutral-content rounded-2xl p-6 lg:p-8 flex flex-col lg:flex-row items-center gap-5">
 		<div class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
 			<Icon icon="solar:star-bold-duotone" class="text-3xl text-amber-300" />
@@ -312,8 +297,6 @@
 			Đăng Ký
 		</a>
 	</div>
-
-	<!-- CTA -->
 	<div class="text-center pb-2">
 		<h2 class="text-lg font-black mb-2">Sẵn Sàng Hát Karaoke?</h2>
 		<p class="text-xs text-base-content/40 font-medium mb-4">Đặt phòng ngay — chỉ mất 30 giây</p>

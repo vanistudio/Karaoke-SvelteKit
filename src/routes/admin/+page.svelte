@@ -136,8 +136,6 @@
 				<p class="text-lg lg:text-xl font-black mt-1">{stats.totalUsers}</p>
 			</div>
 		</div>
-
-		<!-- Revenue Chart -->
 		<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
 			<div class="flex items-center justify-between px-5 py-4 border-b border-base-200">
 				<div class="flex items-center gap-2 text-sm font-bold text-base-content/60">
@@ -285,8 +283,6 @@
 				</div>
 			</div>
 		</div>
-
-		<!-- Heatmap -->
 		{#if heatmapData.length > 0}
 			{@const maxVal = Math.max(...heatmapData.flat(), 1)}
 			{@const dayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']}
@@ -337,8 +333,6 @@
 				</div>
 			</div>
 		{/if}
-
-		<!-- Top Rooms + Top Customers -->
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 			{#if topRooms.length > 0}
 				<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">

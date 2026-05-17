@@ -19,8 +19,6 @@ export class EmailService {
 
 	async send(options: EmailOptions) {
 		const config = await this.getConfig();
-
-		// Mock mode: log to console (replace with real SMTP in production)
 		console.log('═══════════════════════════════════════════');
 		console.log('📧 EMAIL NOTIFICATION (Mock Mode)');
 		console.log('═══════════════════════════════════════════');

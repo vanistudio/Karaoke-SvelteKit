@@ -174,8 +174,6 @@ export class DashboardService {
 					sql`${booking.status} != 'cancelled'`
 				)
 			);
-
-		// Build 7×24 grid (dayOfWeek × hour)
 		const grid: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
 
 		for (const bk of bookings) {

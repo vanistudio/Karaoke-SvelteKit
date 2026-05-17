@@ -206,8 +206,6 @@
 							</div>
 						</div>
 					</div>
-
-					<!-- Timeline -->
 					{#if bk.status !== 'cancelled'}
 						{@const steps = ['pending', 'confirmed', 'checked_in']}
 						{@const currentStep = steps.indexOf(bk.status)}

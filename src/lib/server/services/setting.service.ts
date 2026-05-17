@@ -1,7 +1,6 @@
 import { settingRepository } from '$lib/server/repositories/setting.repository';
 
 export const DEFAULT_SETTINGS: Record<string, { value: string; group: string }> = {
-	// General
 	'site_name': { value: 'KaraSystem', group: 'general' },
 	'site_slogan': { value: 'Đẳng cấp âm thanh', group: 'general' },
 	'site_phone': { value: '1900 1000', group: 'general' },
@@ -9,8 +8,6 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; group: string }> 
 	'site_email': { value: 'contact@karasystem.vn', group: 'general' },
 	'site_open_time': { value: '08:00', group: 'general' },
 	'site_close_time': { value: '02:00', group: 'general' },
-
-	// Loyalty
 	'loyalty_bronze_threshold': { value: '0', group: 'loyalty' },
 	'loyalty_silver_threshold': { value: '5000000', group: 'loyalty' },
 	'loyalty_gold_threshold': { value: '20000000', group: 'loyalty' },
@@ -19,8 +16,6 @@ export const DEFAULT_SETTINGS: Record<string, { value: string; group: string }> 
 	'loyalty_silver_rate': { value: '0.05', group: 'loyalty' },
 	'loyalty_gold_rate': { value: '0.08', group: 'loyalty' },
 	'loyalty_diamond_rate': { value: '0.12', group: 'loyalty' },
-
-	// Booking
 	'booking_min_hours': { value: '1', group: 'booking' },
 	'booking_max_hours': { value: '8', group: 'booking' },
 	'booking_cancel_policy': { value: 'Chỉ hủy được khi đơn đang ở trạng thái chờ duyệt.', group: 'booking' },

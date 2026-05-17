@@ -7,7 +7,7 @@ export const pointHistory = pgTable('point_history', {
 	userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
 	bookingId: integer('booking_id').references(() => booking.id, { onDelete: 'set null' }),
 	amount: integer('amount').notNull(),
-	type: text('type').notNull(), // 'reward', 'redeem', 'admin_adjustment'
+	type: text('type').notNull(),
 	description: text('description').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });

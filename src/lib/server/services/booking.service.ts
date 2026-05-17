@@ -138,8 +138,6 @@ export class BookingService {
 		}
 
 		await activityService.log(booking.userId, 'status_change', 'booking', booking.id, `Đơn #${id}: ${oldStatus} → ${status}`);
-
-		// Send email notification
 		try {
 			const u = await db.select({ email: user.email }).from(user).where(eq(user.id, booking.userId)).then(res => res[0]);
 			const rm = await roomRepository.findById(booking.roomId);

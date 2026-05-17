@@ -3,17 +3,12 @@ import { room, service, promotion, branch, setting } from '$lib/server/db/schema
 import { sql } from 'drizzle-orm';
 
 export async function seedDatabase() {
-	console.log('🌱 Seeding database...');
-
-	// Branches
 	const branches = await db.insert(branch).values([
 		{ name: 'KaraSystem Quận 1', address: '123 Nguyễn Huệ, Quận 1, TP.HCM', phone: '028 1234 5678' },
 		{ name: 'KaraSystem Quận 7', address: '456 Nguyễn Thị Thập, Quận 7, TP.HCM', phone: '028 8765 4321' },
 		{ name: 'KaraSystem Thủ Đức', address: '789 Võ Văn Ngân, TP. Thủ Đức', phone: '028 5555 6666' }
 	]).onConflictDoNothing().returning();
 	console.log(`✓ ${branches.length} chi nhánh`);
-
-	// Rooms
 	const rooms = await db.insert(room).values([
 		{ name: 'Phòng Ánh Sao', capacity: 5, type: 'standard', pricePerHour: 150000, branchId: branches[0]?.id },
 		{ name: 'Phòng Trăng Vàng', capacity: 5, type: 'standard', pricePerHour: 150000, branchId: branches[0]?.id },
@@ -27,8 +22,6 @@ export async function seedDatabase() {
 		{ name: 'Phòng Ngân Hà', capacity: 8, type: 'vip', pricePerHour: 380000, branchId: branches[2]?.id }
 	]).onConflictDoNothing().returning();
 	console.log(`✓ ${rooms.length} phòng`);
-
-	// Services
 	const services = await db.insert(service).values([
 		{ name: 'Combo Bia Tiger (6 lon)', price: 180000, category: 'drink', isAvailable: true },
 		{ name: 'Combo Bia Heineken (6 lon)', price: 240000, category: 'drink', isAvailable: true },
@@ -48,8 +41,6 @@ export async function seedDatabase() {
 		{ name: 'Khăn Lạnh + Nước Suối', price: 15000, category: 'other', isAvailable: true }
 	]).onConflictDoNothing().returning();
 	console.log(`✓ ${services.length} dịch vụ`);
-
-	// Promotions
 	const promos = await db.insert(promotion).values([
 		{ code: 'WELCOME10', type: 'percent', value: 10, minOrderAmount: 200000, maxUsage: 100, isActive: true, isPublic: true, expiresAt: new Date('2026-12-31') },
 		{ code: 'VIP20', type: 'percent', value: 20, minOrderAmount: 500000, maxUsage: 50, isActive: true, isPublic: true, expiresAt: new Date('2026-12-31') },
@@ -57,8 +48,6 @@ export async function seedDatabase() {
 		{ code: 'BIRTHDAY', type: 'percent', value: 30, minOrderAmount: 0, maxUsage: 30, isActive: true, isPublic: false, expiresAt: new Date('2026-12-31') }
 	]).onConflictDoNothing().returning();
 	console.log(`✓ ${promos.length} khuyến mãi`);
-
-	// Settings
 	await db.insert(setting).values([
 		{ key: 'site_name', value: 'KaraSystem', group: 'general' },
 		{ key: 'site_slogan', value: 'Đẳng Cấp Âm Thanh', group: 'general' },
@@ -68,7 +57,4 @@ export async function seedDatabase() {
 		{ key: 'site_open_time', value: '08:00', group: 'general' },
 		{ key: 'site_close_time', value: '02:00', group: 'general' }
 	]).onConflictDoNothing();
-	console.log('✓ Cài đặt hệ thống');
-
-	console.log('🎉 Seed hoàn tất!');
 }

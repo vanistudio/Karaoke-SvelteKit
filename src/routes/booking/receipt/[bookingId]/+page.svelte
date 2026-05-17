@@ -69,7 +69,6 @@
 		</div>
 
 		<div class="print-container bg-base-100 rounded-xl border border-base-300/50 overflow-hidden p-8">
-			<!-- Header -->
 			<div class="flex items-start justify-between mb-8 pb-6 border-b border-base-200">
 				<div>
 					<div class="flex items-center gap-2 mb-1">
@@ -84,8 +83,6 @@
 					<p class="text-xs text-base-content/40 font-medium mt-1">{fmtTime(booking.createdAt)}</p>
 				</div>
 			</div>
-
-			<!-- Status -->
 			<div class="mb-6">
 				{#if booking.status === 'confirmed'}
 					<span class="badge badge-success rounded-md font-bold px-4 py-3">✓ ĐÃ XÁC NHẬN</span>
@@ -95,8 +92,6 @@
 					<span class="badge badge-error text-white rounded-md font-bold px-4 py-3">✕ ĐÃ HỦY</span>
 				{/if}
 			</div>
-
-			<!-- Details -->
 			<div class="mb-6">
 				<h3 class="text-xs font-bold text-base-content/40 uppercase tracking-widest mb-3">Chi Tiết Đặt Phòng</h3>
 				<div class="bg-base-200/30 rounded-lg p-4">
@@ -142,14 +137,10 @@
 					</table>
 				</div>
 			</div>
-
-			<!-- Total -->
 			<div class="flex items-center justify-between p-4 bg-primary/5 border border-primary/15 rounded-lg mb-6">
 				<span class="text-sm font-bold text-base-content/60 uppercase tracking-widest">Tổng Thanh Toán</span>
 				<span class="text-2xl font-black text-primary">{fmtVND(booking.totalCost ?? 0)}</span>
 			</div>
-
-			<!-- Footer -->
 			<div class="text-center pt-6 border-t border-base-200">
 				<p class="text-xs text-base-content/30 font-medium">Cảm ơn quý khách đã sử dụng dịch vụ KaraSystem</p>
 				<p class="text-[10px] text-base-content/20 font-medium mt-1">Hóa đơn được tạo tự động bởi hệ thống — Không cần chữ ký</p>

@@ -48,7 +48,6 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<!-- Hero -->
 	<div class="gradient-karaoke rounded-2xl p-8 lg:p-10 relative overflow-hidden">
 		<div class="absolute top-4 right-8 opacity-10">
 			<Icon icon="solar:cup-hot-bold-duotone" class="text-[100px] text-white" />
@@ -64,8 +63,6 @@
 			<p class="text-white/50 font-medium text-sm">Đặt kèm dịch vụ khi book phòng — đồ ăn, đồ uống, trang trí sự kiện.</p>
 		</div>
 	</div>
-
-	<!-- Category Filter -->
 	<div class="flex gap-2 flex-wrap justify-center">
 		<button onclick={() => activeCategory = 'all'} class={`btn btn-sm rounded-lg font-bold tracking-wider ${activeCategory === 'all' ? 'btn-primary' : 'btn-ghost'}`}>
 			<Icon icon="solar:widget-2-line-duotone" class="text-base"/>
@@ -78,8 +75,6 @@
 			</button>
 		{/each}
 	</div>
-
-	<!-- Services Grid -->
 	{#if !isReady}
 		<div class="flex items-center justify-center min-h-[30vh]">
 			<span class="loading loading-spinner loading-lg text-primary"></span>
@@ -117,8 +112,6 @@
 			{/each}
 		</div>
 	{/if}
-
-	<!-- Info -->
 	<div class="bg-base-100 rounded-xl neon-border p-6">
 		<div class="flex items-center gap-3 mb-4">
 			<div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">

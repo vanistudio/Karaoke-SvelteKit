@@ -14,13 +14,11 @@ export async function POST({ request }: RequestEvent) {
 			return json({ success: false, message: 'No file uploaded.' }, { status: 400 });
 		}
 
-		// Ensure static/uploads exists
 		const uploadDir = join(process.cwd(), 'static', 'uploads');
 		if (!existsSync(uploadDir)) {
 			mkdirSync(uploadDir, { recursive: true });
 		}
 
-		// Generate random filename
 		const ext = file.name.split('.').pop();
 		const fileName = `${randomUUID()}.${ext}`;
 		const filePath = join(uploadDir, fileName);

@@ -86,10 +86,6 @@ export const rateLimitedProcedure = t.procedure.use(({ ctx, next }) => {
 	});
 });
 
-/**
- * Permission-based procedure factory
- * Usage: permissionProcedure('booking:approve')
- */
 export function permissionProcedure(permission: Permission) {
 	return t.procedure.use(({ ctx, next }) => {
 		if (!ctx.user) {

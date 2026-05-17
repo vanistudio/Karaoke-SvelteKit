@@ -7,7 +7,7 @@
 	let bookings = $state<any[]>([]);
 	let isReady = $state(false);
 
-	const hours = Array.from({ length: 18 }, (_, i) => i + 6); // 6:00 - 23:00
+	const hours = Array.from({ length: 18 }, (_, i) => i + 6); 
 
 	$effect(() => {
 		loadData();
@@ -43,8 +43,8 @@
 		const startHour = start.getHours() + start.getMinutes() / 60;
 		const endHour = end.getHours() + end.getMinutes() / 60;
 
-		const gridStart = 6; // grid starts at 6:00
-		const gridEnd = 24;  // grid ends at 24:00
+		const gridStart = 6;
+		const gridEnd = 24;
 		const totalHours = gridEnd - gridStart;
 
 		const leftPercent = Math.max(0, ((startHour - gridStart) / totalHours) * 100);
@@ -105,7 +105,6 @@
 		</div>
 
 		<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
-			<!-- Header: Hours -->
 			<div class="flex border-b border-base-200">
 				<div class="w-32 lg:w-40 shrink-0 px-3 py-2 bg-base-200/30 text-[10px] font-bold text-base-content/40 uppercase tracking-widest flex items-center">
 					Phòng
@@ -118,8 +117,6 @@
 					{/each}
 				</div>
 			</div>
-
-			<!-- Rows: Rooms -->
 			{#if rooms.length === 0}
 				<div class="p-12 text-center text-base-content/30 font-medium text-sm">Chưa có phòng nào trong hệ thống.</div>
 			{:else}
@@ -143,7 +140,6 @@
 									</span>
 								</div>
 							{/each}
-							<!-- Grid lines -->
 							<div class="absolute inset-0 flex pointer-events-none">
 								{#each hours as _}
 									<div class="flex-1 border-l border-base-200/30"></div>

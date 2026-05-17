@@ -268,7 +268,6 @@
 		</h3>
 		<div class="flex flex-col gap-4">
 			<div class="flex gap-4 items-end">
-				<!-- Image Upload -->
 				<div class="flex flex-col gap-2 shrink-0">
 					<span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Hình Ảnh</span>
 					<div class="relative w-20 h-20 rounded-xl border-dashed border-2 border-base-300 bg-base-200 overflow-hidden flex items-center justify-center group">
