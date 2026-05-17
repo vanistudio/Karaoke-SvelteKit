@@ -183,7 +183,9 @@
 									{#if bk.status === 'pending'}
 										<div class="badge badge-warning badge-sm rounded-md font-bold">CHỜ DUYỆT</div>
 									{:else if bk.status === 'confirmed'}
-										<div class="badge badge-success badge-sm rounded-md font-bold">THÀNH CÔNG</div>
+										<div class="badge badge-success badge-sm rounded-md font-bold">XÁC NHẬN</div>
+									{:else if bk.status === 'checked_in'}
+										<div class="badge badge-info badge-sm rounded-md font-bold">ĐÃ ĐẾN</div>
 									{:else}
 										<div class="badge badge-error badge-sm rounded-md font-bold text-white">ĐÃ HỦY</div>
 									{/if}
@@ -193,7 +195,7 @@
 								{#if bk.status === 'pending'}
 									<button onclick={() => cancelBooking(bk.id)} class="btn btn-xs btn-outline btn-error rounded-md font-bold">Hủy</button>
 								{/if}
-								{#if bk.status === 'confirmed'}
+								{#if bk.status === 'confirmed' || bk.status === 'checked_in'}
 									<a href="/booking/receipt/{bk.id}" class="btn btn-xs btn-outline btn-primary rounded-md font-bold">
 										<Icon icon="solar:document-text-line-duotone" class="text-sm"/> Hóa Đơn
 									</a>
@@ -204,6 +206,31 @@
 							</div>
 						</div>
 					</div>
+
+					<!-- Timeline -->
+					{#if bk.status !== 'cancelled'}
+						{@const steps = ['pending', 'confirmed', 'checked_in']}
+						{@const currentStep = steps.indexOf(bk.status)}
+						<div class="px-5 pb-4 pt-0">
+							<div class="flex items-center gap-1">
+								{#each steps as step, i}
+									{@const isCompleted = i <= currentStep}
+									{@const stepLabels = ['Đặt Phòng', 'Xác Nhận', 'Check-in']}
+									<div class="flex items-center gap-1 {i < steps.length - 1 ? 'flex-1' : ''}">
+										<div class="flex flex-col items-center">
+											<div class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black {isCompleted ? 'bg-primary text-white' : 'bg-base-200 text-base-content/30'}">
+												{#if isCompleted && i < currentStep}✓{:else}{i + 1}{/if}
+											</div>
+											<span class="text-[9px] font-bold mt-0.5 {isCompleted ? 'text-primary' : 'text-base-content/25'}">{stepLabels[i]}</span>
+										</div>
+										{#if i < steps.length - 1}
+											<div class="flex-1 h-0.5 rounded-full mx-1 {i < currentStep ? 'bg-primary' : 'bg-base-200'}"></div>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						</div>
+					{/if}
 				</div>
 			{/each}
 		</div>

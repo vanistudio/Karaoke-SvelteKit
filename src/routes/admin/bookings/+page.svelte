@@ -28,13 +28,39 @@
 	let confirmedCount = $derived(bookings.filter(b => b.status === 'confirmed').length);
 	let cancelledCount = $derived(bookings.filter(b => b.status === 'cancelled').length);
 
-	async function changeStatus(id: number, newStatus: 'pending' | 'confirmed' | 'cancelled') {
+	async function changeStatus(id: number, newStatus: 'pending' | 'confirmed' | 'cancelled' | 'checked_in') {
 		try {
 			await trpc().booking.changeStatus.mutate({ id, status: newStatus });
 			addToast(`Đơn #${id} đã cập nhật!`, 'success');
 			await loadData();
 		} catch (e: any) {
 			addToast(e?.message || 'Cập nhật thất bại.', 'error');
+		}
+	}
+
+	let cancelTarget = $state<{ id: number } | null>(null);
+	let cancelReason = $state('');
+	let isCancelling = $state(false);
+
+	function openCancelModal(id: number) {
+		cancelTarget = { id };
+		cancelReason = '';
+		(document.getElementById('cancel_reason_modal') as HTMLDialogElement)?.showModal();
+	}
+
+	async function handleCancelWithReason() {
+		if (!cancelTarget) return;
+		isCancelling = true;
+		try {
+			await trpc().booking.changeStatus.mutate({ id: cancelTarget.id, status: 'cancelled' });
+			addToast(`Đơn #${cancelTarget.id} đã hủy. Lý do: ${cancelReason || 'Không rõ'}`, 'success');
+			(document.getElementById('cancel_reason_modal') as HTMLDialogElement)?.close();
+			cancelTarget = null;
+			await loadData();
+		} catch (e: any) {
+			addToast(e?.message || 'Hủy thất bại.', 'error');
+		} finally {
+			isCancelling = false;
 		}
 	}
 
@@ -153,7 +179,7 @@
 										<button onclick={() => changeStatus(bk.id, 'confirmed')} class="btn btn-xs btn-success text-white join-item" title="Phê Duyệt">
 											<Icon icon="solar:check-circle-bold" class="text-sm"/>
 										</button>
-										<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item" title="Từ Chối">
+										<button onclick={() => openCancelModal(bk.id)} class="btn btn-xs btn-error text-white join-item" title="Từ Chối">
 											<Icon icon="solar:close-circle-bold" class="text-sm"/>
 										</button>
 									</div>
@@ -162,7 +188,7 @@
 										<button onclick={() => handleCheckin(bk.id)} class="btn btn-xs btn-info text-white join-item" title="Check-in">
 											<Icon icon="solar:login-3-bold" class="text-sm"/>
 										</button>
-										<button onclick={() => changeStatus(bk.id, 'cancelled')} class="btn btn-xs btn-error text-white join-item" title="Hủy">
+										<button onclick={() => openCancelModal(bk.id)} class="btn btn-xs btn-error text-white join-item" title="Hủy">
 											<Icon icon="solar:close-circle-bold" class="text-sm"/>
 										</button>
 									</div>
@@ -178,3 +204,23 @@
 		</div>
 	</div>
 </div>
+
+<dialog id="cancel_reason_modal" class="modal">
+	<div class="modal-box rounded-xl max-w-sm">
+		<h3 class="font-bold text-lg mb-3 flex items-center gap-2 text-red-500">
+			<Icon icon="solar:close-circle-bold-duotone" class="text-xl"/>
+			Xác Nhận Hủy Đơn
+		</h3>
+		{#if cancelTarget}
+			<p class="text-sm text-base-content/50 mb-3">Hủy đơn <span class="font-bold text-base-content">#{cancelTarget.id}</span>? Vui lòng nhập lý do:</p>
+			<textarea bind:value={cancelReason} placeholder="Lý do hủy (VD: Khách yêu cầu, hết phòng...)" class="textarea textarea-bordered w-full rounded-lg text-sm" rows="3"></textarea>
+			<div class="modal-action border-t border-base-200 pt-4">
+				<form method="dialog"><button class="btn btn-ghost rounded-lg font-medium" disabled={isCancelling}>Giữ Lại</button></form>
+				<button onclick={handleCancelWithReason} class="btn btn-error text-white rounded-lg font-bold px-6" disabled={isCancelling}>
+					{#if isCancelling}<span class="loading loading-spinner loading-sm"></span>{:else}Xác Nhận Hủy{/if}
+				</button>
+			</div>
+		{/if}
+	</div>
+	<form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
