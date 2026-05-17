@@ -1,34 +1,34 @@
-import { router, adminProcedure } from '$lib/server/trpc/t';
+import { router, managerProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { dashboardService } from '$lib/server/services/dashboard.service';
 
 export const dashboardRouter = router({
-	stats: adminProcedure.query(async () => {
+	stats: managerProcedure.query(async () => {
 		return await dashboardService.getStats();
 	}),
-	recentBookings: adminProcedure
+	recentBookings: managerProcedure
 		.input(z.number().optional())
 		.query(async ({ input }) => {
 			return await dashboardService.getRecentBookings(input || 5);
 		}),
-	enrichedBookings: adminProcedure.query(async () => {
+	enrichedBookings: managerProcedure.query(async () => {
 		return await dashboardService.getEnrichedBookings();
 	}),
-	revenueChart: adminProcedure
+	revenueChart: managerProcedure
 		.input(z.number().min(1).max(90).optional())
 		.query(async ({ input }) => {
 			return await dashboardService.getRevenueChart(input || 7);
 		}),
-	occupancy: adminProcedure.query(async () => {
+	occupancy: managerProcedure.query(async () => {
 		return await dashboardService.getOccupancyRate();
 	}),
-	heatmap: adminProcedure.query(async () => {
+	heatmap: managerProcedure.query(async () => {
 		return await dashboardService.getHeatmapData();
 	}),
-	topRooms: adminProcedure.query(async () => {
+	topRooms: managerProcedure.query(async () => {
 		return await dashboardService.getTopRooms(5);
 	}),
-	topCustomers: adminProcedure.query(async () => {
+	topCustomers: managerProcedure.query(async () => {
 		return await dashboardService.getTopCustomers(5);
 	})
 });

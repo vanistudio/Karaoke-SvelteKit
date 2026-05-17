@@ -122,10 +122,10 @@
 
 				<div class="flex items-center gap-2 shrink-0">
 					{#if user}
-						{#if user.role === 'admin'}
+						{#if ['admin', 'manager', 'staff'].includes(user.role)}
 							<a href="/admin" class="hidden md:flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-primary bg-primary/8 hover:bg-primary/15 px-3.5 py-2 rounded-lg transition-colors">
 								<Icon icon="solar:pie-chart-2-bold-duotone" class="text-sm"/>
-								Admin
+								{user.role === 'admin' ? 'Admin' : user.role === 'manager' ? 'Quản Lý' : 'Nhân Viên'}
 							</a>
 						{/if}
 						<div class="relative">
@@ -153,7 +153,7 @@
 										<Icon icon="solar:ticket-line-duotone" class="text-lg text-base-content/50" />
 										Lịch Sử Đặt Phòng
 									</a>
-									{#if user.role === 'admin'}
+									{#if ['admin', 'manager', 'staff'].includes(user.role)}
 										<a href="/admin" onclick={() => userMenuOpen = false} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors">
 											<Icon icon="solar:pie-chart-2-bold-duotone" class="text-lg" />
 											Khu Vực Quản Trị
