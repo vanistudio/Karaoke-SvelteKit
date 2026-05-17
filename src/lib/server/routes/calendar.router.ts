@@ -1,11 +1,11 @@
-import { router, adminProcedure } from '$lib/server/trpc/t';
+import { router, staffProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { db } from '$lib/server/db';
 import { booking, room, user } from '$lib/server/db/schema';
 import { and, gte, lte, sql, eq } from 'drizzle-orm';
 
 export const calendarRouter = router({
-	getDay: adminProcedure
+	getDay: staffProcedure
 		.input(z.string())
 		.query(async ({ input }) => {
 			const date = new Date(input);

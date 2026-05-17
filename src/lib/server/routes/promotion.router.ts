@@ -1,4 +1,4 @@
-import { router, publicProcedure, protectedProcedure, adminProcedure } from '$lib/server/trpc/t';
+import { router, publicProcedure, protectedProcedure, adminProcedure, managerProcedure } from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { promotionController } from '$lib/server/controllers/promotion.controller';
 import { db } from '$lib/server/db';
@@ -6,7 +6,7 @@ import { promotion } from '$lib/server/db/schema';
 import { eq, and, gt, sql } from 'drizzle-orm';
 
 export const promotionRouter = router({
-	list: adminProcedure.query(async () => {
+	list: managerProcedure.query(async () => {
 		return await promotionController.listPromotions();
 	}),
 	listPublic: publicProcedure.query(async () => {
@@ -21,13 +21,13 @@ export const promotionRouter = router({
 		);
 		return results;
 	}),
-	getById: adminProcedure.input(z.number()).query(async ({ input }) => {
+	getById: managerProcedure.input(z.number()).query(async ({ input }) => {
 		return await promotionController.getPromotion(input);
 	}),
-	count: adminProcedure.query(async () => {
+	count: managerProcedure.query(async () => {
 		return await promotionController.countPromotions();
 	}),
-	create: adminProcedure
+	create: managerProcedure
 		.input(
 			z.object({
 				code: z.string().min(1).transform(v => v.toUpperCase()),

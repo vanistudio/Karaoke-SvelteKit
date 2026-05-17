@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { bookingController } from '$lib/server/controllers/booking.controller';
 
 export const bookingRouter = router({
-	list: adminProcedure.query(async () => {
+	list: staffProcedure.query(async () => {
 		return await bookingController.listBookings();
 	}),
 	getById: protectedProcedure.input(z.number()).query(async ({ input }) => {
