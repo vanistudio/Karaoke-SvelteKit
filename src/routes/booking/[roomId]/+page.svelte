@@ -78,6 +78,9 @@
 		const [eh, em] = selectedEndTime.split(':').map(Number);
 		const startTime = new Date(year, month, day, sh, sm);
 		const endTime = new Date(year, month, day, eh, em);
+		if (endTime < startTime) {
+			endTime.setDate(endTime.getDate() + 1);
+		}
 		return { startTime, endTime };
 	}
 
@@ -134,8 +137,8 @@
 
 	async function checkAvailability() {
 		const { startTime, endTime } = buildTimeRange();
-		if (endTime <= startTime) {
-			addToast('Giờ kết thúc phải sau giờ bắt đầu.', 'error');
+		if (selectedEndTime === selectedStartTime) {
+			addToast('Gi? k?t th�c kh�ng du?c tr�ng gi? b?t d?u.', 'error');
 			return;
 		}
 		try {
@@ -164,8 +167,8 @@
 			return;
 		}
 		const { startTime, endTime } = buildTimeRange();
-		if (endTime <= startTime) {
-			addToast('Giờ kết thúc phải sau giờ bắt đầu.', 'error');
+		if (selectedEndTime === selectedStartTime) {
+			addToast('Gi? k?t th�c kh�ng du?c tr�ng gi? b?t d?u.', 'error');
 			return;
 		}
 		isSubmitting = true;
@@ -496,3 +499,4 @@
 		</div>
 	</div>
 {/if}
+

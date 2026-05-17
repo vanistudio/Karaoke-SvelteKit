@@ -1,4 +1,11 @@
-import { router, publicProcedure, protectedProcedure, adminProcedure, rateLimitedProcedure, staffProcedure } from '$lib/server/trpc/t';
+import {
+	router,
+	publicProcedure,
+	protectedProcedure,
+	adminProcedure,
+	rateLimitedProcedure,
+	staffProcedure
+} from '$lib/server/trpc/t';
 import { z } from 'zod';
 import { bookingController } from '$lib/server/controllers/booking.controller';
 import { activityService } from '$lib/server/services/activity.service';
@@ -54,18 +61,16 @@ export const bookingRouter = router({
 				input.voucherCode
 			);
 		}),
-	cancelMyBooking: protectedProcedure
-		.input(z.number())
-		.mutation(async ({ input, ctx }) => {
-			const bk = await bookingController.getBooking(input);
-			if (bk.userId !== ctx.user.id) {
-				throw new Error('Bạn không có quyền hủy đơn này.');
-			}
-			if (bk.status !== 'pending') {
-				throw new Error('Chỉ có thể hủy đơn đang chờ duyệt.');
-			}
-			return await bookingController.changeStatus(input, 'cancelled');
-		}),
+	cancelMyBooking: protectedProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+		const bk = await bookingController.getBooking(input);
+		if (bk.userId !== ctx.user.id) {
+			throw new Error('Bạn không có quyền hủy đơn này.');
+		}
+		if (bk.status !== 'pending') {
+			throw new Error('Chỉ có thể hủy đơn đang chờ duyệt.');
+		}
+		return await bookingController.changeStatus(input, 'cancelled');
+	}),
 	changeStatus: adminProcedure
 		.input(
 			z.object({
@@ -75,18 +80,22 @@ export const bookingRouter = router({
 		)
 		.mutation(async ({ input, ctx }) => {
 			const updated = await bookingController.changeStatus(input.id, input.status);
-			await activityService.log(ctx.user.id, 'status_change', 'booking', input.id, `Admin d?i tr?ng th�i th�nh ${input.status}`);
+			await activityService.log(
+				ctx.user.id,
+				'status_change',
+				'booking',
+				input.id,
+				`Admin đổi trạng thái ${input.status}`
+			);
 			return updated;
 		}),
-	checkin: staffProcedure
-		.input(z.number())
-		.mutation(async ({ input, ctx }) => {
-			const bk = await bookingController.getBooking(input);
-			if (bk.status !== 'confirmed') {
-				throw new Error('Chỉ có thể check-in đơn đã xác nhận.');
-			}
-			const checkedIn = await bookingController.changeStatus(input, 'checked_in');
-			await activityService.log(ctx.user.id, 'status_change', 'booking', input, 'Check-in don');
-			return checkedIn;
-		})
+	checkin: staffProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+		const bk = await bookingController.getBooking(input);
+		if (bk.status !== 'confirmed') {
+			throw new Error('Chỉ có thể check-in đơn đã xác nhận.');
+		}
+		const checkedIn = await bookingController.changeStatus(input, 'checked_in');
+		await activityService.log(ctx.user.id, 'status_change', 'booking', input, 'Check-in don');
+		return checkedIn;
+	})
 });

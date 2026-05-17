@@ -43,23 +43,32 @@ export class BookingService {
 		selectedServices: { id: number; qty: number }[] = [],
 		voucherCode?: string
 	) {
+		const normalizedStartTime = new Date(data.startTime);
+		const normalizedEndTime = new Date(data.endTime);
+		if (normalizedStartTime.getTime() === normalizedEndTime.getTime()) {
+			throw new Error('Start time and end time cannot be the same');
+		}
+		if (normalizedEndTime < normalizedStartTime) {
+			normalizedEndTime.setDate(normalizedEndTime.getDate() + 1);
+		}
+
 		const room = await roomRepository.findById(data.roomId);
 		if (!room) throw new Error('Room does not exist');
 
-		if (data.startTime >= data.endTime) {
+		if (normalizedStartTime >= normalizedEndTime) {
 			throw new Error('Start time must be before end time');
 		}
 
 		const now = new Date();
-		if (data.startTime < now) {
+		if (normalizedStartTime < now) {
 			throw new Error('Cannot book a time slot in the past');
 		}
 
-		const isAvailable = await this.checkAvailability(data.roomId, data.startTime, data.endTime);
+		const isAvailable = await this.checkAvailability(data.roomId, normalizedStartTime, normalizedEndTime);
 		if (!isAvailable) {
 			throw new Error('Room is not available for the selected time slot');
 		}
-		const roomCost = await pricingService.calculateRoomCost(room.pricePerHour, data.startTime, data.endTime);
+		const roomCost = await pricingService.calculateRoomCost(room.pricePerHour, normalizedStartTime, normalizedEndTime);
 		let extraServicesCost = 0;
 		const validServicesToInsert = [];
 		for (const svc of selectedServices) {
@@ -80,6 +89,8 @@ export class BookingService {
 
 		const bookingData = {
 			...data,
+			startTime: normalizedStartTime,
+			endTime: normalizedEndTime,
 			totalCost: finalCost,
 			voucherCode: voucherCode || null,
 			discountAmount: discountAmount,

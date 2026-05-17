@@ -43,7 +43,14 @@
 
 	function fmtTime(d: string | Date | null) {
 		if (!d) return '—';
-		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(d));
+		return new Intl.DateTimeFormat('vi-VN', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit'
+		}).format(new Date(d));
 	}
 
 	const actionIcons: Record<string, { icon: string; cls: string }> = {
@@ -61,7 +68,7 @@
 		user: 'Thành Viên',
 		setting: 'Cài Đặt',
 		branch: 'Chi Nhánh',
-		pricing: 'Giá/Khung Gi�'
+		pricing: 'Giá/Khung Giờ'
 	};
 
 	const actionLabels: Record<string, string> = {
@@ -75,60 +82,142 @@
 <svelte:head><title>Nhật Ký Hoạt Động | KaraSystem Admin</title></svelte:head>
 
 {#if !isReady}
-	<div class="flex items-center justify-center min-h-[50vh]">
-		<span class="loading loading-spinner loading-lg text-primary"></span>
+	<div class="flex min-h-[50vh] items-center justify-center">
+		<span class="loading loading-lg loading-spinner text-primary"></span>
 	</div>
 {:else}
 	<div class="flex flex-col gap-6">
 		<div class="flex items-center justify-between">
 			<div>
 				<h2 class="text-xl font-bold">Nhật Ký Hoạt Động</h2>
-				<p class="text-sm text-base-content/40 font-medium mt-0.5">Tổng cộng {totalLogs} hoạt động được ghi nhận</p>
+				<p class="mt-0.5 text-sm font-medium text-base-content/40">
+					Tổng cộng {totalLogs} hoạt động được ghi nhận
+				</p>
 			</div>
 		</div>
 
-		<div class="flex gap-2 flex-wrap">
-			<button onclick={() => { filterEntity = ''; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === '' ? 'btn-primary' : 'btn-ghost'}">Tất Cả</button>
-			<button onclick={() => { filterEntity = 'booking'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'booking' ? 'btn-primary' : 'btn-ghost'}">Đặt Phòng</button>
-			<button onclick={() => { filterEntity = 'room'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'room' ? 'btn-primary' : 'btn-ghost'}">Phòng</button>
-			<button onclick={() => { filterEntity = 'service'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'service' ? 'btn-primary' : 'btn-ghost'}">Dịch Vụ</button>
-			<button onclick={() => { filterEntity = 'promotion'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'promotion' ? 'btn-primary' : 'btn-ghost'}">Khuyến Mãi</button>
-			<button onclick={() => { filterEntity = 'user'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'user' ? 'btn-primary' : 'btn-ghost'}">Thành Viên</button>
-			<button onclick={() => { filterEntity = 'branch'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'branch' ? 'btn-primary' : 'btn-ghost'}">Chi Nhánh</button>
-			<button onclick={() => { filterEntity = 'pricing'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'pricing' ? 'btn-primary' : 'btn-ghost'}">Giá/Khung Gi�</button>
-			<button onclick={() => { filterEntity = 'setting'; handleFilter(); }} class="btn btn-xs rounded-lg font-bold {filterEntity === 'setting' ? 'btn-primary' : 'btn-ghost'}">Cài Đặt</button>
+		<div class="flex flex-wrap gap-2">
+			<button
+				onclick={() => {
+					filterEntity = '';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === '' ? 'btn-primary' : 'btn-ghost'}"
+				>Tất Cả</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'booking';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'booking'
+					? 'btn-primary'
+					: 'btn-ghost'}">Đặt Phòng</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'room';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'room'
+					? 'btn-primary'
+					: 'btn-ghost'}">Phòng</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'service';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'service'
+					? 'btn-primary'
+					: 'btn-ghost'}">Dịch Vụ</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'promotion';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'promotion'
+					? 'btn-primary'
+					: 'btn-ghost'}">Khuyến Mãi</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'user';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'user'
+					? 'btn-primary'
+					: 'btn-ghost'}">Thành Viên</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'branch';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'branch'
+					? 'btn-primary'
+					: 'btn-ghost'}">Chi Nhánh</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'pricing';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'pricing'
+					? 'btn-primary'
+					: 'btn-ghost'}">Giá/Khung Giờ</button
+			>
+			<button
+				onclick={() => {
+					filterEntity = 'setting';
+					handleFilter();
+				}}
+				class="btn rounded-lg font-bold btn-xs {filterEntity === 'setting'
+					? 'btn-primary'
+					: 'btn-ghost'}">Cài Đặt</button
+			>
 		</div>
 
-		<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
+		<div class="overflow-hidden rounded-xl border border-base-300/50 bg-base-100">
 			{#if logs.length === 0}
-				<div class="p-12 text-center text-base-content/30 font-medium">
-					<Icon icon="solar:history-line-duotone" class="text-4xl mx-auto mb-3 opacity-50" />
+				<div class="p-12 text-center font-medium text-base-content/30">
+					<Icon icon="solar:history-line-duotone" class="mx-auto mb-3 text-4xl opacity-50" />
 					<p class="text-sm">Chưa có hoạt động nào được ghi nhận.</p>
 				</div>
 			{:else}
 				<div class="divide-y divide-base-200">
 					{#each logs as log}
-						{@const ai = actionIcons[log.action] || { icon: 'solar:info-circle-bold-duotone', cls: 'text-base-content/40' }}
-						<div class="flex items-start gap-4 px-5 py-4 hover:bg-base-200/30 transition-colors">
-							<div class="w-9 h-9 rounded-lg bg-base-200 flex items-center justify-center shrink-0 mt-0.5">
+						{@const ai = actionIcons[log.action] || {
+							icon: 'solar:info-circle-bold-duotone',
+							cls: 'text-base-content/40'
+						}}
+						<div class="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-base-200/30">
+							<div
+								class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-base-200"
+							>
 								<Icon icon={ai.icon} class="text-lg {ai.cls}" />
 							</div>
-							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-2 flex-wrap">
+							<div class="min-w-0 flex-1">
+								<div class="flex flex-wrap items-center gap-2">
 									<span class="text-sm font-bold">{log.userName || 'Hệ thống'}</span>
 									<span class="text-xs font-medium text-base-content/40">
 										{actionLabels[log.action] || log.action}
 									</span>
-									<span class="badge badge-ghost badge-xs rounded-md font-bold">{entityLabels[log.entity] || log.entity}</span>
+									<span class="badge rounded-md badge-ghost badge-xs font-bold"
+										>{entityLabels[log.entity] || log.entity}</span
+									>
 									{#if log.entityId}
-										<span class="text-xs font-mono text-base-content/30">#{log.entityId}</span>
+										<span class="font-mono text-xs text-base-content/30">#{log.entityId}</span>
 									{/if}
 								</div>
 								{#if log.details}
-									<p class="text-xs text-base-content/50 font-medium mt-1">{log.details}</p>
+									<p class="mt-1 text-xs font-medium text-base-content/50">{log.details}</p>
 								{/if}
 							</div>
-							<span class="text-[11px] text-base-content/30 font-medium whitespace-nowrap shrink-0">{fmtTime(log.createdAt)}</span>
+							<span class="shrink-0 text-[11px] font-medium whitespace-nowrap text-base-content/30"
+								>{fmtTime(log.createdAt)}</span
+							>
 						</div>
 					{/each}
 				</div>
@@ -137,8 +226,12 @@
 
 		{#if totalPages > 1}
 			<div class="flex items-center justify-center gap-2">
-				<button onclick={() => goToPage(currentPage - 1)} class="btn btn-ghost btn-sm rounded-lg" disabled={currentPage <= 1}>
-					<Icon icon="solar:arrow-left-line-duotone" class="text-lg"/>
+				<button
+					onclick={() => goToPage(currentPage - 1)}
+					class="btn rounded-lg btn-ghost btn-sm"
+					disabled={currentPage <= 1}
+				>
+					<Icon icon="solar:arrow-left-line-duotone" class="text-lg" />
 				</button>
 				{#each Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
 					if (totalPages <= 7) return i + 1;
@@ -146,16 +239,23 @@
 					if (currentPage >= totalPages - 3) return totalPages - 6 + i;
 					return currentPage - 3 + i;
 				}) as p}
-					<button onclick={() => goToPage(p)} class="btn btn-sm rounded-lg min-w-[36px] {p === currentPage ? 'btn-primary' : 'btn-ghost'} font-bold">
+					<button
+						onclick={() => goToPage(p)}
+						class="btn min-w-[36px] rounded-lg btn-sm {p === currentPage
+							? 'btn-primary'
+							: 'btn-ghost'} font-bold"
+					>
 						{p}
 					</button>
 				{/each}
-				<button onclick={() => goToPage(currentPage + 1)} class="btn btn-ghost btn-sm rounded-lg" disabled={currentPage >= totalPages}>
-					<Icon icon="solar:arrow-right-line-duotone" class="text-lg"/>
+				<button
+					onclick={() => goToPage(currentPage + 1)}
+					class="btn rounded-lg btn-ghost btn-sm"
+					disabled={currentPage >= totalPages}
+				>
+					<Icon icon="solar:arrow-right-line-duotone" class="text-lg" />
 				</button>
 			</div>
 		{/if}
 	</div>
 {/if}
-
-
