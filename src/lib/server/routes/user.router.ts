@@ -11,7 +11,7 @@ export const userRouter = router({
 				search: z.string().optional(),
 				role: z.string().optional(),
 				tier: z.string().optional()
-			}).optional().default({})
+			}).optional().default({ page: 1, limit: 10 })
 		)
 		.query(async ({ input }) => {
 			return await userService.listUsers(input);

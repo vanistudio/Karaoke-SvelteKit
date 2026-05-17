@@ -7,6 +7,7 @@
 	import { signOut } from '$lib/auth-client';
 	import Toast from '$lib/components/Toast.svelte';
 	import { addToast } from '$lib/stores/toast';
+	import { trpc } from '$lib/trpc/client';
 
 	let { children } = $props();
 
@@ -14,6 +15,20 @@
 	let mobileMenuOpen = $state(false);
 	let userMenuOpen = $state(false);
 	let isAdminRoute = $derived(String($page.url.pathname).startsWith('/admin'));
+
+	let siteSettings = $state<Record<string, string>>({
+		site_name: 'KaraSystem',
+		site_slogan: 'Đẳng cấp âm thanh',
+		site_phone: '1900 1000',
+		site_address: '123 Premium Street, District 1',
+		site_email: 'contact@karasystem.vn'
+	});
+
+	$effect(() => {
+		if (!isAdminRoute) {
+			trpc().setting.getPublic.query().then(data => { siteSettings = data; }).catch(() => {});
+		}
+	});
 
 	const navigation = [
 		{ name: 'Trang Chủ', href: '/', icon: 'solar:home-2-line-duotone', iconActive: 'solar:home-2-bold-duotone' },
@@ -59,19 +74,19 @@
 		<div class="hidden lg:block bg-neutral text-neutral-content/70 text-[10px] tracking-[0.2em] uppercase font-semibold">
 			<div class="max-w-7xl mx-auto px-8 h-9 flex items-center justify-between">
 				<div class="flex items-center gap-8">
-					<a href="tel:19001000" class="flex items-center gap-1.5 hover:text-white transition-colors">
+					<a href="tel:{siteSettings.site_phone?.replace(/\s/g, '')}" class="flex items-center gap-1.5 hover:text-white transition-colors">
 						<Icon icon="solar:phone-calling-line-duotone" class="text-sm" />
-						1900 1000
+						{siteSettings.site_phone}
 					</a>
 					<span class="flex items-center gap-1.5 text-neutral-content/40">
 						<Icon icon="solar:map-point-wave-line-duotone" class="text-sm" />
-						123 Premium Street, District 1
+						{siteSettings.site_address}
 					</span>
 				</div>
 				<div class="flex items-center gap-6">
 					<span class="text-primary flex items-center gap-1.5">
-						<Icon icon="solar:star-fall-bold-duotone" class="text-sm"/>
-						Giờ Vàng Giảm 20%
+						<Icon icon="solar:clock-circle-line-duotone" class="text-sm"/>
+						Mở cửa: {siteSettings.site_open_time || '08:00'} — {siteSettings.site_close_time || '02:00'}
 					</span>
 				</div>
 			</div>
@@ -229,11 +244,11 @@
 							<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-3xl" />
 							<div class="flex flex-col">
 								<span class="text-lg font-black uppercase tracking-[0.12em] leading-none">KARA<span class="text-primary">SYSTEM</span></span>
-								<span class="text-[8px] tracking-[0.25em] text-base-content/40 uppercase font-medium mt-0.5">Đẳng cấp âm thanh</span>
+								<span class="text-[8px] tracking-[0.25em] text-base-content/40 uppercase font-medium mt-0.5">{siteSettings.site_slogan}</span>
 							</div>
 						</a>
 						<p class="text-[13px] text-base-content/50 leading-relaxed pr-4">
-							Tổ hợp phòng hát thương gia đạt tiêu chuẩn âm thanh châu Âu. Phục vụ từ 2018.
+							{siteSettings.site_address} • {siteSettings.site_phone}
 						</p>
 						<div class="flex gap-3 items-center">
 							<a href="/" class="w-9 h-9 rounded-lg bg-base-200 flex items-center justify-center text-base-content/40 hover:text-primary hover:bg-primary/10 transition-colors"><Icon icon="solar:map-point-wave-line-duotone" class="text-lg" /></a>

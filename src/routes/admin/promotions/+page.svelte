@@ -16,7 +16,8 @@
 		minOrderAmount: 0,
 		maxUsage: 100,
 		expiresAt: '',
-		isActive: true
+		isActive: true,
+		isPublic: false
 	});
 	let editTarget = $state<{ id: number } | null>(null);
 	let deleteTarget = $state<{ id: number; code: string } | null>(null);
@@ -48,7 +49,7 @@
 
 	function openCreateModal() {
 		editTarget = null;
-		form = { code: '', type: 'percent', value: 10, minOrderAmount: 0, maxUsage: 100, expiresAt: '', isActive: true };
+		form = { code: '', type: 'percent', value: 10, minOrderAmount: 0, maxUsage: 100, expiresAt: '', isActive: true, isPublic: false };
 		(document.getElementById('promo_modal') as HTMLDialogElement)?.showModal();
 	}
 
@@ -61,7 +62,8 @@
 			minOrderAmount: p.minOrderAmount,
 			maxUsage: p.maxUsage,
 			expiresAt: p.expiresAt ? new Date(p.expiresAt).toISOString().slice(0, 16) : '',
-			isActive: p.isActive
+			isActive: p.isActive,
+			isPublic: p.isPublic ?? false
 		};
 		(document.getElementById('promo_modal') as HTMLDialogElement)?.showModal();
 	}
@@ -81,7 +83,8 @@
 				minOrderAmount: form.minOrderAmount,
 				maxUsage: form.maxUsage,
 				expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
-				isActive: form.isActive
+				isActive: form.isActive,
+				isPublic: form.isPublic
 			};
 			if (editTarget) {
 				await trpc().promotion.update.mutate({ id: editTarget.id, ...payload });
@@ -283,11 +286,19 @@
 				<div class="label"><span class="label-text font-bold text-xs uppercase tracking-widest text-base-content/50">Hạn Sử Dụng</span></div>
 				<input type="datetime-local" bind:value={form.expiresAt} class="input input-bordered w-full rounded-lg text-sm font-medium" />
 			</label>
-			<div class="form-control">
-				<label class="label cursor-pointer justify-start gap-3">
-					<input type="checkbox" bind:checked={form.isActive} class="toggle toggle-primary toggle-sm" />
-					<span class="label-text font-bold text-sm">Kích hoạt ngay</span>
-				</label>
+			<div class="flex flex-col gap-2">
+				<div class="form-control">
+					<label class="label cursor-pointer justify-start gap-3">
+						<input type="checkbox" bind:checked={form.isActive} class="toggle toggle-primary toggle-sm" />
+						<span class="label-text font-bold text-sm">Kích hoạt ngay</span>
+					</label>
+				</div>
+				<div class="form-control">
+					<label class="label cursor-pointer justify-start gap-3">
+						<input type="checkbox" bind:checked={form.isPublic} class="toggle toggle-success toggle-sm" />
+						<span class="label-text font-bold text-sm">Hiển thị cho khách hàng</span>
+					</label>
+				</div>
 			</div>
 			<div class="modal-action border-t border-base-200 pt-4">
 				<button onclick={closeModal} class="btn btn-ghost rounded-lg font-medium" disabled={isSaving}>Hủy</button>
