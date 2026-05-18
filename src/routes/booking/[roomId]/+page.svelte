@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { trpc } from '$lib/trpc/client';
@@ -144,6 +144,14 @@
 		}
 	}
 
+	function getBookingErrorMessage(error: any, fallback: string) {
+		const message = error?.message || '';
+		if (message.includes('Cannot book a time slot in the past')) {
+			return 'Khung giờ đã chọn đang ở quá khứ. Vui lòng chọn thời gian từ hiện tại trở đi.';
+		}
+		return message || fallback;
+	}
+
 	async function checkAvailability() {
 		const { startTime, endTime } = buildTimeRange();
 		if (selectedEndTime === selectedStartTime) {
@@ -164,8 +172,8 @@
 			} else {
 				addToast('Phòng đã bận trong khung giờ này. Vui lòng chọn giờ khác.', 'error');
 			}
-		} catch (error) {
-			addToast('Kiểm tra thất bại. Vui lòng thử lại.', 'error');
+		} catch (error: any) {
+			addToast(getBookingErrorMessage(error, 'Kiểm tra thất bại. Vui lòng thử lại.'), 'error');
 		}
 	}
 
@@ -199,7 +207,10 @@
 			addToast('Đặt phòng thành công! Vui lòng chờ xác nhận từ quản lý.', 'success');
 			await goto('/my-bookings', { invalidateAll: true });
 		} catch (error: any) {
-			addToast(error?.message || 'Đặt phòng thất bại. Vui lòng kiểm tra lại.', 'error');
+			addToast(
+				getBookingErrorMessage(error, 'Đặt phòng thất bại. Vui lòng kiểm tra lại.'),
+				'error'
+			);
 		} finally {
 			isSubmitting = false;
 		}
@@ -223,7 +234,10 @@
 			}
 			discount = Math.min(discount, totalCost());
 			voucherResult = { discount, code: result.code, type: result.type, value: result.value };
-			addToast(`Áp dụng mã ${result.code} thành công! Giảm ${formatVND(discount)}`, 'success');
+			addToast(
+				`Áp dụng mã ${result.code} thành công! Giảm ${formatVND(discount)}`,
+				'success'
+			);
 		} catch (e: any) {
 			voucherError = e?.message || 'Mã voucher không hợp lệ.';
 			addToast(voucherError, 'error');
@@ -634,7 +648,8 @@
 						</button>
 						{#if !user}
 							<p class="mt-2 text-center text-xs font-medium text-base-content/50">
-								Bạn cần <a href="/login" class="font-bold text-primary hover:underline">đăng nhập</a
+								Báº¡n cáº§n <a href="/login" class="font-bold text-primary hover:underline"
+									>đăng nhập</a
 								> để tiếp tục.
 							</p>
 						{/if}

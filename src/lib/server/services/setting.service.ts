@@ -102,8 +102,12 @@ export class SettingService {
 		const keys = ['booking_min_hours', 'booking_max_hours', 'booking_advance_days'];
 		const map = await this.getSettingsMap(keys);
 
-		const minHours = Number(map['booking_min_hours'] ?? this.parseIntegerSetting('booking_min_hours', 1));
-		const maxHours = Number(map['booking_max_hours'] ?? this.parseIntegerSetting('booking_max_hours', 8));
+		const minHours = Number(
+			map['booking_min_hours'] ?? this.parseIntegerSetting('booking_min_hours', 1)
+		);
+		const maxHours = Number(
+			map['booking_max_hours'] ?? this.parseIntegerSetting('booking_max_hours', 8)
+		);
 		const advanceDays = Number(
 			map['booking_advance_days'] ?? this.parseIntegerSetting('booking_advance_days', 30)
 		);

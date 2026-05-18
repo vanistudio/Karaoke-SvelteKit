@@ -5,6 +5,12 @@
       "source": "bobmatnyc/claude-mpm-skills",
       "sourceType": "github",
       "computedHash": "ad61f0850a111a44ef32b7a0188b34b0113013d495ba031bf690018909e96374"
+    },
+    "email-best-practices": {
+      "source": "resend/email-best-practices",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "8eddb5aabeb9b5a0d399fceb95b07a4691e0abf7a848f755735176197d3f49b8"
     }
   }
 }

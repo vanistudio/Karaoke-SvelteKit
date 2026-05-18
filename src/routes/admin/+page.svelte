@@ -52,7 +52,13 @@
 
 	function fmtTime(d: string | Date | null) {
 		if (!d) return '—';
-		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(d));
+		return new Intl.DateTimeFormat('vi-VN', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		}).format(new Date(d));
 	}
 
 	function fmtShortDate(d: string) {
@@ -60,11 +66,12 @@
 		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(date);
 	}
 
-	let maxRevenue = $derived(Math.max(...chartData.map(d => d.revenue), 1));
+	let maxRevenue = $derived(Math.max(...chartData.map((d) => d.revenue), 1));
 
 	const statusMap: Record<string, { text: string; cls: string }> = {
 		pending: { text: 'Chờ Duyệt', cls: 'badge-warning' },
 		confirmed: { text: 'Xác Nhận', cls: 'badge-success' },
+		checked_in: { text: 'Đã Đến', cls: 'badge-info' },
 		cancelled: { text: 'Đã Hủy', cls: 'badge-error text-white' }
 	};
 </script>
@@ -72,81 +79,108 @@
 <svelte:head><title>Tổng Quan | KaraSystem Admin</title></svelte:head>
 
 {#if !isReady}
-	<div class="flex items-center justify-center min-h-[50vh]">
-		<span class="loading loading-spinner loading-lg text-primary"></span>
+	<div class="flex min-h-[50vh] items-center justify-center">
+		<span class="loading loading-lg loading-spinner text-primary"></span>
 	</div>
 {:else}
 	<div class="flex flex-col gap-6">
 		<div class="flex items-center justify-between">
 			<div>
 				<h2 class="text-xl font-bold">Tổng Quan</h2>
-				<p class="text-sm text-base-content/40 font-medium mt-0.5">Báo cáo hoạt động hệ thống</p>
+				<p class="mt-0.5 text-sm font-medium text-base-content/40">Báo cáo hoạt động hệ thống</p>
 			</div>
-			<button onclick={loadData} class="btn btn-ghost btn-sm rounded-lg text-base-content/40 hover:text-primary">
-				<Icon icon="solar:refresh-line-duotone" class="text-lg"/>
+			<button
+				onclick={loadData}
+				class="btn rounded-lg text-base-content/40 btn-ghost btn-sm hover:text-primary"
+			>
+				<Icon icon="solar:refresh-line-duotone" class="text-lg" />
 				Làm Mới
 			</button>
 		</div>
 
-		<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-			<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
-				<div class="flex items-center justify-between mb-3">
-					<div class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+		<div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+			<div class="rounded-xl border border-base-300/50 bg-base-100 p-4 lg:p-5">
+				<div class="mb-3 flex items-center justify-between">
+					<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
 						<Icon icon="solar:wallet-line-duotone" class="text-lg text-emerald-500" />
 					</div>
 					{#if stats.confirmedBookings > 0}
-						<span class="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full">{stats.confirmedBookings} xác nhận</span>
+						<span
+							class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600"
+							>{stats.confirmedBookings} xác nhận</span
+						>
 					{/if}
 				</div>
-				<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Doanh Thu Hôm Nay</p>
-				<p class="text-lg lg:text-xl font-black text-emerald-600 mt-1">{fmtVND(stats.todayRevenue)}</p>
+				<p class="text-[10px] font-bold tracking-widest text-base-content/40 uppercase">
+					Doanh Thu Hôm Nay
+				</p>
+				<p class="mt-1 text-lg font-black text-emerald-600 lg:text-xl">
+					{fmtVND(stats.todayRevenue)}
+				</p>
 			</div>
 
-			<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
-				<div class="flex items-center justify-between mb-3">
-					<div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+			<div class="rounded-xl border border-base-300/50 bg-base-100 p-4 lg:p-5">
+				<div class="mb-3 flex items-center justify-between">
+					<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
 						<Icon icon="solar:ticket-line-duotone" class="text-lg text-blue-500" />
 					</div>
 					{#if stats.pendingBookings > 0}
-						<span class="text-[10px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded-full">{stats.pendingBookings} chờ duyệt</span>
+						<span
+							class="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600"
+							>{stats.pendingBookings} chờ duyệt</span
+						>
 					{/if}
 				</div>
-				<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Tổng Đặt Chỗ</p>
-				<p class="text-lg lg:text-xl font-black mt-1">{stats.totalBookings}</p>
+				<p class="text-[10px] font-bold tracking-widest text-base-content/40 uppercase">
+					Tổng Đặt Chỗ
+				</p>
+				<p class="mt-1 text-lg font-black lg:text-xl">{stats.totalBookings}</p>
 			</div>
 
-			<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
-				<div class="flex items-center justify-between mb-3">
-					<div class="w-9 h-9 rounded-lg bg-violet-500/10 flex items-center justify-center">
+			<div class="rounded-xl border border-base-300/50 bg-base-100 p-4 lg:p-5">
+				<div class="mb-3 flex items-center justify-between">
+					<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
 						<Icon icon="solar:home-smile-angle-line-duotone" class="text-lg text-violet-500" />
 					</div>
-					<span class="text-[10px] font-bold text-base-content/30 bg-base-200 px-2 py-0.5 rounded-full">{stats.totalServices} dịch vụ</span>
+					<span
+						class="rounded-full bg-base-200 px-2 py-0.5 text-[10px] font-bold text-base-content/30"
+						>{stats.totalServices} dịch vụ</span
+					>
 				</div>
-				<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Hệ Thống Phòng</p>
-				<p class="text-lg lg:text-xl font-black mt-1">{stats.totalRooms}</p>
+				<p class="text-[10px] font-bold tracking-widest text-base-content/40 uppercase">
+					Hệ Thống Phòng
+				</p>
+				<p class="mt-1 text-lg font-black lg:text-xl">{stats.totalRooms}</p>
 			</div>
 
-			<div class="bg-base-100 rounded-xl border border-base-300/50 p-4 lg:p-5">
-				<div class="flex items-center justify-between mb-3">
-					<div class="w-9 h-9 rounded-lg bg-orange-500/10 flex items-center justify-center">
-						<Icon icon="solar:users-group-two-rounded-line-duotone" class="text-lg text-orange-500" />
+			<div class="rounded-xl border border-base-300/50 bg-base-100 p-4 lg:p-5">
+				<div class="mb-3 flex items-center justify-between">
+					<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10">
+						<Icon
+							icon="solar:users-group-two-rounded-line-duotone"
+							class="text-lg text-orange-500"
+						/>
 					</div>
 				</div>
-				<p class="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">Thành Viên</p>
-				<p class="text-lg lg:text-xl font-black mt-1">{stats.totalUsers}</p>
+				<p class="text-[10px] font-bold tracking-widest text-base-content/40 uppercase">
+					Thành Viên
+				</p>
+				<p class="mt-1 text-lg font-black lg:text-xl">{stats.totalUsers}</p>
 			</div>
 		</div>
-		<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
-			<div class="flex items-center justify-between px-5 py-4 border-b border-base-200">
+		<div class="overflow-hidden rounded-xl border border-base-300/50 bg-base-100">
+			<div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
 				<div class="flex items-center gap-2 text-sm font-bold text-base-content/60">
-					<Icon icon="solar:chart-2-line-duotone" class="text-base"/>
+					<Icon icon="solar:chart-2-line-duotone" class="text-base" />
 					Biểu Đồ Doanh Thu
 				</div>
 				<div class="flex gap-1">
 					{#each [7, 14, 30] as days}
 						<button
 							onclick={() => changeChartDays(days)}
-							class="btn btn-xs rounded-lg font-bold {chartDays === days ? 'btn-primary' : 'btn-ghost'}"
+							class="btn rounded-lg font-bold btn-xs {chartDays === days
+								? 'btn-primary'
+								: 'btn-ghost'}"
 						>
 							{days} ngày
 						</button>
@@ -155,62 +189,80 @@
 			</div>
 			<div class="p-5">
 				{#if chartData.length > 0}
-					<div class="flex items-end gap-1 h-40">
+					<div class="flex h-40 items-end gap-1">
 						{#each chartData as day}
-							<div class="flex-1 flex flex-col items-center gap-1 group relative">
-								<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-base-300 text-base-content text-[10px] font-bold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+							<div class="group relative flex flex-1 flex-col items-center gap-1">
+								<div
+									class="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded-md bg-base-300 px-2 py-1 text-[10px] font-bold whitespace-nowrap text-base-content opacity-0 transition-opacity group-hover:opacity-100"
+								>
 									{fmtVND(day.revenue)} • {day.bookings} đơn
 								</div>
 								<div
-									class="w-full rounded-t-md bg-primary/80 hover:bg-primary transition-colors min-h-[4px]"
+									class="min-h-[4px] w-full rounded-t-md bg-primary/80 transition-colors hover:bg-primary"
 									style="height: {Math.max((day.revenue / maxRevenue) * 100, 3)}%"
 								></div>
-								<span class="text-[9px] font-bold text-base-content/30 mt-1">{fmtShortDate(day.date)}</span>
+								<span class="mt-1 text-[9px] font-bold text-base-content/30"
+									>{fmtShortDate(day.date)}</span
+								>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<div class="text-center py-8 text-base-content/30 font-medium text-sm">Chưa có dữ liệu doanh thu.</div>
+					<div class="py-8 text-center text-sm font-medium text-base-content/30">
+						Chưa có dữ liệu doanh thu.
+					</div>
 				{/if}
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
-			<div class="xl:col-span-2 bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
-				<div class="flex items-center justify-between px-5 py-4 border-b border-base-200">
+		<div class="grid grid-cols-1 gap-4 lg:gap-6 xl:grid-cols-3">
+			<div class="overflow-hidden rounded-xl border border-base-300/50 bg-base-100 xl:col-span-2">
+				<div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
 					<div class="flex items-center gap-2 text-sm font-bold text-base-content/60">
-						<Icon icon="solar:calendar-date-line-duotone" class="text-base"/>
+						<Icon icon="solar:calendar-date-line-duotone" class="text-base" />
 						Đặt Phòng Gần Đây
 					</div>
-					<a href="/admin/bookings" class="text-xs font-bold text-primary hover:underline">Xem tất cả →</a>
+					<a href="/admin/bookings" class="text-xs font-bold text-primary hover:underline"
+						>Xem tất cả →</a
+					>
 				</div>
 				<div class="overflow-x-auto">
 					<table class="table table-sm">
 						<thead>
-							<tr class="text-[10px] uppercase tracking-widest text-base-content/30 bg-base-200/30">
+							<tr class="bg-base-200/30 text-[10px] tracking-widest text-base-content/30 uppercase">
 								<th class="font-bold">Mã</th>
 								<th class="font-bold">Khách Hàng</th>
 								<th class="font-bold">Phòng</th>
 								<th class="font-bold">Thời Gian</th>
-								<th class="font-bold text-right">Tổng</th>
-								<th class="font-bold text-center">Trạng Thái</th>
+								<th class="text-right font-bold">Tổng</th>
+								<th class="text-center font-bold">Trạng Thái</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#if recentBookings.length === 0}
-								<tr><td colspan="6" class="text-center py-12 text-base-content/30 font-medium">Chưa có đơn đặt phòng nào.</td></tr>
+								<tr
+									><td colspan="6" class="py-12 text-center font-medium text-base-content/30"
+										>Chưa có đơn đặt phòng nào.</td
+									></tr
+								>
 							{:else}
 								{#each recentBookings as bk}
 									{@const st = statusMap[bk.status] || { text: bk.status, cls: 'badge-ghost' }}
 									<tr class="hover">
 										<td class="font-mono text-xs font-bold text-base-content/30">#{bk.id}</td>
 										<td>
-											<span class="font-semibold text-sm">{bk.userName || '—'}</span>
+											<span class="text-sm font-semibold">{bk.userName || '—'}</span>
 										</td>
 										<td class="text-sm font-medium text-primary">{bk.roomName || '—'}</td>
-										<td class="text-xs font-medium text-base-content/50">{fmtTime(bk.startTime)}</td>
-										<td class="text-right font-mono text-sm font-bold">{fmtVND(bk.totalCost ?? 0)}</td>
-										<td class="text-center"><span class="badge {st.cls} badge-xs rounded-md font-bold">{st.text}</span></td>
+										<td class="text-xs font-medium text-base-content/50">{fmtTime(bk.startTime)}</td
+										>
+										<td class="text-right font-mono text-sm font-bold"
+											>{fmtVND(bk.totalCost ?? 0)}</td
+										>
+										<td class="text-center"
+											><span class="badge {st.cls} rounded-md badge-xs font-bold">{st.text}</span
+											></td
+										>
 									</tr>
 								{/each}
 							{/if}
@@ -219,63 +271,78 @@
 				</div>
 			</div>
 
-			<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden flex flex-col">
-				<div class="px-5 py-4 border-b border-base-200">
+			<div class="flex flex-col overflow-hidden rounded-xl border border-base-300/50 bg-base-100">
+				<div class="border-b border-base-200 px-5 py-4">
 					<div class="flex items-center gap-2 text-sm font-bold text-base-content/60">
-						<Icon icon="solar:chart-2-line-duotone" class="text-base"/>
+						<Icon icon="solar:chart-2-line-duotone" class="text-base" />
 						Trạng Thái Hệ Thống
 					</div>
 				</div>
-				<div class="p-4 flex flex-col gap-3 flex-1">
+				<div class="flex flex-1 flex-col gap-3 p-4">
 					{#if occupancy}
-						<div class="bg-primary/5 border border-primary/15 rounded-lg p-4">
-							<div class="flex items-center justify-between mb-2">
-								<span class="text-xs font-bold text-base-content/50 uppercase tracking-widest">Tỷ Lệ Lấp Đầy Hôm Nay</span>
+						<div class="rounded-lg border border-primary/15 bg-primary/5 p-4">
+							<div class="mb-2 flex items-center justify-between">
+								<span class="text-xs font-bold tracking-widest text-base-content/50 uppercase"
+									>Tỷ Lệ Lấp Đầy Hôm Nay</span
+								>
 								<span class="text-lg font-black text-primary">{occupancy.rate}%</span>
 							</div>
-							<div class="w-full bg-base-200 rounded-full h-2">
-								<div class="bg-primary rounded-full h-2 transition-all" style="width: {occupancy.rate}%"></div>
+							<div class="h-2 w-full rounded-full bg-base-200">
+								<div
+									class="h-2 rounded-full bg-primary transition-all"
+									style="width: {occupancy.rate}%"
+								></div>
 							</div>
-							<p class="text-[11px] text-base-content/40 font-medium mt-2">{occupancy.occupied}/{occupancy.total} phòng có booking</p>
+							<p class="mt-2 text-[11px] font-medium text-base-content/40">
+								{occupancy.occupied}/{occupancy.total} phòng có booking
+							</p>
 						</div>
 					{/if}
 
 					{#if stats.pendingBookings > 0}
-						<div class="bg-amber-500/5 border border-amber-500/15 rounded-lg p-4">
-							<div class="flex items-center gap-2 mb-1">
-								<Icon icon="solar:bell-bing-bold-duotone" class="text-amber-500"/>
-								<span class="text-sm font-bold text-amber-600">{stats.pendingBookings} Yêu Cầu Mới</span>
+						<div class="rounded-lg border border-amber-500/15 bg-amber-500/5 p-4">
+							<div class="mb-1 flex items-center gap-2">
+								<Icon icon="solar:bell-bing-bold-duotone" class="text-amber-500" />
+								<span class="text-sm font-bold text-amber-600"
+									>{stats.pendingBookings} Yêu Cầu Mới</span
+								>
 							</div>
-							<p class="text-xs text-base-content/40 font-medium">Đang chờ phê duyệt từ quản lý.</p>
-							<a href="/admin/bookings" class="btn btn-xs btn-warning rounded-md mt-3 font-bold">Xử Lý Ngay</a>
+							<p class="text-xs font-medium text-base-content/40">Đang chờ phê duyệt từ quản lý.</p>
+							<a href="/admin/bookings" class="btn mt-3 rounded-md font-bold btn-xs btn-warning"
+								>Xử Lý Ngay</a
+							>
 						</div>
 					{:else}
-						<div class="bg-emerald-500/5 border border-emerald-500/15 rounded-lg p-4">
-							<div class="flex items-center gap-2 mb-1">
-								<Icon icon="solar:check-circle-bold-duotone" class="text-emerald-500"/>
+						<div class="rounded-lg border border-emerald-500/15 bg-emerald-500/5 p-4">
+							<div class="mb-1 flex items-center gap-2">
+								<Icon icon="solar:check-circle-bold-duotone" class="text-emerald-500" />
 								<span class="text-sm font-bold text-emerald-600">Tất Cả Đã Xử Lý</span>
 							</div>
-							<p class="text-xs text-base-content/40 font-medium">Không có đơn nào đang chờ duyệt.</p>
+							<p class="text-xs font-medium text-base-content/40">
+								Không có đơn nào đang chờ duyệt.
+							</p>
 						</div>
 					{/if}
 
-					<div class="bg-base-200/40 rounded-lg p-4 flex-1">
-						<p class="text-xs font-bold text-base-content/50 uppercase tracking-widest mb-3">Tổng Quan Cơ Sở</p>
+					<div class="flex-1 rounded-lg bg-base-200/40 p-4">
+						<p class="mb-3 text-xs font-bold tracking-widest text-base-content/50 uppercase">
+							Tổng Quan Cơ Sở
+						</p>
 						<div class="flex flex-col gap-2.5">
 							<div class="flex justify-between text-sm">
-								<span class="text-base-content/50 font-medium">Phòng Hoạt Động</span>
+								<span class="font-medium text-base-content/50">Phòng Hoạt Động</span>
 								<span class="font-bold">{stats.totalRooms}</span>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-base-content/50 font-medium">Dịch Vụ Trong Menu</span>
+								<span class="font-medium text-base-content/50">Dịch Vụ Trong Menu</span>
 								<span class="font-bold">{stats.totalServices}</span>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-base-content/50 font-medium">Tài Khoản Thành Viên</span>
+								<span class="font-medium text-base-content/50">Tài Khoản Thành Viên</span>
 								<span class="font-bold">{stats.totalUsers}</span>
 							</div>
 							<div class="flex justify-between text-sm">
-								<span class="text-base-content/50 font-medium">Đơn Đã Xác Nhận</span>
+								<span class="font-medium text-base-content/50">Đơn Đã Xác Nhận</span>
 								<span class="font-bold text-emerald-600">{stats.confirmedBookings}</span>
 							</div>
 						</div>
@@ -287,23 +354,31 @@
 			{@const maxVal = Math.max(...heatmapData.flat(), 1)}
 			{@const dayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']}
 			{@const hours = Array.from({ length: 18 }, (_, i) => i + 6)}
-			<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
-				<div class="px-5 py-4 border-b border-base-200 flex items-center gap-2 text-sm font-bold text-base-content/60">
-					<Icon icon="solar:fire-bold-duotone" class="text-base"/>
+			<div class="overflow-hidden rounded-xl border border-base-300/50 bg-base-100">
+				<div
+					class="flex items-center gap-2 border-b border-base-200 px-5 py-4 text-sm font-bold text-base-content/60"
+				>
+					<Icon icon="solar:fire-bold-duotone" class="text-base" />
 					Giờ Cao Điểm (30 Ngày Gần Nhất)
 				</div>
-				<div class="p-5 overflow-x-auto">
-					<div class="flex gap-0.5 min-w-[600px]">
+				<div class="overflow-x-auto p-5">
+					<div class="flex min-w-[600px] gap-0.5">
 						<div class="flex flex-col gap-0.5 pr-2">
 							<div class="h-5"></div>
 							{#each dayLabels as day}
-								<div class="h-6 flex items-center text-[10px] font-bold text-base-content/40">{day}</div>
+								<div class="flex h-6 items-center text-[10px] font-bold text-base-content/40">
+									{day}
+								</div>
 							{/each}
 						</div>
-						<div class="flex-1 flex flex-col gap-0.5">
+						<div class="flex flex-1 flex-col gap-0.5">
 							<div class="flex gap-0.5">
 								{#each hours as h}
-									<div class="flex-1 text-center text-[9px] font-bold text-base-content/30 h-5 flex items-center justify-center">{h}</div>
+									<div
+										class="flex h-5 flex-1 items-center justify-center text-center text-[9px] font-bold text-base-content/30"
+									>
+										{h}
+									</div>
 								{/each}
 							</div>
 							{#each heatmapData as row}
@@ -312,8 +387,11 @@
 										{@const val = row[hi + 6] || 0}
 										{@const intensity = val / maxVal}
 										<div
-											class="flex-1 h-6 rounded-sm transition-colors"
-											style="background-color: oklch(0.65 0.2 270 / {Math.max(intensity * 0.9, 0.05)})"
+											class="h-6 flex-1 rounded-sm transition-colors"
+											style="background-color: oklch(0.65 0.2 270 / {Math.max(
+												intensity * 0.9,
+												0.05
+											)})"
 											title="{val} booking(s)"
 										></div>
 									{/each}
@@ -321,37 +399,55 @@
 							{/each}
 						</div>
 					</div>
-					<div class="flex items-center gap-2 mt-3 justify-end">
-						<span class="text-[10px] text-base-content/30 font-medium">Ít</span>
+					<div class="mt-3 flex items-center justify-end gap-2">
+						<span class="text-[10px] font-medium text-base-content/30">Ít</span>
 						<div class="flex gap-0.5">
 							{#each [0.1, 0.3, 0.5, 0.7, 0.9] as op}
-								<div class="w-4 h-4 rounded-sm" style="background-color: oklch(0.65 0.2 270 / {op})"></div>
+								<div
+									class="h-4 w-4 rounded-sm"
+									style="background-color: oklch(0.65 0.2 270 / {op})"
+								></div>
 							{/each}
 						</div>
-						<span class="text-[10px] text-base-content/30 font-medium">Nhiều</span>
+						<span class="text-[10px] font-medium text-base-content/30">Nhiều</span>
 					</div>
 				</div>
 			</div>
 		{/if}
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+		<div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
 			{#if topRooms.length > 0}
-				<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
-					<div class="px-5 py-4 border-b border-base-200 flex items-center gap-2 text-sm font-bold text-base-content/60">
-						<Icon icon="solar:crown-star-bold-duotone" class="text-base text-amber-500"/>
+				<div class="overflow-hidden rounded-xl border border-base-300/50 bg-base-100">
+					<div
+						class="flex items-center gap-2 border-b border-base-200 px-5 py-4 text-sm font-bold text-base-content/60"
+					>
+						<Icon icon="solar:crown-star-bold-duotone" class="text-base text-amber-500" />
 						Top Phòng Được Đặt Nhiều Nhất
 					</div>
 					<div class="p-4">
 						<div class="flex flex-col gap-2">
 							{#each topRooms as rm, i}
-								<div class="flex items-center gap-3 p-2 rounded-lg {i === 0 ? 'bg-amber-500/5' : ''}">
-									<span class="w-6 h-6 rounded-full {i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-base-300 text-base-content/60' : 'bg-base-200 text-base-content/40'} flex items-center justify-center text-[10px] font-black">{i + 1}</span>
-									<div class="flex-1 min-w-0">
-										<p class="font-bold text-sm truncate">{rm.roomName}</p>
-										<p class="text-[10px] text-base-content/40 font-medium uppercase">{rm.roomType}</p>
+								<div
+									class="flex items-center gap-3 rounded-lg p-2 {i === 0 ? 'bg-amber-500/5' : ''}"
+								>
+									<span
+										class="h-6 w-6 rounded-full {i === 0
+											? 'bg-amber-500 text-white'
+											: i === 1
+												? 'bg-base-300 text-base-content/60'
+												: 'bg-base-200 text-base-content/40'} flex items-center justify-center text-[10px] font-black"
+										>{i + 1}</span
+									>
+									<div class="min-w-0 flex-1">
+										<p class="truncate text-sm font-bold">{rm.roomName}</p>
+										<p class="text-[10px] font-medium text-base-content/40 uppercase">
+											{rm.roomType}
+										</p>
 									</div>
 									<div class="text-right">
 										<p class="text-sm font-black">{rm.bookingCount} đơn</p>
-										<p class="text-[10px] text-base-content/40 font-medium">{fmtVND(rm.totalRevenue)}</p>
+										<p class="text-[10px] font-medium text-base-content/40">
+											{fmtVND(rm.totalRevenue)}
+										</p>
 									</div>
 								</div>
 							{/each}
@@ -361,23 +457,36 @@
 			{/if}
 
 			{#if topCustomers.length > 0}
-				<div class="bg-base-100 rounded-xl border border-base-300/50 overflow-hidden">
-					<div class="px-5 py-4 border-b border-base-200 flex items-center gap-2 text-sm font-bold text-base-content/60">
-						<Icon icon="solar:users-group-rounded-bold-duotone" class="text-base text-primary"/>
+				<div class="overflow-hidden rounded-xl border border-base-300/50 bg-base-100">
+					<div
+						class="flex items-center gap-2 border-b border-base-200 px-5 py-4 text-sm font-bold text-base-content/60"
+					>
+						<Icon icon="solar:users-group-rounded-bold-duotone" class="text-base text-primary" />
 						Top Khách Hàng Chi Tiêu Cao
 					</div>
 					<div class="p-4">
 						<div class="flex flex-col gap-2">
 							{#each topCustomers as cust, i}
-								<div class="flex items-center gap-3 p-2 rounded-lg {i === 0 ? 'bg-primary/5' : ''}">
-									<span class="w-6 h-6 rounded-full {i === 0 ? 'bg-primary text-white' : i === 1 ? 'bg-base-300 text-base-content/60' : 'bg-base-200 text-base-content/40'} flex items-center justify-center text-[10px] font-black">{i + 1}</span>
-									<div class="flex-1 min-w-0">
-										<p class="font-bold text-sm truncate">{cust.userName || 'N/A'}</p>
-										<p class="text-[10px] text-base-content/40 font-medium truncate">{cust.userEmail}</p>
+								<div class="flex items-center gap-3 rounded-lg p-2 {i === 0 ? 'bg-primary/5' : ''}">
+									<span
+										class="h-6 w-6 rounded-full {i === 0
+											? 'bg-primary text-white'
+											: i === 1
+												? 'bg-base-300 text-base-content/60'
+												: 'bg-base-200 text-base-content/40'} flex items-center justify-center text-[10px] font-black"
+										>{i + 1}</span
+									>
+									<div class="min-w-0 flex-1">
+										<p class="truncate text-sm font-bold">{cust.userName || 'N/A'}</p>
+										<p class="truncate text-[10px] font-medium text-base-content/40">
+											{cust.userEmail}
+										</p>
 									</div>
 									<div class="text-right">
 										<p class="text-sm font-black text-primary">{fmtVND(cust.totalSpent)}</p>
-										<p class="text-[10px] text-base-content/40 font-medium">{cust.bookingCount} đơn</p>
+										<p class="text-[10px] font-medium text-base-content/40">
+											{cust.bookingCount} đơn
+										</p>
 									</div>
 								</div>
 							{/each}

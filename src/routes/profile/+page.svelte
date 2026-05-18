@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authClient } from '$lib/auth-client';
+	import { authClient, sendVerificationEmail } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import Icon from '@iconify/svelte';
@@ -19,6 +19,7 @@
 	let newPassword = $state('');
 	let confirmPassword = $state('');
 	let isSavingPassword = $state(false);
+	let isSendingVerification = $state(false);
 
 	let loyaltyInfo = $state<any>(null);
 	let pointHistory = $state<any[]>([]);
@@ -92,6 +93,29 @@
 		}
 	}
 
+	async function resendVerification() {
+		if (!user?.email || user.emailVerified) return;
+
+		isSendingVerification = true;
+		try {
+			const { error } = await sendVerificationEmail({
+				email: user.email,
+				callbackURL: '/verify-email'
+			});
+
+			if (error) {
+				throw new Error(error.message || 'Không thể gửi email xác thực.');
+			}
+
+			addToast('Đã gửi lại email xác thực.', 'success');
+			await goto('/verify-email', { invalidateAll: true });
+		} catch (e: any) {
+			addToast(e?.message || 'Không thể gửi email xác thực.', 'error');
+		} finally {
+			isSendingVerification = false;
+		}
+	}
+
 	function fmtDate(d: Date) {
 		return new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
 	}
@@ -126,6 +150,9 @@
 					<p class="text-sm text-base-content/40 font-medium truncate">{user.email}</p>
 					<div class="flex items-center gap-2 mt-1.5">
 						<span class="badge badge-primary badge-xs rounded-md font-bold uppercase">{roleLabel[(user as any).role] || (user as any).role}</span>
+						<span class="badge badge-xs rounded-md font-bold {user.emailVerified ? 'badge-success' : 'badge-warning'}">
+							{user.emailVerified ? 'Đã xác thực email' : 'Chưa xác thực email'}
+						</span>
 						<span class="text-[11px] text-base-content/30 font-medium">Tham gia {fmtDate(user.createdAt)}</span>
 					</div>
 				</div>
@@ -189,11 +216,32 @@
 				</div>
 
 				<div class="p-6">
-					<div class="flex items-center gap-2 text-sm font-bold text-base-content/60 mb-4">
-						<Icon icon="solar:letter-line-duotone" class="text-base"/>
-						Email
+					<div class="flex items-center justify-between mb-4">
+						<div class="flex items-center gap-2 text-sm font-bold text-base-content/60">
+							<Icon icon="solar:letter-line-duotone" class="text-base"/>
+							Email
+						</div>
+						{#if !user.emailVerified}
+							<button
+								onclick={resendVerification}
+								class="btn btn-ghost btn-xs rounded-lg text-primary font-bold"
+								disabled={isSendingVerification}
+							>
+								{#if isSendingVerification}
+									<span class="loading loading-spinner loading-xs"></span>
+								{:else}
+									<Icon icon="solar:plain-2-line-duotone" class="text-sm"/>
+								{/if}
+								Gửi lại xác thực
+							</button>
+						{/if}
 					</div>
 					<p class="text-base font-medium text-base-content/70">{user.email}</p>
+					<p class="text-xs text-base-content/30 font-medium mt-1">
+						{user.emailVerified
+							? 'Email đã được xác thực.'
+							: 'Email chưa được xác thực. Hãy kiểm tra hộp thư hoặc gửi lại liên kết xác thực.'}
+					</p>
 					<p class="text-xs text-base-content/30 font-medium mt-1">Email không thể thay đổi.</p>
 				</div>
 

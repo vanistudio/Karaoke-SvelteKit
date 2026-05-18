@@ -1,9 +1,11 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import Icon from '@iconify/svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { z } from 'zod';
 	import { signIn } from '$lib/auth-client';
 	import { addToast } from '$lib/stores/toast';
+
 	const loginSchema = z.object({
 		email: z.string().email('Email không đúng định dạng.').trim(),
 		password: z.string().min(8, 'Mật khẩu phải chứa ít nhất 8 ký tự.').trim()
@@ -16,6 +18,20 @@
 	let errorStore = $state<Record<string, string>>({});
 	let globalError = $state<string | null>(null);
 	let isSubmitting = $state(false);
+	let verifyFeedbackShown = $state(false);
+
+	$effect(() => {
+		const error = $page.url.searchParams.get('error');
+		if (!error || verifyFeedbackShown) return;
+
+		verifyFeedbackShown = true;
+		addToast(
+			error === 'token_expired'
+				? 'Liên kết xác thực đã hết hạn. Hãy gửi lại email xác thực.'
+				: 'Xác thực email không thành công. Hãy thử lại.',
+			'error'
+		);
+	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -35,7 +51,7 @@
 
 		isSubmitting = true;
 
-		const { data, error } = await signIn.email({
+		const { error } = await signIn.email({
 			email,
 			password
 		});
@@ -74,6 +90,23 @@
 					Đăng nhập tài khoản khách hàng để đặt phòng và tích điểm ưu đãi.
 				</p>
 			</div>
+
+			<div class="mb-4 rounded-md border border-warning/20 bg-warning/10 p-4">
+				<div class="flex items-start gap-3">
+					<Icon icon="solar:shield-warning-line-duotone" class="mt-0.5 shrink-0 text-xl text-warning" />
+					<div class="text-sm font-medium text-base-content/70">
+						<p class="mb-1 font-bold text-base-content">Chưa xác thực email?</p>
+						<p>
+							Bạn vẫn có thể đăng nhập, sau đó vào
+							<a href="/verify-email" class="font-bold text-primary underline-offset-4 hover:underline">
+								trang xác thực email
+							</a>
+							để gửi lại liên kết.
+						</p>
+					</div>
+				</div>
+			</div>
+
 			{#if globalError}
 				<div class="mb-4 flex items-start gap-3 rounded-md border border-error/20 bg-error/10 p-4">
 					<Icon

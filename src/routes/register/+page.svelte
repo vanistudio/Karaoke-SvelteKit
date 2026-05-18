@@ -48,7 +48,8 @@
 		const { data, error } = await signUp.email({
 			name,
 			email,
-			password
+			password,
+			callbackURL: '/verify-email'
 		});
 
 		isSubmitting = false;
@@ -57,7 +58,7 @@
 			globalError = error.message || 'Xảy ra lỗi trong quá trình khởi tạo tài khoản.';
 		} else {
 			addToast('Tạo tài khoản thành công! Khám phá phòng hát ngay.', 'success');
-			await goto('/', { invalidateAll: true });
+			await goto('/verify-email?sent=1', { invalidateAll: true });
 		}
 	}
 </script>
@@ -237,3 +238,4 @@
 		</div>
 	</div>
 </div>
+

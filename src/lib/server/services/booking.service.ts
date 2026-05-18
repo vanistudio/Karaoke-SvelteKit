@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { booking, user } from '$lib/server/db/schema';
+import { user } from '$lib/server/db/schema';
 import { bookingRepository } from '$lib/server/repositories/booking.repository';
 import { promotionRepository } from '$lib/server/repositories/promotion.repository';
 import { roomRepository } from '$lib/server/repositories/room.repository';
@@ -110,7 +110,10 @@ export class BookingService {
 			.then((res) => res[0] ?? null);
 	}
 
-	private assertCanViewBooking(targetBooking: Awaited<ReturnType<typeof bookingRepository.findById>>, viewer?: BookingViewer) {
+	private assertCanViewBooking(
+		targetBooking: Awaited<ReturnType<typeof bookingRepository.findById>>,
+		viewer?: BookingViewer
+	) {
 		if (!targetBooking) {
 			throw new Error('Booking not found');
 		}
