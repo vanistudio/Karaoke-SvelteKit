@@ -1,72 +1,171 @@
-# Hệ Thống Đặt Phòng Karaoke (Karaoke Booking System)
+# Karaoke-SvelteKit
 
-Đây là tài liệu chi tiết mô tả yêu cầu kỹ thuật, kiến trúc và các tính năng cụ thể của đồ án/website đặt phòng Karaoke chuyên nghiệp.
+Karaoke-SvelteKit là ứng dụng đặt phòng karaoke full-stack, kết hợp public storefront, member flows có xác thực, và admin back office trong cùng một SvelteKit app. UI routing nằm ở SvelteKit, còn booking, loyalty, analytics, email verification, phân quyền, và quản trị vận hành đi qua tRPC.
 
-## 1. Công Nghệ Sử Dụng (Tech Stack)
+## Tổng quan
 
-### Frontend (UI/UX)
-- **Framework:** SvelteKit (Svelte 5)
-- **CSS Framework:** Tailwind CSS v4
-- **UI Components:** Skeleton UI (`@skeletonlabs/skeleton`, `@skeletonlabs/skeleton-svelte`)
+- Public users có thể xem phòng, dịch vụ, khuyến mãi và tạo booking.
+- Registered members có thể đăng ký, đăng nhập, verify email, xem lịch sử booking và gửi review.
+- Staff, manager, admin có các quyền khác nhau cho dashboard, booking management, room/service/promotion/pricing/settings management, branch management, user administration, activity log, calendar, và CSV export.
+- Booking flow xử lý nhiều rule nghiệp vụ như cross-midnight normalization, overlap prevention, policy validation, dynamic pricing, voucher validation, loyalty redemption, activity logging, và email side effects sau transaction.
 
-### Backend (Server-side)
-- **API Engine:** tRPC (Typed RPC, cho phép type-safety từ client đến server)
-- **Database:** PostgreSQL
-- **ORM:** Drizzle ORM
-- **Authentication:** Better-Auth
+## Tech Stack
 
----
+| Layer                  | Công nghệ                   |
+| ---------------------- | --------------------------- |
+| Frontend               | SvelteKit, Svelte 5         |
+| Styling                | Tailwind CSS v4, DaisyUI    |
+| API boundary           | tRPC                        |
+| Validation             | Zod                         |
+| Authentication         | Better Auth                 |
+| Database               | PostgreSQL                  |
+| ORM                    | Drizzle ORM, Drizzle Kit    |
+| Email                  | Resend                      |
+| Tooling                | Vite, TypeScript            |
+| Testing infrastructure | Vitest, Playwright provider |
 
-## 2. Kiến Trúc Backend (Project Structure)
+## Kiến trúc
 
-Toàn bộ logic server-side sẽ được đặt trong thư mục theo kiến trúc 3 class layer pattern chuẩn mực:
-**Path:** `src/lib/server/`
+Luồng request chính là `hooks.server.ts` -> `event.locals` -> `createContext` -> SvelteKit loads hoặc tRPC procedures. Better Auth resolve session một lần ở hook, sau đó page loads và tRPC cùng dùng chung `user` và `session`.
 
-- **`db/` (`*.schema.ts`, `index.ts`)**: Cấu hình kết nối database và định nghĩa các schema (bảng) cho Drizzle.
-- **`repositories/` (`*.repository.ts`)**: Lớp giao tiếp trực tiếp với database. Chịu trách nhiệm thực thi các câu lệnh raw SQL hoặc ORM query (CRUD).
-- **`services/` (`*.service.ts`)**: Lớp chứa Business Logic (quy tắc nghiệp vụ). Xử lý dữ liệu lấy từ cấu trúc DB, gọi external API, xử lý tính toán điểm thưởng, tiền giảm giá...
-- **`controllers/` (`*.controller.ts`)**: Lõi điều phối. Nhận request, gọi đến các file services tương ứng để xử lý và trả về response cho Route/Client.
-- **`routes/` (`*.route.ts` / `*.router.ts`)**: Nơi khai báo tRPC router (mutation, query) và apply validate params/body (Zod).
+Phần backend đi theo layering:
 
----
+`router -> controller -> service -> repository -> db`
 
-## 3. Các Chức Năng Cốt Lõi (Core Features)
+Các domain quan trọng như booking, loyalty, pricing, promotion, review, dashboard, branch, setting, và user đều bám theo flow này. Authorization được tập trung ở reusable procedures như `publicProcedure`, `protectedProcedure`, `staffProcedure`, `managerProcedure`, `adminProcedure`, và `rateLimitedProcedure`.
 
-Dưới đây là sơ đồ tính năng hoàn chỉnh của một phần mềm đặt phòng Karaoke chuyên nghiệp:
+## Cấu trúc thư mục
 
-### 3.1. Tính Năng Người Dùng (Client/Khách hàng)
-- **Xác Thực & Tài Khoản:** Đăng nhập, Đăng ký (OTP/Email), Quản lý profile cá nhân, Đổi mật khẩu.
-- **Xem Danh Sách Phòng:** Tìm kiếm phòng hát theo chi nhánh, sức chứa, loại phòng (Thường, VIP, Super VIP).
-- **Trạng Thái Phòng Trực Tuyến:** Hiển thị phòng trống, phòng đang bận, phòng đã được đặt cọc.
-- **Đặt Phòng Cụ Thể:**
-  - Chọn thời gian (giờ bắt đầu/giờ kết thúc).
-  - Khai báo số người.
-  - Tùy chọn đi kèm (Gói trang trí sinh nhật, loa ngoài...).
-- **Đặt Món Lên Phòng (Menu Đồ ăn/Thức uống):** Mua thêm trái cây, bia, snack từ trên web trước khi đến.
-- **Chương Trình Khuyến Mãi (Promotions) & Giảm Giá:** 
-  - Xem danh sách mã giảm giá.
-  - Áp dụng các ưu đãi % hoặc giảm cố định trên tổng bill.
-- **Thành Viên & Tích Điểm (Loyalty):** 
-  - Thăng hạng thẻ (Bạc, Vàng, Kim Cương).
-  - Tích điểm hóa đơn và dùng điểm khấu trừ vào các lần đặt phòng kế tiếp.
-- **Lịch Sử Đặt Phòng:** Xem lại danh sách đặt chỗ cũ, trạng thái hóa đơn. Cổng thanh toán (Đặt cọc VNPay/Momo).
+```text
+src/
+  routes/                 SvelteKit pages, layouts, HTTP endpoints
+  lib/components/         Shared UI components
+  lib/stores/             Shared client stores
+  lib/trpc/               Browser tRPC client wrapper
+  lib/server/
+    routes/               tRPC routers
+    controllers/          Thin orchestration layer
+    services/             Business logic
+    repositories/         Drizzle-backed data access
+    db/schema/            Database schema and relations
+    trpc/                 Context, auth guards, rate limiting
+drizzle/                  Generated migrations
+docs/project-report/      Academic and technical report bundle
+static/                   Static assets
+```
 
-### 3.2. Tính Năng Quản Trị Hệ Thống (Admin / Staff)
-- **Dashboard Thống Kê:** Biểu đồ doanh thu ngày/tháng/năm, tỷ lệ lấp đầy phòng, nhóm khách hàng VIP.
-- **Quản Lý Đơn Đặt (Booking Management):** 
-  - Chấp nhận, Từ chối đặt chỗ.
-  - Cập nhật quá trình (Check-in, Check-out).
-  - Xử lý chuyển phòng cho khách.
-- **Quản Lý Phòng & Sơ Đồ Phòng:** Thêm, sửa, xóa các phòng hát. Quản lý trạng thái "Đang bảo trì".
-- **Quản Lý Bảng Giá (Pricing Cấu Hình Cao):** Set giá đa dạng (Giá theo ngày lễ, giá theo khung giờ Vàng/giờ Sáng/giờ Tối).
-- **Quản Lý Khuyến Mãi & Voucher:** Tạo mã code, setup điều kiện sử dụng (VD: hóa đơn trên 2 triệu).
-- **Quản Lý Menu Món Ăn/Dịch Vụ:** Thêm món ăn mới, xóa, điều chỉnh giá nhập giá bán.
-- **Quản Lý Người Theo Dõi / Tích Điểm:** Xác nhận cấu hình (%) cộng điểm theo hạn mức thành viên.
-- **Quản Trị Phân Quyền (Role-based Access Control):** 
-  - Phân quyền Chủ quán (Toàn quyền).
-  - Phân quyền Quản lý chi nhánh.
-  - Phân quyền Nhân viên (Chỉ xem đơn và xếp phòng).
+## Tính năng chính
 
----
+- Public room browsing và service/promotion listing
+- Booking tạo từ web với time range, guest count, optional services, voucher, loyalty points
+- Booking history, pending booking cancellation, review submission
+- Email verification qua Resend
+- Dashboard analytics: revenue, occupancy, heatmap, top rooms, top customers
+- Admin CRUD cho rooms, services, promotions, pricing, settings, branches, users, reviews
+- Calendar view và activity logging
+- File upload cho service assets
+- `GET /api/export/bookings` để export CSV
 
-Dự án này sẽ tạo nên một hệ thống O2O (Online-to-Offline) toàn diện, ứng dụng kiến trúc chuẩn Enterprise ngay từ những bước đầu tiên.
+## Trạng thái triển khai hiện tại
+
+Các điểm đã được code evidencing:
+
+- Payment gateway integration chưa có trong codebase hiện tại
+- Contact page đọc public settings thật nhưng chưa persist form submit ở backend
+- CI/CD, monitoring, backup automation, distributed cache, queue system chưa có artifact được commit
+- Upload hiện dùng `static/uploads`, tức là deployment cần writable local disk nếu giữ nguyên thiết kế này
+
+## Yêu cầu môi trường
+
+Ứng dụng hiện dùng các biến môi trường sau trong `.env`:
+
+```env
+APP_DATABASE_URI="postgres://user:password@host:port/db-name"
+APP_ORIGIN_URL=""
+APP_BETTER_SECRET=""
+RESEND_API_KEY=""
+RESEND_FROM_EMAIL=""
+RESEND_FROM_NAME="KaraSystem"
+RESEND_REPLY_TO=""
+```
+
+`APP_DATABASE_URI` là bắt buộc ngay từ startup. Email-related variables là bắt buộc cho các flow gửi mail như verification và booking notification.
+
+## Chạy local
+
+```bash
+npm install
+cp .env.example .env
+```
+
+Điền giá trị phù hợp vào `.env`, chuẩn bị PostgreSQL, sau đó chạy một trong các flow schema sau:
+
+```bash
+npm run db:push
+# hoặc
+npm run db:migrate
+```
+
+Nếu cần seed dữ liệu:
+
+```bash
+npm run db:seed
+```
+
+Khởi động development server:
+
+```bash
+npm run dev
+```
+
+## Scripts hữu ích
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run check
+npm run test
+npm run db:push
+npm run db:migrate
+npm run db:generate
+npm run db:seed
+npm run db:studio
+npm run auth:schema
+```
+
+## Tài liệu tham khảo
+
+Thư mục [`docs/project-report`](./docs/project-report) là bộ tài liệu học thuật và kỹ thuật đầy đủ cho dự án. Nên đọc theo thứ tự sau:
+
+1. [`project_overview.md`](./docs/project-report/project_overview.md)
+2. [`architecture.md`](./docs/project-report/architecture.md)
+3. [`business_analysis.md`](./docs/project-report/business_analysis.md)
+4. [`system_analysis_and_design.md`](./docs/project-report/system_analysis_and_design.md)
+5. [`developer_guide.md`](./docs/project-report/developer_guide.md)
+
+Các tài liệu còn lại trong bundle:
+
+- [`index.md`](./docs/project-report/index.md): mục lục và phạm vi tài liệu
+- [`components.md`](./docs/project-report/components.md): breakdown frontend, backend, shared modules
+- [`interfaces.md`](./docs/project-report/interfaces.md): internal boundaries và integration surfaces
+- [`api_documentation.md`](./docs/project-report/api_documentation.md): tRPC procedures và HTTP endpoints
+- [`data_models.md`](./docs/project-report/data_models.md): domain entities
+- [`database_design.md`](./docs/project-report/database_design.md): physical schema design
+- [`workflows.md`](./docs/project-report/workflows.md): technical execution flows
+- [`user_workflows.md`](./docs/project-report/user_workflows.md): end-user journeys
+- [`security_and_performance.md`](./docs/project-report/security_and_performance.md): security/performance review
+- [`testing_and_evaluation.md`](./docs/project-report/testing_and_evaluation.md): test reality và evaluation guidance
+- [`deployment_and_operations.md`](./docs/project-report/deployment_and_operations.md): deployment assumptions và operational constraints
+- [`feature_breakdown.md`](./docs/project-report/feature_breakdown.md): feature-by-feature analysis
+- [`dependencies.md`](./docs/project-report/dependencies.md): dependency rationale
+- [`diagrams.md`](./docs/project-report/diagrams.md): catalog Mermaid diagrams
+- [`codebase_info.md`](./docs/project-report/codebase_info.md): repository inventory
+- [`review_notes.md`](./docs/project-report/review_notes.md): gaps, inconsistencies, technical debt
+- [`thesis_report_outline.md`](./docs/project-report/thesis_report_outline.md): gợi ý cấu trúc báo cáo tốt nghiệp
+
+## Ghi chú cho contributor
+
+- Đây là typed full-stack app, nên thay đổi ở router/service thường có ảnh hưởng trực tiếp đến UI gọi qua `trpc()`.
+- Booking là domain nhạy cảm nhất; khi sửa cần kiểm tra side effects sang pricing, promotion, loyalty, activity log, và email notification.
+- Đừng dựa hoàn toàn vào tài liệu cũ như `SRS.md`; ưu tiên code hiện tại và bundle trong `docs/project-report`.
