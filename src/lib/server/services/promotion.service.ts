@@ -1,6 +1,37 @@
+import { db } from '$lib/server/db';
 import { promotionRepository } from '$lib/server/repositories/promotion.repository';
 
+type PromotionRecord = Awaited<ReturnType<typeof promotionRepository.findByCode>>;
+
 export class PromotionService {
+	private calculateDiscount(promo: NonNullable<PromotionRecord>, orderAmount: number): number {
+		const discount =
+			promo.type === 'percent' ? Math.round((orderAmount * promo.value) / 100) : promo.value;
+
+		return Math.min(discount, orderAmount);
+	}
+
+	private async getActiveVoucher(
+		code: string,
+		orderAmount: number,
+		executor: any = db
+	): Promise<NonNullable<PromotionRecord>> {
+		const promo = await promotionRepository.findByCode(code.toUpperCase(), executor);
+		if (!promo) throw new Error('Mã voucher không tồn tại');
+		if (!promo.isActive) throw new Error('Voucher đã ngừng hoạt động');
+		if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) {
+			throw new Error('Voucher đã hết hạn');
+		}
+		if (promo.currentUsage >= promo.maxUsage) {
+			throw new Error('Voucher đã hết lượt sử dụng');
+		}
+		if (orderAmount < promo.minOrderAmount) {
+			throw new Error(`Đơn hàng tối thiểu ${promo.minOrderAmount.toLocaleString('vi-VN')}₫`);
+		}
+
+		return promo;
+	}
+
 	async getAllPromotions() {
 		return await promotionRepository.findAll();
 	}
@@ -33,13 +64,9 @@ export class PromotionService {
 		return await promotionRepository.count();
 	}
 
-	async validateVoucher(code: string, orderAmount: number) {
-		const promo = await promotionRepository.findByCode(code.toUpperCase());
-		if (!promo) throw new Error('Mã voucher không tồn tại');
-		if (!promo.isActive) throw new Error('Voucher đã ngừng hoạt động');
-		if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) throw new Error('Voucher đã hết hạn');
-		if (promo.currentUsage >= promo.maxUsage) throw new Error('Voucher đã hết lượt sử dụng');
-		if (orderAmount < promo.minOrderAmount) throw new Error(`Đơn hàng tối thiểu ${promo.minOrderAmount.toLocaleString('vi-VN')}₫`);
+	async validateVoucher(code: string, orderAmount: number, executor: any = db) {
+		const promo = await this.getActiveVoucher(code, orderAmount, executor);
+
 		return {
 			code: promo.code,
 			type: promo.type,
@@ -48,18 +75,10 @@ export class PromotionService {
 		};
 	}
 
-	async applyVoucher(code: string, orderAmount: number) {
-		await this.validateVoucher(code, orderAmount);
-		const promo = await promotionRepository.findByCode(code.toUpperCase());
-		if (!promo) throw new Error('Mã voucher không tồn tại');
-		let discount = 0;
-		if (promo.type === 'percent') {
-			discount = Math.round(orderAmount * promo.value / 100);
-		} else {
-			discount = promo.value;
-		}
-		discount = Math.min(discount, orderAmount);
-		await promotionRepository.incrementUsage(promo.id);
+	async applyVoucher(code: string, orderAmount: number, executor: any = db) {
+		const promo = await this.getActiveVoucher(code, orderAmount, executor);
+		const discount = this.calculateDiscount(promo, orderAmount);
+
 		return {
 			promotionId: promo.id,
 			code: promo.code,
@@ -68,6 +87,29 @@ export class PromotionService {
 			discount,
 			finalAmount: orderAmount - discount
 		};
+	}
+
+	async reserveVoucher(code: string, orderAmount: number, executor: any = db) {
+		const promo = await this.getActiveVoucher(code, orderAmount, executor);
+		const updated = await promotionRepository.incrementUsage(promo.id, executor);
+		if (!updated) {
+			throw new Error('Voucher đã hết lượt sử dụng');
+		}
+
+		const discount = this.calculateDiscount(promo, orderAmount);
+
+		return {
+			promotionId: promo.id,
+			code: promo.code,
+			type: promo.type,
+			value: promo.value,
+			discount,
+			finalAmount: orderAmount - discount
+		};
+	}
+
+	async releaseVoucherUsage(promotionId: number, executor: any = db) {
+		return await promotionRepository.decrementUsage(promotionId, executor);
 	}
 }
 

@@ -1,7 +1,9 @@
 import { userRepository } from '$lib/server/repositories/user.repository';
 
 export class UserService {
-	async listUsers(params: { page?: number; limit?: number; search?: string; role?: string; tier?: string } = {}) {
+	async listUsers(
+		params: { page?: number; limit?: number; search?: string; role?: string; tier?: string } = {}
+	) {
 		return await userRepository.findAll(params);
 	}
 

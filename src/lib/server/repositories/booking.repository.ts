@@ -3,21 +3,21 @@ import { booking, bookingServiceItem } from '$lib/server/db/schema';
 import { eq, and, not, lt, gt, or } from 'drizzle-orm';
 
 export class BookingRepository {
-	async findAll() {
-		return await db.select().from(booking);
+	async findAll(executor: any = db) {
+		return await executor.select().from(booking);
 	}
 
-	async findById(id: number) {
-		const result = await db.select().from(booking).where(eq(booking.id, id));
+	async findById(id: number, executor: any = db) {
+		const result = await executor.select().from(booking).where(eq(booking.id, id));
 		return result[0];
 	}
 
-	async findByUserId(userId: string) {
-		return await db.select().from(booking).where(eq(booking.userId, userId));
+	async findByUserId(userId: string, executor: any = db) {
+		return await executor.select().from(booking).where(eq(booking.userId, userId));
 	}
 
-	async findActiveByRoomId(roomId: number) {
-		return await db
+	async findActiveByRoomId(roomId: number, executor: any = db) {
+		return await executor
 			.select()
 			.from(booking)
 			.where(
@@ -28,13 +28,18 @@ export class BookingRepository {
 			);
 	}
 
-	async create(data: typeof booking.$inferInsert) {
-		const result = await db.insert(booking).values(data).returning();
+	async create(data: typeof booking.$inferInsert, executor: any = db) {
+		const result = await executor.insert(booking).values(data).returning();
 		return result[0];
 	}
 
-	async findOverlappingBookings(roomId: number, startTime: Date, endTime: Date) {
-		return await db
+	async findOverlappingBookings(
+		roomId: number,
+		startTime: Date,
+		endTime: Date,
+		executor: any = db
+	) {
+		return await executor
 			.select()
 			.from(booking)
 			.where(
@@ -47,13 +52,17 @@ export class BookingRepository {
 			);
 	}
 
-	async updateStatus(id: number, status: string) {
-		const result = await db.update(booking).set({ status }).where(eq(booking.id, id)).returning();
+	async updateStatus(id: number, status: string, executor: any = db) {
+		const result = await executor
+			.update(booking)
+			.set({ status })
+			.where(eq(booking.id, id))
+			.returning();
 		return result[0];
 	}
 
-	async createServiceItem(data: typeof bookingServiceItem.$inferInsert) {
-		const result = await db.insert(bookingServiceItem).values(data).returning();
+	async createServiceItem(data: typeof bookingServiceItem.$inferInsert, executor: any = db) {
+		const result = await executor.insert(bookingServiceItem).values(data).returning();
 		return result[0];
 	}
 }

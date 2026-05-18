@@ -1,17 +1,27 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
-	let { 
-		value = $bindable(), 
-		placeholder = 'Chọn ngày hát...' 
-	} = $props<{ value?: Date, placeholder?: string }>();
+	let { value = $bindable(), placeholder = 'Chọn ngày hát...' } = $props<{
+		value?: Date;
+		placeholder?: string;
+	}>();
 	let isOpen = $state(false);
 	let dropDownRef: HTMLDivElement;
 	let viewDate = $state(value ? new Date(value) : new Date());
 	let currentMonth = $derived(viewDate.getMonth());
 	let currentYear = $derived(viewDate.getFullYear());
 	const monthNames = [
-		'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-		'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+		'Tháng 1',
+		'Tháng 2',
+		'Tháng 3',
+		'Tháng 4',
+		'Tháng 5',
+		'Tháng 6',
+		'Tháng 7',
+		'Tháng 8',
+		'Tháng 9',
+		'Tháng 10',
+		'Tháng 11',
+		'Tháng 12'
 	];
 	const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 	let daysInMonth = $derived(new Date(currentYear, currentMonth + 1, 0).getDate());
@@ -38,24 +48,34 @@
 		const newDate = new Date(currentYear, currentMonth, day);
 		value = newDate;
 		isOpen = false;
-        if(document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
-        }
+		if (document.activeElement instanceof HTMLElement) {
+			document.activeElement.blur();
+		}
 	}
 	function formatDate(d: Date | undefined) {
 		if (!d) return placeholder;
 		return d.toLocaleDateString('vi-VN', {
-			day: '2-digit', month: '2-digit', year: 'numeric'
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
 		});
 	}
 	let displayValue = $derived(formatDate(value));
 	function isSelected(day: number) {
 		if (!value) return false;
-		return value.getDate() === day && value.getMonth() === currentMonth && value.getFullYear() === currentYear;
+		return (
+			value.getDate() === day &&
+			value.getMonth() === currentMonth &&
+			value.getFullYear() === currentYear
+		);
 	}
 	function isToday(day: number) {
 		const today = new Date();
-		return today.getDate() === day && today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+		return (
+			today.getDate() === day &&
+			today.getMonth() === currentMonth &&
+			today.getFullYear() === currentYear
+		);
 	}
 
 	function isPast(day: number) {
@@ -66,12 +86,14 @@
 </script>
 
 <div class="dropdown w-full" bind:this={dropDownRef}>
-	<div 
-		tabindex="0" 
-		role="button" 
-		class="input input-bordered rounded-md border-base-300 w-full flex items-center justify-between {isOpen ? 'border-primary outline-none' : ''}" 
-		onclick={() => isOpen = true}
-        onkeydown={(e) => e.key === 'Enter' && (isOpen = true)}
+	<div
+		tabindex="0"
+		role="button"
+		class="input-bordered input flex w-full items-center justify-between rounded-md border-base-300 {isOpen
+			? 'border-primary outline-none'
+			: ''}"
+		onclick={() => (isOpen = true)}
+		onkeydown={(e) => e.key === 'Enter' && (isOpen = true)}
 	>
 		<div class="flex items-center gap-2 {value ? 'text-base-content' : 'text-base-content/50'}">
 			<Icon icon="solar:calendar-date-line-duotone" class="text-xl" />
@@ -79,20 +101,20 @@
 		</div>
 		<Icon icon="solar:alt-arrow-down-line-duotone" class="text-base-content/50" />
 	</div>
-	<div 
-		tabindex="-1" 
-		class="dropdown-content z-50 bg-base-100 shadow-xl border border-base-300 rounded-md w-72 p-4 mt-2 focus:outline-none"
+	<div
+		tabindex="-1"
+		class="dropdown-content z-50 mt-2 w-72 rounded-md border border-base-300 bg-base-100 p-4 shadow-xl focus:outline-none"
 	>
-		<div class="flex justify-between items-center mb-4">
-			<button class="btn btn-sm btn-ghost btn-square" onclick={prevMonth}>
+		<div class="mb-4 flex items-center justify-between">
+			<button class="btn btn-square btn-ghost btn-sm" onclick={prevMonth}>
 				<Icon icon="solar:alt-arrow-left-line-duotone" class="text-lg" />
 			</button>
-			<span class="font-bold text-sm tracking-wide">{monthNames[currentMonth]} {currentYear}</span>
-			<button class="btn btn-sm btn-ghost btn-square" onclick={nextMonth}>
+			<span class="text-sm font-bold tracking-wide">{monthNames[currentMonth]} {currentYear}</span>
+			<button class="btn btn-square btn-ghost btn-sm" onclick={nextMonth}>
 				<Icon icon="solar:alt-arrow-right-line-duotone" class="text-lg" />
 			</button>
 		</div>
-		<div class="grid grid-cols-7 gap-1 text-center mb-2">
+		<div class="mb-2 grid grid-cols-7 gap-1 text-center">
 			{#each dayNames as day}
 				<div class="text-xs font-semibold text-base-content/50">{day}</div>
 			{/each}
@@ -100,9 +122,17 @@
 		<div class="grid grid-cols-7 gap-1">
 			{#each calendarDays as day}
 				{#if day}
-					<button 
+					<button
 						disabled={isPast(day)}
-						class="btn btn-sm btn-square w-full rounded-md transition-transform active:scale-95 {isPast(day) ? 'btn-disabled opacity-30 bg-base-200' : 'btn-ghost hover:bg-base-200'} {isSelected(day) ? 'bg-primary! text-primary-content! font-bold shadow-sm' : isToday(day) && !isSelected(day) ? 'border-primary border text-primary font-bold' : ''}"
+						class="btn btn-square w-full rounded-md transition-transform btn-sm active:scale-95 {isPast(
+							day
+						)
+							? 'btn-disabled bg-base-200 opacity-30'
+							: 'btn-ghost hover:bg-base-200'} {isSelected(day)
+							? 'bg-primary! font-bold text-primary-content! shadow-sm'
+							: isToday(day) && !isSelected(day)
+								? 'border border-primary font-bold text-primary'
+								: ''}"
 						onclick={() => selectDate(day)}
 					>
 						{day}

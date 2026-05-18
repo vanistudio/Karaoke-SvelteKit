@@ -10,7 +10,11 @@ export class EmailService {
 	private async getConfig() {
 		try {
 			return await settingService.getSettingsMap([
-				'email_smtp_host', 'email_smtp_port', 'email_smtp_user', 'email_smtp_pass', 'email_from_name'
+				'email_smtp_host',
+				'email_smtp_port',
+				'email_smtp_user',
+				'email_smtp_pass',
+				'email_from_name'
 			]);
 		} catch {
 			return {};
@@ -26,15 +30,31 @@ export class EmailService {
 		console.log(`Subject: ${options.subject}`);
 		console.log(`From: ${config['email_from_name'] || 'KaraSystem'}`);
 		console.log('───────────────────────────────────────────');
-		console.log(options.html.replace(/<[^>]*>/g, '').trim().slice(0, 200));
+		console.log(
+			options.html
+				.replace(/<[^>]*>/g, '')
+				.trim()
+				.slice(0, 200)
+		);
 		console.log('═══════════════════════════════════════════');
 
 		return true;
 	}
 
-	async sendBookingConfirmed(email: string, data: { bookingId: number; roomName: string; startTime: Date; endTime: Date; totalCost: number }) {
-		const fmtTime = (d: Date) => new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(d);
-		const fmtVND = (v: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
+	async sendBookingConfirmed(
+		email: string,
+		data: { bookingId: number; roomName: string; startTime: Date; endTime: Date; totalCost: number }
+	) {
+		const fmtTime = (d: Date) =>
+			new Intl.DateTimeFormat('vi-VN', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit'
+			}).format(d);
+		const fmtVND = (v: number) =>
+			new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v);
 
 		const html = `
 			<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -55,10 +75,17 @@ export class EmailService {
 			</div>
 		`;
 
-		return await this.send({ to: email, subject: `✅ Xác nhận đặt phòng #${data.bookingId} — KaraSystem`, html });
+		return await this.send({
+			to: email,
+			subject: `✅ Xác nhận đặt phòng #${data.bookingId} — KaraSystem`,
+			html
+		});
 	}
 
-	async sendBookingCancelled(email: string, data: { bookingId: number; roomName: string; reason?: string }) {
+	async sendBookingCancelled(
+		email: string,
+		data: { bookingId: number; roomName: string; reason?: string }
+	) {
 		const html = `
 			<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
 				<div style="background: #ef4444; padding: 24px; border-radius: 12px 12px 0 0;">
@@ -74,7 +101,11 @@ export class EmailService {
 			</div>
 		`;
 
-		return await this.send({ to: email, subject: `❌ Hủy đặt phòng #${data.bookingId} — KaraSystem`, html });
+		return await this.send({
+			to: email,
+			subject: `❌ Hủy đặt phòng #${data.bookingId} — KaraSystem`,
+			html
+		});
 	}
 }
 

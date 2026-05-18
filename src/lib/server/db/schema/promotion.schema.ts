@@ -13,4 +13,3 @@ export const promotion = pgTable('promotion', {
 	isPublic: boolean('is_public').default(false).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull()
 });
-

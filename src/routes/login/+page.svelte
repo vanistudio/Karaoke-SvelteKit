@@ -11,6 +11,7 @@
 
 	let email = $state('');
 	let password = $state('');
+	let isPasswordVisible = $state(false);
 
 	let errorStore = $state<Record<string, string>>({});
 	let globalError = $state<string | null>(null);
@@ -116,14 +117,29 @@
 							>Quên mật khẩu?</a
 						>
 					</div>
-					<input
-						type="password"
-						bind:value={password}
-						class="input-bordered input w-full rounded-md border-base-300 {errorStore.password
-							? 'input-error focus-within:border-error'
-							: 'focus:border-primary'}"
-						placeholder="••••••••"
-					/>
+					<div class="relative">
+						<input
+							type={isPasswordVisible ? 'text' : 'password'}
+							bind:value={password}
+							class="input-bordered input w-full rounded-md border-base-300 pr-12 {errorStore.password
+								? 'input-error focus-within:border-error'
+								: 'focus:border-primary'}"
+							placeholder="••••••••"
+						/>
+						<button
+							type="button"
+							class="btn absolute top-1/2 right-2 h-8 min-h-0 -translate-y-1/2 px-2 btn-ghost btn-sm"
+							onclick={() => (isPasswordVisible = !isPasswordVisible)}
+							aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+						>
+							<Icon
+								icon={isPasswordVisible
+									? 'solar:eye-closed-line-duotone'
+									: 'solar:eye-line-duotone'}
+								class="text-lg text-base-content/70"
+							/>
+						</button>
+					</div>
 					{#if errorStore.password}
 						<div class="label pt-2 pb-0 text-[11px] font-bold text-error">
 							{errorStore.password}

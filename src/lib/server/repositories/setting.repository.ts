@@ -12,7 +12,11 @@ export class SettingRepository {
 	}
 
 	async findByKey(key: string) {
-		return await db.select().from(setting).where(eq(setting.key, key)).then(res => res[0] ?? null);
+		return await db
+			.select()
+			.from(setting)
+			.where(eq(setting.key, key))
+			.then((res) => res[0] ?? null);
 	}
 
 	async upsert(key: string, value: string, group: string) {

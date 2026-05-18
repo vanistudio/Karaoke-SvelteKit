@@ -22,8 +22,18 @@ export const branchRouter = router({
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
-			const created = await db.insert(branch).values(input).returning().then(res => res[0]);
-			await activityService.log(ctx.user.id, 'create', 'branch', created.id, `Tạo chi nhánh ${created.name}`);
+			const created = await db
+				.insert(branch)
+				.values(input)
+				.returning()
+				.then((res) => res[0]);
+			await activityService.log(
+				ctx.user.id,
+				'create',
+				'branch',
+				created.id,
+				`Tạo chi nhánh ${created.name}`
+			);
 			return created;
 		}),
 	update: adminProcedure
@@ -38,18 +48,24 @@ export const branchRouter = router({
 		)
 		.mutation(async ({ input, ctx }) => {
 			const { id, ...data } = input;
-			const updated = await db.update(branch).set(data).where(eq(branch.id, id)).returning().then(res => res[0]);
+			const updated = await db
+				.update(branch)
+				.set(data)
+				.where(eq(branch.id, id))
+				.returning()
+				.then((res) => res[0]);
 			await activityService.log(ctx.user.id, 'update', 'branch', id, `Cập nhật chi nhánh #${id}`);
 			return updated;
 		}),
-	delete: adminProcedure
-		.input(z.number())
-		.mutation(async ({ input, ctx }) => {
-			const deleted = await db.delete(branch).where(eq(branch.id, input));
-			await activityService.log(ctx.user.id, 'delete', 'branch', input, `Xóa chi nhánh #${input}`);
-			return deleted;
-		}),
+	delete: adminProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+		const deleted = await db.delete(branch).where(eq(branch.id, input));
+		await activityService.log(ctx.user.id, 'delete', 'branch', input, `Xóa chi nhánh #${input}`);
+		return deleted;
+	}),
 	count: adminProcedure.query(async () => {
-		return await db.select({ count: count() }).from(branch).then(res => res[0].count);
+		return await db
+			.select({ count: count() })
+			.from(branch)
+			.then((res) => res[0].count);
 	})
 });

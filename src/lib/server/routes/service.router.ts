@@ -3,6 +3,10 @@ import { z } from 'zod';
 import { serviceController } from '$lib/server/controllers/service.controller';
 import { activityService } from '$lib/server/services/activity.service';
 
+const uploadedImageUrlSchema = z
+	.string()
+	.regex(/^\/uploads\/[a-f0-9-]+\.(png|jpg|jpeg|webp|gif)$/i, 'Image URL must be a local uploaded asset');
+
 export const serviceRouter = router({
 	list: publicProcedure.query(async () => {
 		return await serviceController.listServices();
@@ -20,13 +24,19 @@ export const serviceRouter = router({
 				category: z.enum(['food', 'drink', 'decoration', 'other']),
 				price: z.number().positive(),
 				description: z.string().optional(),
-				imageUrl: z.string().optional(),
+				imageUrl: uploadedImageUrlSchema.optional(),
 				isAvailable: z.boolean().optional()
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
 			const created = await serviceController.addService(input);
-			await activityService.log(ctx.user.id, 'create', 'service', created.id, `Tạo dịch vụ ${created.name}`);
+			await activityService.log(
+				ctx.user.id,
+				'create',
+				'service',
+				created.id,
+				`Tạo dịch vụ ${created.name}`
+			);
 			return created;
 		}),
 	update: managerProcedure
@@ -37,7 +47,7 @@ export const serviceRouter = router({
 				category: z.enum(['food', 'drink', 'decoration', 'other']).optional(),
 				price: z.number().positive().optional(),
 				description: z.string().optional(),
-				imageUrl: z.string().optional(),
+				imageUrl: uploadedImageUrlSchema.optional(),
 				isAvailable: z.boolean().optional()
 			})
 		)
@@ -47,11 +57,9 @@ export const serviceRouter = router({
 			await activityService.log(ctx.user.id, 'update', 'service', id, `Cập nhật dịch vụ #${id}`);
 			return updated;
 		}),
-	delete: adminProcedure
-		.input(z.number())
-		.mutation(async ({ input, ctx }) => {
-			const deleted = await serviceController.deleteService(input);
-			await activityService.log(ctx.user.id, 'delete', 'service', input, `Xóa dịch vụ #${input}`);
-			return deleted;
-		})
+	delete: adminProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+		const deleted = await serviceController.deleteService(input);
+		await activityService.log(ctx.user.id, 'delete', 'service', input, `Xóa dịch vụ #${input}`);
+		return deleted;
+	})
 });

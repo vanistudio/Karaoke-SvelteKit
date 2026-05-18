@@ -6,11 +6,9 @@ export const dashboardRouter = router({
 	stats: managerProcedure.query(async () => {
 		return await dashboardService.getStats();
 	}),
-	recentBookings: managerProcedure
-		.input(z.number().optional())
-		.query(async ({ input }) => {
-			return await dashboardService.getRecentBookings(input || 5);
-		}),
+	recentBookings: managerProcedure.input(z.number().optional()).query(async ({ input }) => {
+		return await dashboardService.getRecentBookings(input || 5);
+	}),
 	enrichedBookings: managerProcedure.query(async () => {
 		return await dashboardService.getEnrichedBookings();
 	}),

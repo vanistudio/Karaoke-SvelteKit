@@ -6,10 +6,10 @@ export const reviewRouter = router({
 	create: protectedProcedure
 		.input(
 			z.object({
-				bookingId: z.number(),
-				roomId: z.number(),
-				rating: z.number().min(1).max(5),
-				comment: z.string().optional()
+				bookingId: z.number().int().positive(),
+				roomId: z.number().int().positive(),
+				rating: z.number().int().min(1).max(5),
+				comment: z.string().trim().max(1000).optional()
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -21,25 +21,24 @@ export const reviewRouter = router({
 				comment: input.comment
 			});
 		}),
-	listByRoom: publicProcedure
-		.input(z.number())
-		.query(async ({ input }) => {
-			return await reviewService.getByRoom(input);
-		}),
-	roomStats: publicProcedure
-		.input(z.number())
-		.query(async ({ input }) => {
-			return await reviewService.getRoomStats(input);
-		}),
+	listByRoom: publicProcedure.input(z.number().int().positive()).query(async ({ input }) => {
+		return await reviewService.getByRoom(input);
+	}),
+	roomStats: publicProcedure.input(z.number().int().positive()).query(async ({ input }) => {
+		return await reviewService.getRoomStats(input);
+	}),
 	allRoomStats: publicProcedure.query(async () => {
 		return await reviewService.getAllRoomStats();
 	}),
 	list: managerProcedure
 		.input(
-			z.object({
-				page: z.number().min(1).optional().default(1),
-				limit: z.number().min(1).max(50).optional().default(20)
-			}).optional().default({ page: 1, limit: 20 })
+			z
+				.object({
+					page: z.number().min(1).optional().default(1),
+					limit: z.number().min(1).max(50).optional().default(20)
+				})
+				.optional()
+				.default({ page: 1, limit: 20 })
 		)
 		.query(async ({ input }) => {
 			return await reviewService.getAll(input);

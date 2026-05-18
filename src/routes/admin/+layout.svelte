@@ -42,7 +42,11 @@
 
 <div class="flex min-h-screen bg-base-200 font-sans">
 	{#if sidebarOpen}
-		<button class="fixed inset-0 bg-black/40 z-40 lg:hidden" onclick={() => sidebarOpen = false}></button>
+		<button
+			class="fixed inset-0 bg-black/40 z-40 lg:hidden"
+			aria-label="Đóng thanh điều hướng"
+			onclick={() => sidebarOpen = false}
+		></button>
 	{/if}
 
 	<aside class="fixed lg:sticky top-0 left-0 z-50 h-screen flex flex-col bg-base-100 border-r border-base-300/80 transition-all duration-300
@@ -98,7 +102,11 @@
 					Về Trang Chủ
 				</a>
 			{/if}
-			<button onclick={() => sidebarCollapsed = !sidebarCollapsed} class="hidden lg:flex items-center gap-3 px-3 h-10 rounded-lg text-[13px] font-medium text-base-content/30 hover:text-base-content/60 hover:bg-base-200/40 transition-colors w-full {sidebarCollapsed ? 'justify-center' : ''}">
+			<button
+				onclick={() => sidebarCollapsed = !sidebarCollapsed}
+				aria-label={sidebarCollapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
+				class="hidden lg:flex items-center gap-3 px-3 h-10 rounded-lg text-[13px] font-medium text-base-content/30 hover:text-base-content/60 hover:bg-base-200/40 transition-colors w-full {sidebarCollapsed ? 'justify-center' : ''}"
+			>
 				<Icon icon={sidebarCollapsed ? 'solar:arrow-right-line-duotone' : 'solar:arrow-left-line-duotone'} class="text-lg" />
 				{#if !sidebarCollapsed}<span>Thu Gọn</span>{/if}
 			</button>
@@ -111,7 +119,11 @@
 				<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-xl" />
 				<span class="text-xs font-black uppercase tracking-[0.1em]">KARA<span class="text-primary">ADMIN</span></span>
 			</a>
-			<button onclick={() => sidebarOpen = true} class="btn btn-ghost btn-sm btn-square rounded-lg">
+			<button
+				onclick={() => sidebarOpen = true}
+				aria-label="Mở thanh điều hướng"
+				class="btn btn-ghost btn-sm btn-square rounded-lg"
+			>
 				<Icon icon="solar:hamburger-menu-line-duotone" class="text-2xl text-base-content/70" />
 			</button>
 		</header>
