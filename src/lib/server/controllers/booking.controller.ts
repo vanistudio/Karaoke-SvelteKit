@@ -5,8 +5,8 @@ export class BookingController {
 		return await bookingService.getAllBookings();
 	}
 
-	async getBooking(id: number) {
-		return await bookingService.getBooking(id);
+	async getBooking(id: number, viewer?: { id: string; role: string }) {
+		return await bookingService.getBooking(id, viewer);
 	}
 
 	async getBookingsByUser(userId: string) {
@@ -33,8 +33,8 @@ export class BookingController {
 	) {
 		return await bookingService.createBooking(data, usedPoints, selectedServices, voucherCode);
 	}
-	
-	async changeStatus(id: number, status: string) {
+
+	async changeStatus(id: number, status: 'pending' | 'confirmed' | 'cancelled' | 'checked_in') {
 		return await bookingService.updateBookingStatus(id, status);
 	}
 
@@ -44,4 +44,3 @@ export class BookingController {
 }
 
 export const bookingController = new BookingController();
-

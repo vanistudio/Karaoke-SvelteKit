@@ -5,8 +5,15 @@ import { user } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export class ActivityService {
-	async log(userId: string | null, action: string, entity: string, entityId?: string | number, details?: string) {
-		await db.insert(activityLog).values({
+	async log(
+		userId: string | null,
+		action: string,
+		entity: string,
+		entityId?: string | number,
+		details?: string,
+		executor: any = db
+	) {
+		await executor.insert(activityLog).values({
 			userId,
 			action,
 			entity,
@@ -39,13 +46,16 @@ export class ActivityService {
 			query = query.where(eq(activityLog.entity, entity));
 		}
 
-		const data = await query.orderBy(sql`${activityLog.createdAt} DESC`).limit(limit).offset(offset);
+		const data = await query
+			.orderBy(sql`${activityLog.createdAt} DESC`)
+			.limit(limit)
+			.offset(offset);
 
 		let countQuery = db.select({ count: count() }).from(activityLog).$dynamic();
 		if (entity) {
 			countQuery = countQuery.where(eq(activityLog.entity, entity));
 		}
-		const total = await countQuery.then(res => res[0].count);
+		const total = await countQuery.then((res) => res[0].count);
 
 		return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
 	}

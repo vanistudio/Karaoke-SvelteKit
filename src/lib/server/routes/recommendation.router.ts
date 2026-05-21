@@ -18,9 +18,7 @@ export const recommendationRouter = router({
 				new Date(input.endTime)
 			);
 		}),
-	popularServices: publicProcedure
-		.input(z.string())
-		.query(async ({ input }) => {
-			return await recommendationService.getPopularServices(input);
-		})
+	popularServices: publicProcedure.input(z.string()).query(async ({ input }) => {
+		return await recommendationService.getPopularServices(input);
+	})
 });

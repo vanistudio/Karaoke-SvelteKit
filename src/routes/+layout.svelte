@@ -47,11 +47,36 @@
 	});
 
 	const navigation = [
-		{ name: 'Trang Chủ', href: '/', icon: 'solar:home-2-line-duotone', iconActive: 'solar:home-2-bold-duotone' },
-		{ name: 'Phòng Hát', href: '/rooms', icon: 'solar:soundwave-circle-line-duotone', iconActive: 'solar:soundwave-circle-bold-duotone' },
-		{ name: 'Dịch Vụ', href: '/services', icon: 'solar:cup-hot-line-duotone', iconActive: 'solar:cup-hot-bold-duotone' },
-		{ name: 'Ưu Đãi', href: '/promotions', icon: 'solar:tag-price-line-duotone', iconActive: 'solar:tag-price-bold-duotone' },
-		{ name: 'Liên Hệ', href: '/contact', icon: 'solar:chat-round-dots-line-duotone', iconActive: 'solar:chat-round-dots-bold-duotone' }
+		{
+			name: 'Trang Chủ',
+			href: '/',
+			icon: 'solar:home-2-line-duotone',
+			iconActive: 'solar:home-2-bold-duotone'
+		},
+		{
+			name: 'Phòng Hát',
+			href: '/rooms',
+			icon: 'solar:soundwave-circle-line-duotone',
+			iconActive: 'solar:soundwave-circle-bold-duotone'
+		},
+		{
+			name: 'Dịch Vụ',
+			href: '/services',
+			icon: 'solar:cup-hot-line-duotone',
+			iconActive: 'solar:cup-hot-bold-duotone'
+		},
+		{
+			name: 'Ưu Đãi',
+			href: '/promotions',
+			icon: 'solar:tag-price-line-duotone',
+			iconActive: 'solar:tag-price-bold-duotone'
+		},
+		{
+			name: 'Liên Hệ',
+			href: '/contact',
+			icon: 'solar:chat-round-dots-line-duotone',
+			iconActive: 'solar:chat-round-dots-bold-duotone'
+		}
 	];
 
 	function isActive(href: string) {
@@ -82,16 +107,25 @@
 	<title>KaraSystem | Hệ Thống Phòng Hát Cao Cấp</title>
 </svelte:head>
 
-<svelte:window onclick={() => { if (userMenuOpen) userMenuOpen = false; }} />
+<svelte:window
+	onclick={() => {
+		if (userMenuOpen) userMenuOpen = false;
+	}}
+/>
 
 <Toast />
 
-<div class="flex flex-col min-h-screen bg-base-200 font-sans">
+<div class="flex min-h-screen flex-col bg-base-200 font-sans">
 	{#if !isAdminRoute}
-		<div class="hidden lg:block bg-neutral text-neutral-content/70 text-[10px] tracking-[0.2em] uppercase font-semibold">
-			<div class="max-w-7xl mx-auto px-8 h-9 flex items-center justify-between">
+		<div
+			class="hidden bg-neutral text-[10px] font-semibold tracking-[0.2em] text-neutral-content/70 uppercase lg:block"
+		>
+			<div class="mx-auto flex h-9 max-w-7xl items-center justify-between px-8">
 				<div class="flex items-center gap-8">
-					<a href="tel:{siteSettings.site_phone?.replace(/\s/g, '')}" class="flex items-center gap-1.5 hover:text-white transition-colors">
+					<a
+						href="tel:{siteSettings.site_phone?.replace(/\s/g, '')}"
+						class="flex items-center gap-1.5 transition-colors hover:text-white"
+					>
 						<Icon icon="solar:phone-calling-line-duotone" class="text-sm" />
 						{siteSettings.site_phone}
 					</a>
@@ -101,82 +135,128 @@
 					</span>
 				</div>
 				<div class="flex items-center gap-6">
-					<span class="text-primary flex items-center gap-1.5">
-						<Icon icon="solar:clock-circle-line-duotone" class="text-sm"/>
-						Mở cửa: {siteSettings.site_open_time || '08:00'} — {siteSettings.site_close_time || '02:00'}
+					<span class="flex items-center gap-1.5 text-primary">
+						<Icon icon="solar:clock-circle-line-duotone" class="text-sm" />
+						Mở cửa: {siteSettings.site_open_time || '08:00'} — {siteSettings.site_close_time ||
+							'02:00'}
 					</span>
 				</div>
 			</div>
 		</div>
 
-		<header class="bg-base-100/95 backdrop-blur-lg border-b border-base-300/80 sticky top-0 z-50">
-			<div class="max-w-7xl mx-auto px-4 lg:px-8 h-16 lg:h-[72px] flex items-center justify-between gap-4">
-				<a href="/" class="flex items-center gap-2.5 hover:opacity-80 transition-opacity shrink-0">
-					<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-3xl lg:text-4xl" />
+		<header class="sticky top-0 z-50 border-b border-base-300/80 bg-base-100/95 backdrop-blur-lg">
+			<div
+				class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:h-[72px] lg:px-8"
+			>
+				<a href="/" class="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80">
+					<Icon icon="solar:microphone-3-line-duotone" class="text-3xl text-primary lg:text-4xl" />
 					<div class="flex flex-col">
-						<span class="text-lg lg:text-xl font-black uppercase tracking-[0.12em] leading-none">KARA<span class="text-primary">SYSTEM</span></span>
-						<span class="text-[8px] tracking-[0.25em] text-base-content/40 uppercase font-medium mt-0.5 hidden sm:block">Đẳng cấp âm thanh</span>
+						<span class="text-lg leading-none font-black tracking-[0.12em] uppercase lg:text-xl"
+							>KARA<span class="text-primary">SYSTEM</span></span
+						>
+						<span
+							class="mt-0.5 hidden text-[8px] font-medium tracking-[0.25em] text-base-content/40 uppercase sm:block"
+							>Đẳng cấp âm thanh</span
+						>
 					</div>
 				</a>
 
-				<nav class="hidden lg:flex items-center gap-1">
+				<nav class="hidden items-center gap-1 lg:flex">
 					{#each navigation as item}
 						<a
 							href={item.href}
-							class="relative px-4 py-2 rounded-lg text-[13px] font-semibold tracking-wide transition-all duration-200
+							class="relative rounded-lg px-4 py-2 text-[13px] font-semibold tracking-wide transition-all duration-200
 								{isActive(item.href)
-									? 'text-primary'
-									: 'text-base-content/50 hover:text-base-content hover:bg-base-200/60'}"
+								? 'text-primary'
+								: 'text-base-content/50 hover:bg-base-200/60 hover:text-base-content'}"
 						>
 							{item.name}
 							{#if isActive(item.href)}
-								<span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-primary rounded-full"></span>
+								<span
+									class="absolute bottom-0 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary"
+								></span>
 							{/if}
 						</a>
 					{/each}
 				</nav>
 
-				<div class="flex items-center gap-2 shrink-0">
+				<div class="flex shrink-0 items-center gap-2">
 					{#if user}
 						{#if ['admin', 'manager', 'staff'].includes(user.role)}
-							<a href="/admin" class="hidden md:flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-primary bg-primary/8 hover:bg-primary/15 px-3.5 py-2 rounded-lg transition-colors">
-								<Icon icon="solar:pie-chart-2-bold-duotone" class="text-sm"/>
-								{user.role === 'admin' ? 'Admin' : user.role === 'manager' ? 'Quản Lý' : 'Nhân Viên'}
+							<a
+								href="/admin"
+								class="hidden items-center gap-1.5 rounded-lg bg-primary/8 px-3.5 py-2 text-[11px] font-bold tracking-widest text-primary uppercase transition-colors hover:bg-primary/15 md:flex"
+							>
+								<Icon icon="solar:pie-chart-2-bold-duotone" class="text-sm" />
+								{user.role === 'admin'
+									? 'Admin'
+									: user.role === 'manager'
+										? 'Quản Lý'
+										: 'Nhân Viên'}
 							</a>
 						{/if}
 						<div class="relative">
 							<button
-								onclick={(e) => { e.stopPropagation(); toggleUserMenu(); }}
-								class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-base-200/60 transition-colors"
+								onclick={(e) => {
+									e.stopPropagation();
+									toggleUserMenu();
+								}}
+								class="flex items-center gap-2 rounded-lg px-3 py-1.5 transition-colors hover:bg-base-200/60"
 							>
-								<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-									<Icon icon="solar:user-bold-duotone" class="text-primary text-lg" />
+								<div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+									<Icon icon="solar:user-bold-duotone" class="text-lg text-primary" />
 								</div>
-								<span class="hidden md:block text-sm font-semibold text-base-content/70 max-w-[120px] truncate">{user.name}</span>
-								<Icon icon="solar:alt-arrow-down-line-duotone" class="text-xs text-base-content/40 hidden md:block" />
+								<span
+									class="hidden max-w-[120px] truncate text-sm font-semibold text-base-content/70 md:block"
+									>{user.name}</span
+								>
+								<Icon
+									icon="solar:alt-arrow-down-line-duotone"
+									class="hidden text-xs text-base-content/40 md:block"
+								/>
 							</button>
 							{#if userMenuOpen}
-								<div class="absolute right-0 top-full mt-2 w-56 bg-base-100 border border-base-300 rounded-xl shadow-xl py-2 z-60">
-									<div class="px-4 py-3 border-b border-base-200">
-										<p class="text-sm font-bold truncate">{user.name}</p>
-										<p class="text-xs text-base-content/50 truncate">{user.email}</p>
+								<div
+									class="absolute top-full right-0 z-60 mt-2 w-56 rounded-xl border border-base-300 bg-base-100 py-2 shadow-xl"
+								>
+									<div class="border-b border-base-200 px-4 py-3">
+										<p class="truncate text-sm font-bold">{user.name}</p>
+										<p class="truncate text-xs text-base-content/50">{user.email}</p>
 									</div>
-									<a href="/profile" onclick={() => userMenuOpen = false} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-base-200/60 transition-colors">
-										<Icon icon="solar:user-circle-line-duotone" class="text-lg text-base-content/50" />
+									<a
+										href="/profile"
+										onclick={() => (userMenuOpen = false)}
+										class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-base-200/60"
+									>
+										<Icon
+											icon="solar:user-circle-line-duotone"
+											class="text-lg text-base-content/50"
+										/>
 										Hồ Sơ Cá Nhân
 									</a>
-									<a href="/my-bookings" onclick={() => userMenuOpen = false} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-base-200/60 transition-colors">
+									<a
+										href="/my-bookings"
+										onclick={() => (userMenuOpen = false)}
+										class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-base-200/60"
+									>
 										<Icon icon="solar:ticket-line-duotone" class="text-lg text-base-content/50" />
 										Lịch Sử Đặt Phòng
 									</a>
 									{#if ['admin', 'manager', 'staff'].includes(user.role)}
-										<a href="/admin" onclick={() => userMenuOpen = false} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors">
+										<a
+											href="/admin"
+											onclick={() => (userMenuOpen = false)}
+											class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+										>
 											<Icon icon="solar:pie-chart-2-bold-duotone" class="text-lg" />
 											Khu Vực Quản Trị
 										</a>
 									{/if}
-									<div class="border-t border-base-200 mt-1 pt-1">
-										<button onclick={handleLogout} class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-error hover:bg-error/5 transition-colors w-full text-left">
+									<div class="mt-1 border-t border-base-200 pt-1">
+										<button
+											onclick={handleLogout}
+											class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-error transition-colors hover:bg-error/5"
+										>
 											<Icon icon="solar:logout-2-line-duotone" class="text-lg" />
 											Đăng Xuất
 										</button>
@@ -185,31 +265,45 @@
 							{/if}
 						</div>
 					{:else}
-						<a href="/login" class="hidden md:block text-sm font-semibold text-base-content/60 hover:text-base-content px-3 py-2 rounded-lg transition-colors">
+						<a
+							href="/login"
+							class="hidden rounded-lg px-3 py-2 text-sm font-semibold text-base-content/60 transition-colors hover:text-base-content md:block"
+						>
 							Đăng Nhập
 						</a>
-						<a href="/register" class="btn btn-primary btn-sm rounded-lg font-bold tracking-wider text-xs h-9 px-5">
+						<a
+							href="/register"
+							class="btn h-9 rounded-lg px-5 text-xs font-bold tracking-wider btn-sm btn-primary"
+						>
 							Đăng Ký
 						</a>
 					{/if}
 
-					<button onclick={() => mobileMenuOpen = !mobileMenuOpen} class="lg:hidden btn btn-ghost btn-sm btn-square rounded-lg">
-						<Icon icon={mobileMenuOpen ? 'solar:close-circle-line-duotone' : 'solar:hamburger-menu-line-duotone'} class="text-xl" />
+					<button
+						onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
+						class="btn btn-square rounded-lg btn-ghost btn-sm lg:hidden"
+					>
+						<Icon
+							icon={mobileMenuOpen
+								? 'solar:close-circle-line-duotone'
+								: 'solar:hamburger-menu-line-duotone'}
+							class="text-xl"
+						/>
 					</button>
 				</div>
 			</div>
 
 			{#if mobileMenuOpen}
-				<div class="lg:hidden border-t border-base-200 bg-base-100 animate-[slideDown_0.2s_ease-out]">
-					<div class="px-4 py-3 flex flex-col gap-1">
+				<div
+					class="animate-[slideDown_0.2s_ease-out] border-t border-base-200 bg-base-100 lg:hidden"
+				>
+					<div class="flex flex-col gap-1 px-4 py-3">
 						{#each navigation as item}
 							<a
 								href={item.href}
 								onclick={closeMobileMenu}
-								class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-colors
-									{isActive(item.href)
-										? 'text-primary bg-primary/8'
-										: 'text-base-content/60 hover:bg-base-200/60'}"
+								class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold transition-colors
+									{isActive(item.href) ? 'bg-primary/8 text-primary' : 'text-base-content/60 hover:bg-base-200/60'}"
 							>
 								<Icon icon={isActive(item.href) ? item.iconActive : item.icon} class="text-xl" />
 								{item.name}
@@ -217,31 +311,48 @@
 						{/each}
 
 						{#if user}
-							<div class="border-t border-base-200 mt-2 pt-2">
+							<div class="mt-2 border-t border-base-200 pt-2">
 								<div class="flex items-center gap-3 px-4 py-3">
-									<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+									<div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
 										<Icon icon="solar:user-bold-duotone" class="text-primary" />
 									</div>
-									<div class="flex-1 min-w-0">
-										<p class="text-sm font-bold truncate">{user.name}</p>
-										<p class="text-xs text-base-content/40 truncate">{user.email}</p>
+									<div class="min-w-0 flex-1">
+										<p class="truncate text-sm font-bold">{user.name}</p>
+										<p class="truncate text-xs text-base-content/40">{user.email}</p>
 									</div>
 								</div>
 								{#if user.role === 'admin'}
-									<a href="/admin" onclick={closeMobileMenu} class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors">
+									<a
+										href="/admin"
+										onclick={closeMobileMenu}
+										class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
+									>
 										<Icon icon="solar:pie-chart-2-bold-duotone" class="text-xl" />
 										Khu Vực Quản Trị
 									</a>
 								{/if}
-								<button onclick={handleLogout} class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-error hover:bg-error/5 transition-colors w-full">
+								<button
+									onclick={handleLogout}
+									class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-error transition-colors hover:bg-error/5"
+								>
 									<Icon icon="solar:logout-2-line-duotone" class="text-xl" />
 									Đăng Xuất
 								</button>
 							</div>
 						{:else}
-							<div class="border-t border-base-200 mt-2 pt-3 flex gap-2 px-4 pb-2">
-								<a href="/login" onclick={closeMobileMenu} class="btn btn-ghost btn-sm rounded-lg flex-1 font-bold text-xs tracking-wider">Đăng Nhập</a>
-								<a href="/register" onclick={closeMobileMenu} class="btn btn-primary btn-sm rounded-lg flex-1 font-bold text-xs tracking-wider">Đăng Ký</a>
+							<div class="mt-2 flex gap-2 border-t border-base-200 px-4 pt-3 pb-2">
+								<a
+									href="/login"
+									onclick={closeMobileMenu}
+									class="btn flex-1 rounded-lg text-xs font-bold tracking-wider btn-ghost btn-sm"
+									>Đăng Nhập</a
+								>
+								<a
+									href="/register"
+									onclick={closeMobileMenu}
+									class="btn flex-1 rounded-lg text-xs font-bold tracking-wider btn-sm btn-primary"
+									>Đăng Ký</a
+								>
 							</div>
 						{/if}
 					</div>
@@ -249,101 +360,156 @@
 			{/if}
 		</header>
 
-		<main class="flex-1 w-full max-w-7xl mx-auto p-4 lg:p-8 pb-24 lg:pb-8">
+		<main class="mx-auto w-full max-w-7xl flex-1 p-4 pb-24 lg:p-8 lg:pb-8">
 			{@render children()}
 		</main>
 
-		<footer class="bg-base-100 border-t border-base-200 mt-auto hidden lg:block">
-			<div class="max-w-7xl mx-auto w-full px-8 py-16">
+		<footer class="mt-auto hidden border-t border-base-200 bg-base-100 lg:block">
+			<div class="mx-auto w-full max-w-7xl px-8 py-16">
 				<div class="grid grid-cols-4 gap-10">
 					<div class="flex flex-col gap-5">
-						<a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-							<Icon icon="solar:microphone-3-line-duotone" class="text-primary text-3xl" />
+						<a href="/" class="flex items-center gap-2 transition-opacity hover:opacity-80">
+							<Icon icon="solar:microphone-3-line-duotone" class="text-3xl text-primary" />
 							<div class="flex flex-col">
-								<span class="text-lg font-black uppercase tracking-[0.12em] leading-none">KARA<span class="text-primary">SYSTEM</span></span>
-								<span class="text-[8px] tracking-[0.25em] text-base-content/40 uppercase font-medium mt-0.5">{siteSettings.site_slogan}</span>
+								<span class="text-lg leading-none font-black tracking-[0.12em] uppercase"
+									>KARA<span class="text-primary">SYSTEM</span></span
+								>
+								<span
+									class="mt-0.5 text-[8px] font-medium tracking-[0.25em] text-base-content/40 uppercase"
+									>{siteSettings.site_slogan}</span
+								>
 							</div>
 						</a>
-						<p class="text-[13px] text-base-content/50 leading-relaxed pr-4">
+						<p class="pr-4 text-[13px] leading-relaxed text-base-content/50">
 							{siteSettings.site_address} • {siteSettings.site_phone}
 						</p>
-						<div class="flex gap-3 items-center">
-							<a href="/" class="w-9 h-9 rounded-lg bg-base-200 flex items-center justify-center text-base-content/40 hover:text-primary hover:bg-primary/10 transition-colors"><Icon icon="solar:map-point-wave-line-duotone" class="text-lg" /></a>
-							<a href="/" class="w-9 h-9 rounded-lg bg-base-200 flex items-center justify-center text-base-content/40 hover:text-primary hover:bg-primary/10 transition-colors"><Icon icon="solar:phone-calling-line-duotone" class="text-lg" /></a>
-							<a href="/" class="w-9 h-9 rounded-lg bg-base-200 flex items-center justify-center text-base-content/40 hover:text-primary hover:bg-primary/10 transition-colors"><Icon icon="solar:letter-line-duotone" class="text-lg" /></a>
+						<div class="flex items-center gap-3">
+							<a
+								href="/"
+								class="flex h-9 w-9 items-center justify-center rounded-lg bg-base-200 text-base-content/40 transition-colors hover:bg-primary/10 hover:text-primary"
+								><Icon icon="solar:map-point-wave-line-duotone" class="text-lg" /></a
+							>
+							<a
+								href="/"
+								class="flex h-9 w-9 items-center justify-center rounded-lg bg-base-200 text-base-content/40 transition-colors hover:bg-primary/10 hover:text-primary"
+								><Icon icon="solar:phone-calling-line-duotone" class="text-lg" /></a
+							>
+							<a
+								href="/"
+								class="flex h-9 w-9 items-center justify-center rounded-lg bg-base-200 text-base-content/40 transition-colors hover:bg-primary/10 hover:text-primary"
+								><Icon icon="solar:letter-line-duotone" class="text-lg" /></a
+							>
 						</div>
 					</div>
 					<div>
-						<h6 class="text-xs font-bold tracking-widest uppercase mb-5 text-base-content">Dịch Vụ</h6>
-						<ul class="flex flex-col gap-3 text-[13px] text-base-content/50 font-medium">
-							<li><a href="/rooms" class="hover:text-primary transition-colors">Phòng Hát Tiêu Chuẩn</a></li>
-							<li><a href="/rooms" class="hover:text-primary transition-colors">Phòng Hội Nghị / Party</a></li>
-							<li><a href="/services" class="hover:text-primary transition-colors">Dịch Vụ Ẩm Thực</a></li>
-							<li><a href="/services" class="hover:text-primary transition-colors">Trang Trí Sự Kiện</a></li>
+						<h6 class="mb-5 text-xs font-bold tracking-widest text-base-content uppercase">
+							Dịch Vụ
+						</h6>
+						<ul class="flex flex-col gap-3 text-[13px] font-medium text-base-content/50">
+							<li>
+								<a href="/rooms" class="transition-colors hover:text-primary"
+									>Phòng Hát Tiêu Chuẩn</a
+								>
+							</li>
+							<li>
+								<a href="/rooms" class="transition-colors hover:text-primary"
+									>Phòng Hội Nghị / Party</a
+								>
+							</li>
+							<li>
+								<a href="/services" class="transition-colors hover:text-primary">Dịch Vụ Ẩm Thực</a>
+							</li>
+							<li>
+								<a href="/services" class="transition-colors hover:text-primary"
+									>Trang Trí Sự Kiện</a
+								>
+							</li>
 						</ul>
 					</div>
 					<div>
-						<h6 class="text-xs font-bold tracking-widest uppercase mb-5 text-base-content">Công Ty</h6>
-						<ul class="flex flex-col gap-3 text-[13px] text-base-content/50 font-medium">
-							<li><a href="/" class="hover:text-primary transition-colors">Về Chúng Tôi</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Tuyển Dụng</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Tin Tức Khuyến Mãi</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Liên Hệ Đặt Lịch</a></li>
+						<h6 class="mb-5 text-xs font-bold tracking-widest text-base-content uppercase">
+							Công Ty
+						</h6>
+						<ul class="flex flex-col gap-3 text-[13px] font-medium text-base-content/50">
+							<li><a href="/" class="transition-colors hover:text-primary">Về Chúng Tôi</a></li>
+							<li><a href="/" class="transition-colors hover:text-primary">Tuyển Dụng</a></li>
+							<li>
+								<a href="/" class="transition-colors hover:text-primary">Tin Tức Khuyến Mãi</a>
+							</li>
+							<li><a href="/" class="transition-colors hover:text-primary">Liên Hệ Đặt Lịch</a></li>
 						</ul>
 					</div>
 					<div>
-						<h6 class="text-xs font-bold tracking-widest uppercase mb-5 text-base-content">Hỗ Trợ</h6>
-						<ul class="flex flex-col gap-3 text-[13px] text-base-content/50 font-medium">
-							<li><a href="/" class="hover:text-primary transition-colors">Điều Khoản Sử Dụng</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Chính Sách Bảo Mật</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Chính Sách Hoàn Tiền</a></li>
-							<li><a href="/" class="hover:text-primary transition-colors">Trung Tâm Trợ Giúp</a></li>
+						<h6 class="mb-5 text-xs font-bold tracking-widest text-base-content uppercase">
+							Hỗ Trợ
+						</h6>
+						<ul class="flex flex-col gap-3 text-[13px] font-medium text-base-content/50">
+							<li>
+								<a href="/" class="transition-colors hover:text-primary">Điều Khoản Sử Dụng</a>
+							</li>
+							<li>
+								<a href="/" class="transition-colors hover:text-primary">Chính Sách Bảo Mật</a>
+							</li>
+							<li>
+								<a href="/" class="transition-colors hover:text-primary">Chính Sách Hoàn Tiền</a>
+							</li>
+							<li>
+								<a href="/" class="transition-colors hover:text-primary">Trung Tâm Trợ Giúp</a>
+							</li>
 						</ul>
 					</div>
 				</div>
 			</div>
 			<div class="border-t border-base-200">
-				<div class="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
-					<span class="text-xs text-base-content/40 font-medium tracking-wide">
+				<div class="mx-auto flex max-w-7xl items-center justify-between px-8 py-5">
+					<span class="text-xs font-medium tracking-wide text-base-content/40">
 						© 2026 KaraSystem. All rights reserved.
 					</span>
-					<div class="flex gap-6 text-[11px] font-semibold text-base-content/30 uppercase tracking-widest">
-						<a href="/" class="hover:text-primary transition-colors">Báo Lỗi</a>
-						<a href="/" class="hover:text-primary transition-colors">Hỗ Trợ 24/7</a>
+					<div
+						class="flex gap-6 text-[11px] font-semibold tracking-widest text-base-content/30 uppercase"
+					>
+						<a href="/" class="transition-colors hover:text-primary">Báo Lỗi</a>
+						<a href="/" class="transition-colors hover:text-primary">Hỗ Trợ 24/7</a>
 					</div>
 				</div>
 			</div>
 		</footer>
 
-		<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-base-100/95 backdrop-blur-lg border-t border-base-300/80 safe-area-bottom">
-			<div class="flex items-center justify-around h-16 px-2">
+		<nav
+			class="safe-area-bottom fixed right-0 bottom-0 left-0 z-50 border-t border-base-300/80 bg-base-100/95 backdrop-blur-lg lg:hidden"
+		>
+			<div class="flex h-16 items-center justify-around px-2">
 				{#each navigation as item}
 					<a
 						href={item.href}
-						class="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors min-w-[60px]
-							{isActive(item.href)
-								? 'text-primary'
-								: 'text-base-content/40 active:text-base-content/60'}"
+						class="flex min-w-[60px] flex-col items-center gap-0.5 rounded-xl px-3 py-1 transition-colors
+							{isActive(item.href) ? 'text-primary' : 'text-base-content/40 active:text-base-content/60'}"
 					>
 						<Icon icon={isActive(item.href) ? item.iconActive : item.icon} class="text-xl" />
 						<span class="text-[10px] font-semibold tracking-wide">{item.name}</span>
 						{#if isActive(item.href)}
-							<span class="w-1 h-1 rounded-full bg-primary -mt-0.5"></span>
+							<span class="-mt-0.5 h-1 w-1 rounded-full bg-primary"></span>
 						{/if}
 					</a>
 				{/each}
 				{#if user}
 					<button
-						onclick={(e) => { e.stopPropagation(); toggleUserMenu(); }}
-						class="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-base-content/40 min-w-[60px]"
+						onclick={(e) => {
+							e.stopPropagation();
+							toggleUserMenu();
+						}}
+						class="flex min-w-[60px] flex-col items-center gap-0.5 rounded-xl px-3 py-1 text-base-content/40"
 					>
-						<div class="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center">
-							<Icon icon="solar:user-bold-duotone" class="text-primary text-sm" />
+						<div class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15">
+							<Icon icon="solar:user-bold-duotone" class="text-sm text-primary" />
 						</div>
 						<span class="text-[10px] font-semibold tracking-wide">Tôi</span>
 					</button>
 				{:else}
-					<a href="/login" class="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl text-base-content/40 min-w-[60px]">
+					<a
+						href="/login"
+						class="flex min-w-[60px] flex-col items-center gap-0.5 rounded-xl px-3 py-1 text-base-content/40"
+					>
 						<Icon icon="solar:login-2-line-duotone" class="text-xl" />
 						<span class="text-[10px] font-semibold tracking-wide">Đăng Nhập</span>
 					</a>
@@ -357,8 +523,14 @@
 
 <style>
 	@keyframes slideDown {
-		from { opacity: 0; transform: translateY(-8px); }
-		to { opacity: 1; transform: translateY(0); }
+		from {
+			opacity: 0;
+			transform: translateY(-8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 	.safe-area-bottom {
 		padding-bottom: env(safe-area-inset-bottom, 0px);

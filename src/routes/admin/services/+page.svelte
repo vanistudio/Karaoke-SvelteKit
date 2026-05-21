@@ -128,12 +128,9 @@
 		await uploadFileAction(target.files[0]);
 	}
 
-	async function handlePaste(e: ClipboardEvent) {
+async function handlePaste(e: ClipboardEvent) {
 		const items = e.clipboardData?.items;
 		if (!items) return;
-		
-		const activeTag = document.activeElement?.tagName.toLowerCase();
-		const isInputFocused = activeTag === 'input' || activeTag === 'textarea';
 
 		for (const item of items) {
 			if (item.type.startsWith('image/')) {
@@ -141,13 +138,6 @@
 				const file = item.getAsFile();
 				if (file) await uploadFileAction(file);
 				break;
-			} else if (item.type === 'text/plain' && !isInputFocused) {
-				const text = e.clipboardData?.getData('text/plain');
-				if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
-					form.imageUrl = text.trim();
-					addToast('Đã nhận link ảnh!', 'success');
-					break;
-				}
 			}
 		}
 	}

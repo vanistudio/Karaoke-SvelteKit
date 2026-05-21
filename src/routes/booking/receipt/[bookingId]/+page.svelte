@@ -88,8 +88,12 @@
 					<span class="badge badge-success rounded-md font-bold px-4 py-3">✓ ĐÃ XÁC NHẬN</span>
 				{:else if booking.status === 'pending'}
 					<span class="badge badge-warning rounded-md font-bold px-4 py-3">⏳ CHỜ DUYỆT</span>
-				{:else}
+				{:else if booking.status === 'checked_in'}
+					<span class="badge badge-info text-white rounded-md font-bold px-4 py-3">✓ ĐÃ CHECK-IN</span>
+				{:else if booking.status === 'cancelled'}
 					<span class="badge badge-error text-white rounded-md font-bold px-4 py-3">✕ ĐÃ HỦY</span>
+				{:else}
+					<span class="badge badge-ghost rounded-md font-bold px-4 py-3">{booking.status}</span>
 				{/if}
 			</div>
 			<div class="mb-6">

@@ -1,21 +1,57 @@
 import { db } from '$lib/server/db';
-import { review, user, room } from '$lib/server/db/schema';
-import { eq, sql, count, avg } from 'drizzle-orm';
+import { booking, review, room, user } from '$lib/server/db/schema';
+import { avg, count, eq, sql } from 'drizzle-orm';
 
 export class ReviewService {
-	async create(data: { userId: string; bookingId: number; roomId: number; rating: number; comment?: string }) {
+	async create(data: {
+		userId: string;
+		bookingId: number;
+		roomId: number;
+		rating: number;
+		comment?: string;
+	}) {
 		if (data.rating < 1 || data.rating > 5) throw new Error('Rating phải từ 1 đến 5');
 
-		const existing = await db.select().from(review).where(eq(review.bookingId, data.bookingId)).then(res => res[0]);
+		const targetBooking = await db
+			.select({
+				id: booking.id,
+				userId: booking.userId,
+				roomId: booking.roomId,
+				status: booking.status,
+				endTime: booking.endTime
+			})
+			.from(booking)
+			.where(eq(booking.id, data.bookingId))
+			.then((res) => res[0] ?? null);
+		if (!targetBooking) throw new Error('Booking không tồn tại');
+		if (targetBooking.userId !== data.userId) {
+			throw new Error('Bạn không có quyền đánh giá đơn này');
+		}
+		if (targetBooking.roomId !== data.roomId) {
+			throw new Error('Phòng đánh giá không khớp với booking');
+		}
+		if (targetBooking.status !== 'checked_in') {
+			throw new Error('Chỉ có thể đánh giá booking đã check-in');
+		}
+
+		const existing = await db
+			.select()
+			.from(review)
+			.where(eq(review.bookingId, data.bookingId))
+			.then((res) => res[0] ?? null);
 		if (existing) throw new Error('Bạn đã đánh giá đơn này rồi');
 
-		return await db.insert(review).values({
-			userId: data.userId,
-			bookingId: data.bookingId,
-			roomId: data.roomId,
-			rating: data.rating,
-			comment: data.comment ?? null
-		}).returning().then(res => res[0]);
+		return await db
+			.insert(review)
+			.values({
+				userId: data.userId,
+				bookingId: data.bookingId,
+				roomId: data.roomId,
+				rating: data.rating,
+				comment: data.comment ?? null
+			})
+			.returning()
+			.then((res) => res[0]);
 	}
 
 	async getByRoom(roomId: number) {
@@ -59,10 +95,10 @@ export class ReviewService {
 			.from(review)
 			.groupBy(review.roomId);
 
-		return results.map(r => ({
-			roomId: r.roomId,
-			avgRating: r.avgRating ? Number(Number(r.avgRating).toFixed(1)) : 0,
-			totalReviews: r.totalReviews
+		return results.map((result) => ({
+			roomId: result.roomId,
+			avgRating: result.avgRating ? Number(Number(result.avgRating).toFixed(1)) : 0,
+			totalReviews: result.totalReviews
 		}));
 	}
 
@@ -89,7 +125,10 @@ export class ReviewService {
 			.limit(limit)
 			.offset(offset);
 
-		const total = await db.select({ count: count() }).from(review).then(res => res[0].count);
+		const total = await db
+			.select({ count: count() })
+			.from(review)
+			.then((res) => res[0].count);
 
 		return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
 	}

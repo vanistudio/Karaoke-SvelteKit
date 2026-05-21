@@ -6,8 +6,14 @@ export class DashboardService {
 	async getStats() {
 		const rooms = await db.select({ count: count() }).from(room);
 		const bookings = await db.select({ count: count() }).from(booking);
-		const pendingBookings = await db.select({ count: count() }).from(booking).where(eq(booking.status, 'pending'));
-		const confirmedBookings = await db.select({ count: count() }).from(booking).where(eq(booking.status, 'confirmed'));
+		const pendingBookings = await db
+			.select({ count: count() })
+			.from(booking)
+			.where(eq(booking.status, 'pending'));
+		const confirmedBookings = await db
+			.select({ count: count() })
+			.from(booking)
+			.where(eq(booking.status, 'confirmed'));
 		const users = await db.select({ count: count() }).from(user);
 		const services = await db.select({ count: count() }).from(service);
 
@@ -112,12 +118,7 @@ export class DashboardService {
 			const bookingCount = await db
 				.select({ count: count() })
 				.from(booking)
-				.where(
-					and(
-						gte(booking.createdAt, dayStart),
-						lte(booking.createdAt, dayEnd)
-					)
-				);
+				.where(and(gte(booking.createdAt, dayStart), lte(booking.createdAt, dayEnd)));
 
 			results.push({
 				date: dayStart.toISOString().slice(0, 10),
@@ -168,12 +169,7 @@ export class DashboardService {
 				endTime: booking.endTime
 			})
 			.from(booking)
-			.where(
-				and(
-					gte(booking.createdAt, thirtyDaysAgo),
-					sql`${booking.status} != 'cancelled'`
-				)
-			);
+			.where(and(gte(booking.createdAt, thirtyDaysAgo), sql`${booking.status} != 'cancelled'`));
 		const grid: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
 
 		for (const bk of bookings) {

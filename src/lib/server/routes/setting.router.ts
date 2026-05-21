@@ -7,11 +7,9 @@ export const settingRouter = router({
 	list: adminProcedure.query(async () => {
 		return await settingService.getAllSettings();
 	}),
-	getByGroup: adminProcedure
-		.input(z.string())
-		.query(async ({ input }) => {
-			return await settingService.getSettingsByGroup(input);
-		}),
+	getByGroup: adminProcedure.input(z.string()).query(async ({ input }) => {
+		return await settingService.getSettingsByGroup(input);
+	}),
 	update: adminProcedure
 		.input(
 			z.array(
@@ -24,7 +22,7 @@ export const settingRouter = router({
 		)
 		.mutation(async ({ ctx, input }) => {
 			const result = await settingService.updateSettings(input);
-			const groups = Array.from(new Set(input.map(entry => entry.group))).join(', ');
+			const groups = Array.from(new Set(input.map((entry) => entry.group))).join(', ');
 			await activityService.log(
 				ctx.user.id,
 				'update',
@@ -36,8 +34,13 @@ export const settingRouter = router({
 		}),
 	getPublic: publicProcedure.query(async () => {
 		const keys = [
-			'site_name', 'site_slogan', 'site_phone',
-			'site_address', 'site_email', 'site_open_time', 'site_close_time'
+			'site_name',
+			'site_slogan',
+			'site_phone',
+			'site_address',
+			'site_email',
+			'site_open_time',
+			'site_close_time'
 		];
 		return await settingService.getSettingsMap(keys);
 	})

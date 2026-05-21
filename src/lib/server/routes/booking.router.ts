@@ -1,9 +1,9 @@
 import {
-	router,
-	publicProcedure,
-	protectedProcedure,
 	adminProcedure,
+	protectedProcedure,
+	publicProcedure,
 	rateLimitedProcedure,
+	router,
 	staffProcedure
 } from '$lib/server/trpc/t';
 import { z } from 'zod';
@@ -14,8 +14,8 @@ export const bookingRouter = router({
 	list: staffProcedure.query(async () => {
 		return await bookingController.listBookings();
 	}),
-	getById: protectedProcedure.input(z.number()).query(async ({ input }) => {
-		return await bookingController.getBooking(input);
+	getById: protectedProcedure.input(z.number().int().positive()).query(async ({ input, ctx }) => {
+		return await bookingController.getBooking(input, { id: ctx.user.id, role: ctx.user.role });
 	}),
 	myBookings: protectedProcedure.query(async ({ ctx }) => {
 		return await bookingController.getBookingsByUser(ctx.user.id);
@@ -23,7 +23,7 @@ export const bookingRouter = router({
 	checkAvailability: publicProcedure
 		.input(
 			z.object({
-				roomId: z.number().positive(),
+				roomId: z.number().int().positive(),
 				startTime: z.string().datetime().or(z.date()),
 				endTime: z.string().datetime().or(z.date())
 			})
@@ -38,13 +38,20 @@ export const bookingRouter = router({
 	create: rateLimitedProcedure
 		.input(
 			z.object({
-				roomId: z.number().positive(),
+				roomId: z.number().int().positive(),
 				startTime: z.string().datetime().or(z.date()),
 				endTime: z.string().datetime().or(z.date()),
-				guestCount: z.number().positive().optional(),
-				pointsToUse: z.number().min(0).optional(),
-				services: z.array(z.object({ id: z.number(), qty: z.number() })).optional(),
-				voucherCode: z.string().optional()
+				guestCount: z.number().int().positive().optional(),
+				pointsToUse: z.number().int().min(0).optional(),
+				services: z
+					.array(
+						z.object({
+							id: z.number().int().positive(),
+							qty: z.number().int().positive()
+						})
+					)
+					.optional(),
+				voucherCode: z.string().trim().min(1).optional()
 			})
 		)
 		.mutation(async ({ input, ctx }) => {
@@ -61,20 +68,25 @@ export const bookingRouter = router({
 				input.voucherCode
 			);
 		}),
-	cancelMyBooking: protectedProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
-		const bk = await bookingController.getBooking(input);
-		if (bk.userId !== ctx.user.id) {
-			throw new Error('Bạn không có quyền hủy đơn này.');
-		}
-		if (bk.status !== 'pending') {
-			throw new Error('Chỉ có thể hủy đơn đang chờ duyệt.');
-		}
-		return await bookingController.changeStatus(input, 'cancelled');
-	}),
+	cancelMyBooking: protectedProcedure
+		.input(z.number().int().positive())
+		.mutation(async ({ input, ctx }) => {
+			const targetBooking = await bookingController.getBooking(input, {
+				id: ctx.user.id,
+				role: ctx.user.role
+			});
+			if (targetBooking.userId !== ctx.user.id) {
+				throw new Error('Bạn không có quyền hủy đơn này.');
+			}
+			if (targetBooking.status !== 'pending') {
+				throw new Error('Chỉ có thể hủy đơn đang chờ duyệt.');
+			}
+			return await bookingController.changeStatus(input, 'cancelled');
+		}),
 	changeStatus: adminProcedure
 		.input(
 			z.object({
-				id: z.number(),
+				id: z.number().int().positive(),
 				status: z.enum(['pending', 'confirmed', 'cancelled', 'checked_in'])
 			})
 		)
@@ -89,9 +101,12 @@ export const bookingRouter = router({
 			);
 			return updated;
 		}),
-	checkin: staffProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
-		const bk = await bookingController.getBooking(input);
-		if (bk.status !== 'confirmed') {
+	checkin: staffProcedure.input(z.number().int().positive()).mutation(async ({ input, ctx }) => {
+		const targetBooking = await bookingController.getBooking(input, {
+			id: ctx.user.id,
+			role: ctx.user.role
+		});
+		if (targetBooking.status !== 'confirmed') {
 			throw new Error('Chỉ có thể check-in đơn đã xác nhận.');
 		}
 		const checkedIn = await bookingController.changeStatus(input, 'checked_in');

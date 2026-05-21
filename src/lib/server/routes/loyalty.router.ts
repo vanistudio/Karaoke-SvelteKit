@@ -9,7 +9,8 @@ export const loyaltyRouter = router({
 		return await loyaltyService.getLoyaltyInfo(ctx.user.id);
 	}),
 	getHistory: protectedProcedure.query(async ({ ctx }) => {
-		return await db.select()
+		return await db
+			.select()
 			.from(pointHistory)
 			.where(eq(pointHistory.userId, ctx.user.id))
 			.orderBy(desc(pointHistory.createdAt));

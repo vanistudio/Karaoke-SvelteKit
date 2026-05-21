@@ -25,7 +25,13 @@ export const roomRouter = router({
 		)
 		.mutation(async ({ input, ctx }) => {
 			const created = await roomController.addRoom(input);
-			await activityService.log(ctx.user.id, 'create', 'room', created.id, `Tạo phòng ${created.name}`);
+			await activityService.log(
+				ctx.user.id,
+				'create',
+				'room',
+				created.id,
+				`Tạo phòng ${created.name}`
+			);
 			return created;
 		}),
 	update: managerProcedure
@@ -45,13 +51,11 @@ export const roomRouter = router({
 			await activityService.log(ctx.user.id, 'update', 'room', id, `Cập nhật phòng #${id}`);
 			return updated;
 		}),
-	delete: adminProcedure
-		.input(z.number())
-		.mutation(async ({ input, ctx }) => {
-			const deleted = await roomController.deleteRoom(input);
-			await activityService.log(ctx.user.id, 'delete', 'room', input, `Xóa phòng #${input}`);
-			return deleted;
-		}),
+	delete: adminProcedure.input(z.number()).mutation(async ({ input, ctx }) => {
+		const deleted = await roomController.deleteRoom(input);
+		await activityService.log(ctx.user.id, 'delete', 'room', input, `Xóa phòng #${input}`);
+		return deleted;
+	}),
 	findAvailable: publicProcedure
 		.input(
 			z.object({

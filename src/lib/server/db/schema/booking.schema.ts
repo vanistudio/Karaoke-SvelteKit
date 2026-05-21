@@ -1,18 +1,34 @@
-import { pgTable, serial, integer, text, timestamp } from 'drizzle-orm/pg-core';
+import { index, pgTable, serial, integer, text, timestamp } from 'drizzle-orm/pg-core';
 import { user } from './user.schema';
 import { room } from './room.schema';
 
-export const booking = pgTable('booking', {
-	id: serial('id').primaryKey(),
-	userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-	roomId: integer('room_id').notNull().references(() => room.id, { onDelete: 'cascade' }),
-	startTime: timestamp('start_time').notNull(),
-	endTime: timestamp('end_time').notNull(),
-	guestCount: integer('guest_count'),
-	status: text('status').default('pending').notNull(),
-	totalCost: integer('total_cost'),
-	voucherCode: text('voucher_code'),
-	discountAmount: integer('discount_amount').default(0).notNull(),
-	usedPoints: integer('used_points').default(0).notNull(),
-	createdAt: timestamp('created_at').defaultNow().notNull()
-});
+export const booking = pgTable(
+	'booking',
+	{
+		id: serial('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id, { onDelete: 'cascade' }),
+		roomId: integer('room_id')
+			.notNull()
+			.references(() => room.id, { onDelete: 'cascade' }),
+		startTime: timestamp('start_time').notNull(),
+		endTime: timestamp('end_time').notNull(),
+		guestCount: integer('guest_count'),
+		status: text('status').default('pending').notNull(),
+		totalCost: integer('total_cost'),
+		voucherCode: text('voucher_code'),
+		discountAmount: integer('discount_amount').default(0).notNull(),
+		usedPoints: integer('used_points').default(0).notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull()
+	},
+	(table) => [
+		index('booking_room_status_time_idx').on(
+			table.roomId,
+			table.status,
+			table.startTime,
+			table.endTime
+		),
+		index('booking_user_created_at_idx').on(table.userId, table.createdAt)
+	]
+);
